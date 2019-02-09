@@ -23,10 +23,10 @@ use Yii;
  * @property int $current_serial 用于产生票务的序列号
  * @property string $pic_url 暂不支持传入图片
  *
- * @property TkOrganizer $releaseBy
- * @property TkActivityEvent[] $tkActivityEvents
- * @property TkTicket[] $tkTickets
- * @property TkTicketEvent[] $tkTicketEvents
+ * @property Organizer $releaseBy
+ * @property ActivityEvent[] $tkActivityEvents
+ * @property Ticket[] $tkTickets
+ * @property TicketEvent[] $tkTicketEvents
  */
 class Activity extends \yii\db\ActiveRecord
 {
@@ -49,7 +49,7 @@ class Activity extends \yii\db\ActiveRecord
             [['name'], 'string', 'max' => 32],
             [['location'], 'string', 'max' => 64],
             [['end_at', 'introduction', 'pic_url'], 'string', 'max' => 255],
-            [['release_by'], 'exist', 'skipOnError' => true, 'targetClass' => TkOrganizer::className(), 'targetAttribute' => ['release_by' => 'id']],
+            [['release_by'], 'exist', 'skipOnError' => true, 'targetClass' => Organizer::className(), 'targetAttribute' => ['release_by' => 'id']],
         ];
     }
 
@@ -62,7 +62,7 @@ class Activity extends \yii\db\ActiveRecord
             'id' => 'ID',
             'name' => 'Name',
             'release_by' => 'organizer/-id',
-            'category' => '标记用户类别0-学生1-教职员工2-其他',
+            'category' => '标记用户类别0-正常1-取消2-结束',
             'status' => '该用户类别下，他的证件号',
             'location' => 'Location',
             'release_at' => 'Release At',
@@ -82,31 +82,31 @@ class Activity extends \yii\db\ActiveRecord
      */
     public function getReleaseBy()
     {
-        return $this->hasOne(TkOrganizer::className(), ['id' => 'release_by']);
+        return $this->hasOne(Organizer::className(), ['id' => 'release_by']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getTkActivityEvents()
+    public function getActivityEvents()
     {
-        return $this->hasMany(TkActivityEvent::className(), ['activity_id' => 'id']);
+        return $this->hasMany(ActivityEvent::className(), ['activity_id' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getTkTickets()
+    public function getTickets()
     {
-        return $this->hasMany(TkTicket::className(), ['activity_id' => 'id']);
+        return $this->hasMany(Ticket::className(), ['activity_id' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getTkTicketEvents()
+    public function getTicketEvents()
     {
-        return $this->hasMany(TkTicketEvent::className(), ['activity_id' => 'id']);
+        return $this->hasMany(TicketEvent::className(), ['activity_id' => 'id']);
     }
 
     public function fields()
@@ -114,9 +114,46 @@ class Activity extends \yii\db\ActiveRecord
         return [
             "id",
             "name",
-            "release_by",
-            "category",
-            "status",
+            "organizer" => function($model)
+            {
+                return $model->releaseBy->name;
+            },
+            "category" => function($model)
+            {
+                switch($model->category)
+                {
+                    case 0:
+                        return '讲座';
+                        break;
+                    case 1:
+                        return '文艺';
+                        break;
+                    case 2:
+                        return '其他';
+                        break;
+                    default:
+                        return '未知';
+                        break;
+                }
+            },
+            "status" => function($model)
+            {
+                switch ($model->status) 
+                {
+                    case 0:
+                        return '正常';
+                        break;
+                    case 1:
+                        return '取消';
+                        break;
+                    case 2:
+                        return '结束';
+                        break;
+                    default:
+                        return '未知';
+                        break;
+                }
+            },
             "location",
             "release_at",
             "start_at",
