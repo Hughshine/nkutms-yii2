@@ -114,8 +114,11 @@ class Activity extends \yii\db\ActiveRecord
         return [
             "id",
             "name",
-            "organizer" => function($model)
+            "organizer_id" => "release_by",
+            "organizer_name" => function($model)
             {
+                if($model->releaseBy == null)
+                    return '无发布者';
                 return $model->releaseBy->name;
             },
             "category" => function($model)
@@ -164,8 +167,8 @@ class Activity extends \yii\db\ActiveRecord
         ];
     }
 
-    public function extraFields()
-    {
+    // public function extraFields()
+    // {
 
-    }
+    // }
 }

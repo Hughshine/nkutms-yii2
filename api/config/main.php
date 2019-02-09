@@ -43,8 +43,16 @@ return [
             'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'activity'],
                 [
-                    'class' => 'yii\rest\UrlRule', 'controller' => 'activity'
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'activity',
+                    'extraPatterns' => ['POST search' => 'search'],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'activity',
+                    'extraPatterns' => ['GET valid' => 'valid'],
                 ],
             ],
         ],
