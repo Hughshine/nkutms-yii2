@@ -1,6 +1,6 @@
 <?php
 
-namespace common\models;
+namespace api\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -26,7 +26,7 @@ use yii\web\IdentityInterface;
  * @property Ticket[] $tkTickets
  * @property TicketEvent[] $tkTicketEvents
  */
-class User extends \yii\db\ActiveRecord  implements IdentityInterface
+class User extends \yii\db\ActiveRecord implements IdentityInterface
 {
     //TODO
     public function behaviors()

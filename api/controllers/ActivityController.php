@@ -6,9 +6,46 @@ use yii\rest\ActiveController;
 use yii\data\ActiveDataProvider;
 use common\models\Activity;
 
+use yii\helpers\ArrayHelper;
+use yii\filters\auth\QueryParamAuth;
+
+
 class ActivityController extends ActiveController
 {
 	public $modelClass = 'common\models\Activity';
+	//TODO 权限控制，对活动进行提交修改；
+	 function behaviors() {
+        $behaviors = parent::behaviors();
+        
+        // 当前操作的id
+        $currentAction = Yii::$app->controller->action->id;
+ 
+        // 需要进行认证的action
+        $authActions = ['ticketing'];
+ 
+        // 需要进行认证的action就要设置安全认证类
+        if(in_array($currentAction, $authActions)) {
+ 
+            $behaviors['authenticator'] = [
+                'class' => QueryParamAuth::className(),
+            ];
+        }
+        return $behaviors;
+        // return ArrayHelper::merge([
+        //     //设置可以接收访问的域和方法。
+        //     [
+        //         'class' => Cors::className(),
+        //         'cors' => [
+        //             'Origin' => ['*'],
+        //             // 'Access-Control-Request-Method' => ['GET', 'HEAD', 'OPTIONS'],
+        //             'Access-Control-Request-Headers' => ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
+        //             'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+        //         ],
+        //     ],
+        // ], $behaviors);      
+ 
+	}
+
 
 	public function actions()
 	{
@@ -24,6 +61,7 @@ class ActivityController extends ActiveController
 		//TODO: asArray
 		return new ActiveDataProvider(
 			[
+				// 'msg' => 0,
 				'query' => $modelClass::find()
 				->where(['and',
 					['category' => 0],
@@ -59,7 +97,8 @@ class ActivityController extends ActiveController
 		$sql_status = $request->post('status',0);   
 
 
-		return new ActiveDataProvider(
+		return new ActiveDataProvider(//暂时不增加message,前端通过返回的码判断
+
 			[
 				'query' => Activity::find() //暂时没有问题
 						->where(['and', 
@@ -72,6 +111,8 @@ class ActivityController extends ActiveController
 				'pagination' => ['pageSize'=>5],
 			]
 		);
+
+		
 		
 		// return $customer = Activity::find() //暂时没有问题
 		// ->where(['and', 
@@ -82,5 +123,10 @@ class ActivityController extends ActiveController
 		// ->orderBy('release_at DESC')//根据发布时间逆序排序
 		// // ->asArray() //会破坏fields
 		// ->all();
+	}
+
+	public function actionTicketing()
+	{
+		return true;
 	}
 }

@@ -17,14 +17,15 @@ return [
             'csrfParam' => '_csrf-backend',
         ],
         'user' => [
-            'identityClass' => 'common\models\User',
+            'identityClass' => 'api\models\User',
             'enableAutoLogin' => true,
-            'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
+            'enableSession' => false,
+            // 'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
         ],
-        'session' => [
-            // this is the name of the session cookie used for login on the backend
-            'name' => 'advanced-backend',
-        ],
+        // 'session' => [
+        //     // this is the name of the session cookie used for login on the backend
+        //     'name' => 'advanced-backend',
+        // ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
@@ -53,6 +54,21 @@ return [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => 'activity',
                     'extraPatterns' => ['GET valid' => 'valid'],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'user',
+                    'except' => ['GET'],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'user',
+                    'extraPatterns' => ['POST wechat-login' => 'wechat-login'],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'activity',
+                    'extraPatterns' => ['POST ticketing' => 'ticketing'],
                 ],
             ],
         ],
