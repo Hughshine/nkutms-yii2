@@ -17,7 +17,7 @@ class ActivityController extends ActiveController
 {
 	public $modelClass = 'common\models\Activity';
 	//TODO 权限控制，对活动进行提交修改；
-	 function behaviors() {
+	public function behaviors() {
         $behaviors = parent::behaviors();
         
         // 当前操作的id
@@ -32,7 +32,7 @@ class ActivityController extends ActiveController
             $behaviors['authenticator'] = [
                 'class' => QueryParamAuth::className(),
             ];
-        }
+    	}
         //设置不再请求头返回速率限制信息
         // $behaviors['rateLimiter']['enableRateLimitHeaders'] = false;
         
@@ -62,6 +62,9 @@ class ActivityController extends ActiveController
 	{
 		$actions = parent::actions();
 		unset($actions['index']);
+		unset($actions['create']);
+		// unset($actions['view']); //允许访问activity的细节
+		unset($actions['update']);
 		return $actions;
 	}
 
@@ -122,9 +125,6 @@ class ActivityController extends ActiveController
 				'pagination' => ['pageSize'=>5],
 			]
 		);
-
-		
-		
 		// return $customer = Activity::find() //暂时没有问题
 		// ->where(['and', 
 		// ['like','name',$sql_name],

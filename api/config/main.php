@@ -44,7 +44,10 @@ return [
             'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
-                ['class' => 'yii\rest\UrlRule', 'controller' => 'activity'],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'activity'
+                ],
                 [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => 'activity',
@@ -55,10 +58,10 @@ return [
                     'controller' => 'activity',
                     'extraPatterns' => ['GET valid' => 'valid'],
                 ],
-                [
+                [//可能only字段无用
                     'class' => 'yii\rest\UrlRule',
                     'controller' => 'user',
-                    'except' => ['GET'],
+                    'only' => ['POST'],
                 ],
                 [
                     'class' => 'yii\rest\UrlRule',
@@ -69,6 +72,25 @@ return [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => 'activity',
                     'extraPatterns' => ['POST ticketing' => 'ticketing'],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'ticket',
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'ticket',
+                    'extraPatterns' => ['POST my-tickets' => 'my-tickets'],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'ticket',
+                    'extraPatterns' => ['POST search-by-id' => 'search-by-id'],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'ticket',
+                    'extraPatterns' => ['POST withdraw' => 'withdraw'],
                 ],
             ],
         ],

@@ -14,12 +14,27 @@ class UserController extends ActiveController
 {
 	public $modelClass = 'common\models\User';
 
+	public function actions()
+	{
+		$actions = parent::actions();
+		unset($actions['index']);
+		unset($actions['create']);
+		unset($actions['view']);
+		unset($actions['update']);
+		//TODO 限制其他接口
+		return $actions;
+	}
+
+	public function actionIndex(){}
+
 	public function actionWechatLogin()
 	{
 		//TODO
 		$request = Yii::$app->request;
 
-		$sql_wechat = $request->post('wechat_id','');   
+		$sql_wechat = $request->post('wechat_id');   
+		if($sql_wechat == null)
+			return ['message'=>'empty wechat_id'];
 		$sql_category = $request->post('category', 3); 
 
 		$user = User::find()

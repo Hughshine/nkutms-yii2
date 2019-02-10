@@ -85,6 +85,30 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
         ];
     }
 
+    public function fields(){
+        return [
+            'user_id' => 'id',
+            'name',
+            'category' => function($model)
+            {
+                switch ($model->category) {
+                    case 0:
+                        return '学生';
+                        break;
+                    case 1:
+                        return '教职员';
+                        break;
+                    case 2:
+                        return '其他';
+                        break;
+                    default:
+                        return '未知身份';
+                        break;
+                }
+            },
+            'credential',
+        ];
+    }
     /**
      * @return \yii\db\ActiveQuery
      */
