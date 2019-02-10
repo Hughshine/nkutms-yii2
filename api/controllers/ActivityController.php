@@ -8,6 +8,9 @@ use common\models\Activity;
 
 use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
+use yii\filters\RateLimiter;
+
+use yii\behaviors\TimestampBehavior;
 
 
 class ActivityController extends ActiveController
@@ -30,7 +33,15 @@ class ActivityController extends ActiveController
                 'class' => QueryParamAuth::className(),
             ];
         }
+        //设置不再请求头返回速率限制信息
+        // $behaviors['rateLimiter']['enableRateLimitHeaders'] = false;
+        
         return $behaviors;
+        	// [
+         //        'class' => TimestampBehavior::className(),
+         //        'updatedAtAttribute' => 'allowance_update_at',
+         //        // 'value' => new Expression('NOW()'),
+         //    ]];
         // return ArrayHelper::merge([
         //     //设置可以接收访问的域和方法。
         //     [

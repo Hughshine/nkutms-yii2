@@ -112,7 +112,10 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
         
         //findIdentityByAccessToken()方法的实现是系统定义的
         //例如，一个简单的场景，当每个用户只有一个access token, 可存储access token 到user表的access_token列中， 方法可在User类中简单实现，如下所示：
-        return static::findOne(['access_token' => $token]);
+        return static::find(['access_token' => $token])
+        ->where(['>','expire_at',time()])
+        ->limit(1)
+        ->one();
         //return static::findOne(['id' => 1]);
         //throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
         

@@ -32,6 +32,7 @@ class UserController extends ActiveController
 			$user = new User();
 			$user->wechat_id = $sql_wechat;
 			$user->category = $sql_category;
+			$user->expire_at = time()+3600*24;
 			/*
 				新微信号的注册处理。没有验证来源是微信小程序。
 			 */
@@ -55,6 +56,7 @@ class UserController extends ActiveController
 		}
 
 		$access_token = $user->generateAccessToken();
+		$user->expire_at = time()+3600*24;
 		$user->save(false);//TODO
 
 

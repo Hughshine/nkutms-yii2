@@ -6,6 +6,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Expression;
 use yii\web\IdentityInterface;
+use yii\filters\RateLimitInterface;
 /**
  * This is the model class for table "tk_user".
  *
@@ -26,7 +27,7 @@ use yii\web\IdentityInterface;
  * @property Ticket[] $tkTickets
  * @property TicketEvent[] $tkTicketEvents
  */
-class User extends \yii\db\ActiveRecord implements IdentityInterface
+class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitInterface
 {
     //TODO
     public function behaviors()
@@ -55,9 +56,8 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['wechat_id', 'credential'], 'required'],
-            [['category', 'logged_at', 'expire_at', 'update_at', 'allowance', 'allowance_updated_at'], 'integer'],
-            [['signup_at'], 'safe'],
+            [['wechat_id'], 'required'],
+            [['category', 'signup_at', 'logged_at', 'expire_at', 'update_at', 'allowance', 'allowance_updated_at'], 'integer'],
             [['name'], 'string', 'max' => 32],
             [['wechat_id', 'credential', 'password', 'access_token'], 'string', 'max' => 255],
         ];
@@ -112,7 +112,10 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         
         //findIdentityByAccessToken()方法的实现是系统定义的
         //例如，一个简单的场景，当每个用户只有一个access token, 可存储access token 到user表的access_token列中， 方法可在User类中简单实现，如下所示：
-        return static::findOne(['access_token' => $token]);
+        return static::find(['access_token' => $token])
+        ->where(['>','expire_at',time()])//授权时间为一天
+        ->limit(1)
+        ->one();
         //return static::findOne(['id' => 1]);
         //throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
         
@@ -127,4 +130,23 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     public function validateAuthKey($authKey){}
 
     public function getAuthKey(){}
+
+    public function getRateLimit($request, $action)
+    {
+        return [2,1];
+    }
+
+    public function loadAllowance($request, $action)
+    {
+        return [$this->allowance, $this->allowance_updated_at];
+    }
+
+    public function saveAllowance($request,$action,$allowance,$timestamp)
+    {
+        // echo $allowance;
+        // echo $timestamp;
+        $this->allowance = $allowance;
+        $this->allowance_updated_at = $timestamp;//time();
+        $this->save();
+    }
 }
