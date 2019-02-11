@@ -1,5 +1,5 @@
 <?php
-namespace api\controllers;
+namespace userapi\controllers;
 
 use Yii;
 use yii\rest\ActiveController;
@@ -185,7 +185,7 @@ class ActivityController extends ActiveController
 				->one();
 
 		if($ticket != null)
-			return ['message' => '已抢过票！'];
+			return ['message' => '已抢过票！!!'];
 
 		$activity->current_serial++;
 		$activity->save(false);

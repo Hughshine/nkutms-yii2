@@ -169,9 +169,15 @@ class ActivityController extends ActiveController
 		if( $user == null || $activity == null )
 			return ['message' => 'wrong id'];
 
+		if(time()<$activity->ticketing_start_at||time()>$activity->ticketing_end_at)
+		{
+			return ['message' -> '未在抢票时间内'];
+		}
+
 		$current_serial = $activity->current_serial;
 
-		if($current_serial > $activity->max_people)
+		$current_people = $activity->current_people;
+		if($current_people > $activity->max_people)
 			return ['message'=>'已达上限'];
 
 		// return ['1'=>($user!=null),'2'=>($activity!=null)];
@@ -187,6 +193,7 @@ class ActivityController extends ActiveController
 		if($ticket != null)
 			return ['message' => '已抢过票！'];
 
+		$activity->current_people++;
 		$activity->current_serial++;
 		$activity->save(false);
 

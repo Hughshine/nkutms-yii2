@@ -7,9 +7,9 @@ $params = array_merge(
 );
 
 return [
-    'id' => 'app-api',
+    'id' => 'app-userapi',
     'basePath' => dirname(__DIR__),
-    'controllerNamespace' => 'api\controllers',
+    'controllerNamespace' => 'userapi\controllers',
     'bootstrap' => ['log'],
     'modules' => [],
     'components' => [
@@ -17,7 +17,7 @@ return [
             'csrfParam' => '_csrf-backend',
         ],
         'user' => [
-            'identityClass' => 'api\models\User',
+            'identityClass' => 'userapi\models\User',
             'enableAutoLogin' => true,
             'enableSession' => false,
             // 'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],

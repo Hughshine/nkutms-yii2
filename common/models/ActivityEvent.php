@@ -14,9 +14,9 @@ use Yii;
  * @property string $update_at
  * @property int $operated_by_admin -1时，非管理员操作
  *
- * @property TkActivity $activity
- * @property TkAdmin $operatedByAdmin
- * @property TkOrganizer $organizer
+ * @property Activity $activity
+ * @property Admin $operatedByAdmin
+ * @property Organizer $organizer
  */
 class ActivityEvent extends \yii\db\ActiveRecord
 {
@@ -38,9 +38,9 @@ class ActivityEvent extends \yii\db\ActiveRecord
             [['status'], 'required'],
             [['update_at'], 'safe'],
             [['status'], 'string', 'max' => 1],
-            [['activity_id'], 'exist', 'skipOnError' => true, 'targetClass' => TkActivity::className(), 'targetAttribute' => ['activity_id' => 'id']],
-            [['operated_by_admin'], 'exist', 'skipOnError' => true, 'targetClass' => TkAdmin::className(), 'targetAttribute' => ['operated_by_admin' => 'id']],
-            [['organizer_id'], 'exist', 'skipOnError' => true, 'targetClass' => TkOrganizer::className(), 'targetAttribute' => ['organizer_id' => 'id']],
+            [['activity_id'], 'exist', 'skipOnError' => true, 'targetClass' => Activity::className(), 'targetAttribute' => ['activity_id' => 'id']],
+            [['operated_by_admin'], 'exist', 'skipOnError' => true, 'targetClass' => Admin::className(), 'targetAttribute' => ['operated_by_admin' => 'id']],
+            [['organizer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organizer::className(), 'targetAttribute' => ['organizer_id' => 'id']],
         ];
     }
 
@@ -64,7 +64,7 @@ class ActivityEvent extends \yii\db\ActiveRecord
      */
     public function getActivity()
     {
-        return $this->hasOne(TkActivity::className(), ['id' => 'activity_id']);
+        return $this->hasOne(Activity::className(), ['id' => 'activity_id']);
     }
 
     /**
@@ -72,7 +72,7 @@ class ActivityEvent extends \yii\db\ActiveRecord
      */
     public function getOperatedByAdmin()
     {
-        return $this->hasOne(TkAdmin::className(), ['id' => 'operated_by_admin']);
+        return $this->hasOne(Admin::className(), ['id' => 'operated_by_admin']);
     }
 
     /**
@@ -80,6 +80,6 @@ class ActivityEvent extends \yii\db\ActiveRecord
      */
     public function getOrganizer()
     {
-        return $this->hasOne(TkOrganizer::className(), ['id' => 'organizer_id']);
+        return $this->hasOne(Organizer::className(), ['id' => 'organizer_id']);
     }
 }

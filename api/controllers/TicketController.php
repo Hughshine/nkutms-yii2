@@ -109,6 +109,13 @@ class TicketController extends ActiveController
 			$ticket -> status = 1;
 			$ticket->save(false);
 
+			$activity = Activity::find()
+						->where(['id'=>$ticket->activity->id])
+						->limit(1)
+						->one();
+			$activity->current_people--;
+			$activity->save(false);
+
 			$ticket_event = new TicketEvent();
 			$ticket_event->ticket_id = $ticket->id;
 			$ticket_event->user_id = $ticket->user_id;		

@@ -1,11 +1,12 @@
 <?php
 
-namespace common\models;
+namespace orgapi\models;
 
 use Yii;
 
 use yii\web\IdentityInterface;
 
+use yii\filters\RateLimitInterface;
 /**
  * This is the model class for table "tk_organizer".
  *
@@ -27,7 +28,7 @@ use yii\web\IdentityInterface;
  *
  * @property ActivityEvent[] $tkActivityEvents
  */
-class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
+class Organizer extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitInterface
 {
     /**
      * {@inheritdoc}
@@ -147,4 +148,23 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
     public function validateAuthKey($authKey){}
 
     public function getAuthKey(){}
+
+    public function getRateLimit($request, $action)
+    {
+        return [2,3];
+    }
+
+    public function loadAllowance($request, $action)
+    {
+        return [$this->allowance, $this->allowance_updated_at];
+    }
+
+    public function saveAllowance($request,$action,$allowance,$timestamp)
+    {
+        // echo $allowance;
+        // echo $timestamp;
+        $this->allowance = $allowance;
+        $this->allowance_updated_at = $timestamp;//time();
+        $this->save();
+    }
 }
