@@ -8,6 +8,8 @@ use yii\rest\ActiveController;
 use yii\data\ActiveDataProvider;
 use common\models\Ticket;
 use common\models\TicketEvent;
+use common\models\Activity;
+
 
 use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
@@ -51,12 +53,11 @@ class TicketController extends ActiveController
 			$sql_id = $request->post('user_id');   
 
 			if($sql_id == null)
-				return ['message' => 'empty user_id'];
+				return ['code'=>1,'message' => 'empty user_id'];
 			
 			$modelClass = $this->modelClass;
 
-			//TODO: asArray
-			return new ActiveDataProvider(
+			$provider = new ActiveDataProvider(
 				[
 					// 'msg' => 0,
 					'query' => $modelClass::find()
@@ -69,6 +70,8 @@ class TicketController extends ActiveController
 					'pagination' => ['pageSize'=>5],
 				]
 			);
+			//TODO: asArray
+			return ['code'=>0,'message'=>'success','data'=> $provider->getModels()];
 		}
 
 		/*
@@ -85,7 +88,7 @@ class TicketController extends ActiveController
 					->one();
 			if($ticket == null)
 			{
-				return ['message' => 'ticket do not exist'];
+				return ['code' => 1, 'message' => 'ticket do not exist'];
 			}
 			return $ticket;
 		}
@@ -103,7 +106,7 @@ class TicketController extends ActiveController
 					->one();
 			if($ticket == null)
 			{
-				return ['message' => 'ticket do not exist'];
+				return ['code' => 1, 'message' => 'ticket do not exist'];
 			}
 
 			$ticket -> status = 1;
@@ -124,6 +127,6 @@ class TicketController extends ActiveController
 			$ticket_event->update_at = time();
 			$ticket_event->save(false);
 
-			return $ticket;
+			return ['code' => 0, 'message' => 'success', 'data' => $ticket];
 		}
 }

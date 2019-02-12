@@ -108,7 +108,13 @@ return [
                         'POST signup' => 'signup'
                     ]
                 ],
-
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'organizer',
+                    'extraPatterns' => [
+                        'POST edit-profile' => 'edit-profile'
+                    ]
+                ],
             ],
         ],
         

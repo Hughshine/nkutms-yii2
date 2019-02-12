@@ -14,6 +14,27 @@ class UserController extends ActiveController
 {
 	public $modelClass = 'common\models\User';
 
+	public function behaviors() {
+        $behaviors = parent::behaviors();
+        
+        // 当前操作的id
+        $currentAction = Yii::$app->controller->action->id;
+ 
+        // 需要进行认证的action
+        $authActions = ['edit-profile'];
+ 
+        // 需要进行认证的action就要设置安全认证类
+        if(in_array($currentAction, $authActions)) {
+ 
+            $behaviors['authenticator'] = [
+                'class' => QueryParamAuth::className(),
+            ];
+    	}
+        //设置不再请求头返回速率限制信息
+        // $behaviors['rateLimiter']['enableRateLimitHeaders'] = false;
+        return $behaviors;
+	}
+
 	public function actions()
 	{
 		$actions = parent::actions();
@@ -25,8 +46,6 @@ class UserController extends ActiveController
 		return $actions;
 	}
 
-	public function actionIndex(){}
-
 	public function actionWechatLogin()
 	{
 		//TODO
@@ -34,7 +53,7 @@ class UserController extends ActiveController
 
 		$sql_wechat = $request->post('wechat_id');   
 		if($sql_wechat == null)
-			return ['message'=>'empty wechat_id'];
+			return ['code'=>1,'message'=>'empty wechat_id'];
 		$sql_category = $request->post('category', 3); 
 
 		$user = User::find()
@@ -53,7 +72,7 @@ class UserController extends ActiveController
 			 */
 			if (!$user->save(false)) 
 			{
-    			return ['message' => 'wrong', 'user_info' => null];
+    			return ['code'=>1,'message' => 'wrong', 'user_info' => null];
 			}
 
 			/*
@@ -67,7 +86,9 @@ class UserController extends ActiveController
 					->where(['wechat_id' => $sql_wechat])
 					->limit(1)
 					->one();
-			return ['message' => 'create', 'user_info' => $user, 'access_token' => $access_token];
+			return ['code'=>0,
+			'message' => 'create',
+			 'data'=>['user_info' => $user,'access_token' => $access_token]];
 		}
 
 		$access_token = $user->generateAccessToken();
@@ -75,7 +96,37 @@ class UserController extends ActiveController
 		$user->save(false);//TODO
 
 
-		return [ 'message'=> 'success', 'user_info' => $user,'access_token' => $access_token];
+		return [ 'code'=>0,
+		'message'=> 'success', 
+		'data' => [
+			'user_info' => $user,
+			'access_token' => $access_token]
+		];
+	}
+
+	public function actionEditProfile()
+	{
+		$request = Yii::$app->request;
+
+		$sql_id = $request->post('user_id');
+		$sql_name = $request->post('name');
+		$sql_category = $request->post('category');
+		$sql_credential = $request->post('credential');
+
+		$user = User::find()
+				->where(['id' => $sql_id])
+				->limit(1)
+				->one();
+		if($user == null)
+			return ['code'=>1, 'message'=>'user inexists'];
+
+		$user->name = $sql_name==null?$user->name:$sql_name;
+		$user->category = $sql_category==null?$user->category:$sql_category;
+		$user->credential = $sql_credential==null?$user->credential:$sql_credential;
+
+		$user->save(false);
+
+		return ['code'=>0, 'message'=>'success', 'data'=>$user];
 	}
 
 

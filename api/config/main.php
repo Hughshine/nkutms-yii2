@@ -92,6 +92,13 @@ return [
                     'controller' => 'ticket',
                     'extraPatterns' => ['POST withdraw' => 'withdraw'],
                 ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'user',
+                    'extraPatterns' => [
+                        'POST edit-profile' => 'edit-profile'
+                    ]
+                ],
             ],
         ],
         

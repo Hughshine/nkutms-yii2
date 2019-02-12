@@ -53,7 +53,7 @@ class ActivityController extends ActiveController
 		$actions = parent::actions();
 		unset($actions['index']);
 		unset($actions['create']);
-		// unset($actions['view']); //允许访问activity的细节
+		unset($actions['view']); //允许访问activity的细节
 		unset($actions['update']);
 		return $actions;
 	}
@@ -63,7 +63,7 @@ class ActivityController extends ActiveController
 		$modelClass = $this->modelClass;
 
 		//TODO: asArray
-		return new ActiveDataProvider(
+		$provider = new ActiveDataProvider(
 			[
 				// 'msg' => 0,
 				'query' => $modelClass::find()
@@ -75,6 +75,16 @@ class ActivityController extends ActiveController
 				'pagination' => ['pageSize'=>5],
 			]
 		);
+
+		return ['code'=>0,'message'=>'success','data'=>$provider->getModels()];
+	}
+
+	public function actionView($id){
+		$activity = Activity::find()->where(['id'=>$id])->limit(1)->one();
+
+		if($activity == null)
+			return ['code'=>1,'message'=>'activity inexists'];
+		return ['code'=>0,'message'=>'success','data'=>$activity];
 	}
 	// // public function actionValid()
 	// // {
@@ -100,8 +110,7 @@ class ActivityController extends ActiveController
 		$sql_category = $request->post('category',0);   
 		$sql_status = $request->post('status',0);   
 
-
-		return new ActiveDataProvider(//暂时不增加message,前端通过返回的码判断
+		$provider = new ActiveDataProvider(//暂时不增加message,前端通过返回的码判断
 			[
 				'query' => Activity::find() //暂时没有问题
 						->where(['and', 
@@ -114,6 +123,7 @@ class ActivityController extends ActiveController
 				'pagination' => ['pageSize'=>5],
 			]
 		);
+		return ['code'=>0, 'message'=>'success', 'data'=> $provider->getModels()];
 		// return $customer = Activity::find() //暂时没有问题
 		// ->where(['and', 
 		// ['like','name',$sql_name],
@@ -135,7 +145,7 @@ class ActivityController extends ActiveController
 		$sql_id = $request->post('org_id');
 
 		if($sql_id == null)
-			return ['message' => 'wrong paramters'];
+			return ['code'=>1,'message' => 'wrong paramters'];
 
 		$organizer = Organizer::find()
 					->where(['id'=>$sql_id])
@@ -143,12 +153,11 @@ class ActivityController extends ActiveController
 					->one();
 
 		if($organizer == null)
-			return ['message' => 'organizer inexists'];
+			return ['code'=>1,'message' => 'organizer inexists'];
 
-		return Activity::find()
+		return ['code'=>0,'message'=>'success','data'=>Activity::find()
 				->where(['release_by' => $sql_id])
-				->all();
-
+				->all()];
 	}
 
 	/*
@@ -164,7 +173,7 @@ class ActivityController extends ActiveController
 		$activity_id = $request->post('activity_id');
 
 		if($org_id == null || $activity_id == null)
-			return ['message' => 'wrong paramters'];
+			return ['code'=>1,'message' => 'wrong paramters'];
 
 		$organizer = Organizer::find()
 					->where(['id'=>$org_id])
@@ -172,7 +181,7 @@ class ActivityController extends ActiveController
 					->one();
 
 		if($organizer == null)
-			return ['message' => 'organizer inexists'];
+			return ['code'=>1,'message' => 'organizer inexists'];
 
 		$activity = Activity::find()
 					->where(['id'=>$activity_id])
@@ -180,17 +189,17 @@ class ActivityController extends ActiveController
 					->one();
 
 		if($organizer == null)
-			return ['message' => 'organizer inexists'];
+			return ['code'=>1,'message' => 'organizer inexists'];
 		if($activity == null)
-			return ['message' => 'activity inexists'];
+			return ['code'=>1,'message' => 'activity inexists'];
 
 
-		return Ticket::find()
+		return ['code'=>0,'message'=>'success','data'=> Ticket::find()
 				// ->where(['organizer_id' => $org_id])
 				->where(['activity_id' => $activity_id])
 				->andWhere(['status' => 0])
 				->orderBy('serial_number')
-				->all();
+				->all()];
 
 	}
 	/*
@@ -224,8 +233,8 @@ class ActivityController extends ActiveController
 		$max_people = $request->post('max_people');
 		$intro = $request->post('intro','no introduction');
 
-		if($org_id == null || $activity_name == null || $location == null|| $activity_name == null || $ticketing_start_at == null || $ticketing_end_at == null || $start_at == null  || $end_at == null || $max_people == null )
-			return ['message' => 'incomplete paramters'];
+		if($org_id == null || $activity_name == null || $category == null|| $location == null || $ticketing_start_at == null || $ticketing_end_at == null || $start_at == null  || $end_at == null || $max_people == null )
+			return ['code'=>1,'message' => 'incomplete paramters'];
 
 		$activity = Activity::find()
 					->where(['name' => $activity_name])
@@ -233,7 +242,7 @@ class ActivityController extends ActiveController
 					->one();
 
 		if($activity != null)
-			return ['message' => 'duplicate activity name'];
+			return ['code'=>1,'message' => 'duplicate activity name'];
 
 
 
@@ -262,7 +271,7 @@ class ActivityController extends ActiveController
 		$activity_event->operated_by_admin = -1;
 		$activity_event->save(false);
 
-		return ['message' => 'success', 'activity' => $activity];
+		return ['code'=>0, 'message' => 'success', 'data' => $activity];
 	}
 
 	/*
@@ -287,7 +296,7 @@ class ActivityController extends ActiveController
 		$activity_name = $request->post('activity_name');
 
 		if($org_id == null || $activity_id == null)
-			return ['message' => 'empty paramters'];
+			return ['code'=>1, 'message' => 'empty paramters'];
 
 		$organizer = Organizer::find()
 					->where(['id'=>$org_id])
@@ -295,7 +304,7 @@ class ActivityController extends ActiveController
 					->one();
 
 		if($organizer == null)
-			return ['message' => 'organizer inexists'];
+			return ['code'=>1, 'message' => 'organizer inexists'];
 
 		$activity = Activity::find()
 					->where(['name' => $activity_name])
@@ -303,7 +312,7 @@ class ActivityController extends ActiveController
 					->one();
 
 		if($activity != null)
-			return ['message' => 'duplicate activity name'];
+			return ['code'=>1, 'message' => 'duplicate activity name'];
 
 		$activity = Activity::find()
 					->where(['id'=>$activity_id])
@@ -311,16 +320,16 @@ class ActivityController extends ActiveController
 					->one();
 
 		if($activity == null)
-			return ['message' => 'activity inexists'];
+			return ['code'=>1, 'message' => 'activity inexists'];
 
 
 
 		if($organizer == null)
-			return ['message' => 'organizer inexists'];
+			return ['code'=>1, 'message' => 'organizer inexists'];
 
 
 		if($activity->release_by != $org_id)
-			return ['message' => 'illegal request'];
+			return ['code'=>1, 'message' => 'illegal request'];
 
 
 
@@ -350,7 +359,7 @@ class ActivityController extends ActiveController
 		$activity->introduction = $intro==null?$activity->introduction:$intro;
 		$activity->save(false);
 
-		return ['message' => 'edit success' , 'activity' => $activity];
+		return ['code'=>0,'message' => 'success' , 'data'=>$activity];
 	}
 
 
@@ -368,7 +377,7 @@ class ActivityController extends ActiveController
 		$activity_id = $request->post('activity_id');
 
 		if($org_id == null || $activity_id == null)
-			return ['message' => 'empty paramters'];
+			return ['code'=>1,'message' => 'empty paramters'];
 
 		$organizer = Organizer::find()
 					->where(['id'=>$org_id])
@@ -376,7 +385,7 @@ class ActivityController extends ActiveController
 					->one();
 
 		if($organizer == null)
-			return ['message' => 'organizer inexists'];
+			return ['code'=>1,'message' => 'organizer inexists'];
 
 		$activity = Activity::find()
 					->where(['id'=>$activity_id])
@@ -384,16 +393,16 @@ class ActivityController extends ActiveController
 					->one();
 
 		if($organizer == null)
-			return ['message' => 'organizer inexists'];
+			return ['code'=>1,'message' => 'organizer inexists'];
 
 		if($activity == null)
-			return ['message' => 'activity inexists'];
+			return ['code'=>1,'message' => 'activity inexists'];
 
 		if($activity->release_by != $org_id)
-			return ['message' => 'illegal request'];
+			return ['code'=>1,'message' => 'illegal request'];
 
 		if($activity->status == 1)
-			return ['message' => 'already cancelled'];
+			return ['code'=>1,'message' => 'already cancelled'];
 		$activity->status = 1;
 		$activity->save(false);
 
@@ -411,6 +420,6 @@ class ActivityController extends ActiveController
 		$activity_event->update_at = time();
 		$activity_event->operated_by_admin = -1;
 		$activity_event->save(false);
-		return ['message' => 'cancel success'];
+		return ['code'=>0,'message' => 'cancel success','data'=>$activity];
 	}
 }

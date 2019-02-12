@@ -161,6 +161,8 @@ class Activity extends \yii\db\ActiveRecord
             "release_at",
             "start_at",
             "end_at",
+            "ticketing_start_at",
+            "ticketing_end_at",
             "introduction",
             "current_people",
             "max_people",

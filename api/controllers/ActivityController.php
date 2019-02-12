@@ -38,26 +38,7 @@ class ActivityController extends ActiveController
     	}
         //设置不再请求头返回速率限制信息
         // $behaviors['rateLimiter']['enableRateLimitHeaders'] = false;
-        
         return $behaviors;
-        	// [
-         //        'class' => TimestampBehavior::className(),
-         //        'updatedAtAttribute' => 'allowance_update_at',
-         //        // 'value' => new Expression('NOW()'),
-         //    ]];
-        // return ArrayHelper::merge([
-        //     //设置可以接收访问的域和方法。
-        //     [
-        //         'class' => Cors::className(),
-        //         'cors' => [
-        //             'Origin' => ['*'],
-        //             // 'Access-Control-Request-Method' => ['GET', 'HEAD', 'OPTIONS'],
-        //             'Access-Control-Request-Headers' => ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
-        //             'Access-Control-Request-Method' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
-        //         ],
-        //     ],
-        // ], $behaviors);      
- 
 	}
 
 
@@ -66,7 +47,7 @@ class ActivityController extends ActiveController
 		$actions = parent::actions();
 		unset($actions['index']);
 		unset($actions['create']);
-		// unset($actions['view']); //允许访问activity的细节
+		unset($actions['view']); //允许访问activity的细节
 		unset($actions['update']);
 		return $actions;
 	}
@@ -75,8 +56,7 @@ class ActivityController extends ActiveController
 	{
 		$modelClass = $this->modelClass;
 
-		//TODO: asArray
-		return new ActiveDataProvider(
+		$provider = new ActiveDataProvider(
 			[
 				// 'msg' => 0,
 				'query' => $modelClass::find()
@@ -88,6 +68,16 @@ class ActivityController extends ActiveController
 				'pagination' => ['pageSize'=>5],
 			]
 		);
+		//TODO: asArray
+		return ['code'=>0,'message'=>'success','data'=>$provider->getModels()];
+	}
+
+	public function actionView($id){
+		$activity = Activity::find()->where(['id'=>$id])->limit(1)->one();
+
+		if($activity == null)
+			return ['code'=>1,'message'=>'activity inexists'];
+		return ['code'=>0,'message'=>'success','data'=>$activity];
 	}
 	// public function actionValid()
 	// {
@@ -114,7 +104,7 @@ class ActivityController extends ActiveController
 		$sql_status = $request->post('status',0);   
 
 
-		return new ActiveDataProvider(//暂时不增加message,前端通过返回的码判断
+		$provider = new ActiveDataProvider(//暂时不增加message,前端通过返回的码判断
 
 			[
 				'query' => Activity::find() //暂时没有问题
@@ -128,6 +118,8 @@ class ActivityController extends ActiveController
 				'pagination' => ['pageSize'=>5],
 			]
 		);
+
+		return ['code'=>0,'message'=>'success','data' => $provider->getModels()];
 		// return $customer = Activity::find() //暂时没有问题
 		// ->where(['and', 
 		// ['like','name',$sql_name],
@@ -154,7 +146,7 @@ class ActivityController extends ActiveController
 		//TODO验证传入的信息是否符合规则;
 		
 		if( $user_id == null || $activity_id == null )
-			return ['message' => 'empty paramters'];
+			return ['code'=> 1,'message' => 'empty paramters'];
 
 		$user = User::find()
 				->where(['id' => $user_id])
@@ -167,18 +159,18 @@ class ActivityController extends ActiveController
 				->one();
 
 		if( $user == null || $activity == null )
-			return ['message' => 'wrong id'];
+			return ['code'=> 1, 'message' => 'wrong id'];
 
 		if(time()<$activity->ticketing_start_at||time()>$activity->ticketing_end_at)
 		{
-			return ['message' -> '未在抢票时间内'];
+			return ['code'=> 1, 'message' => '未在抢票时间内'];
 		}
 
 		$current_serial = $activity->current_serial;
 
 		$current_people = $activity->current_people;
 		if($current_people > $activity->max_people)
-			return ['message'=>'已达上限'];
+			return ['code'=> 1, 'message'=>'已达上限'];
 
 		// return ['1'=>($user!=null),'2'=>($activity!=null)];
 		$ticket = Ticket::find()
@@ -191,7 +183,7 @@ class ActivityController extends ActiveController
 				->one();
 
 		if($ticket != null)
-			return ['message' => '已抢过票！'];
+			return ['code'=> 1,'message' => '已抢过票！'];
 
 		$activity->current_people++;
 		$activity->current_serial++;
@@ -219,6 +211,6 @@ class ActivityController extends ActiveController
 		$ticket_event->save(false);
 
 
-		return $ticket;
+		return ['code'=> 0, 'message' => 'success', 'data' => $ticket];
 	}
 }
