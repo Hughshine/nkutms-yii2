@@ -120,6 +120,18 @@ class UserController extends ActiveController
 		if($user == null)
 			return ['code'=>1, 'message'=>'user inexists'];
 
+		$user2 = User::find()
+				->where(['credential'=>$sql_credential])
+				->limit(1)
+				->one();
+		if($user2 != null){
+			if($user->name == $user2->name){
+				break;
+			}
+			return ['code'=>1, 'message'=>'dulpilicate credential'];
+		}
+
+
 		$user->name = $sql_name==null?$user->name:$sql_name;
 		$user->category = $sql_category==null?$user->category:$sql_category;
 		$user->credential = $sql_credential==null?$user->credential:$sql_credential;
