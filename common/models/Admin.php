@@ -1,5 +1,4 @@
 <?php
-
 namespace common\models;
 
 use Yii;
@@ -8,7 +7,7 @@ use Yii;
  * This is the model class for table "tk_admin".
  *
  * @property int $id
- * @property string $name
+ * @property string $admin_name
  * @property string $password
  * @property string $signup_at
  * @property string $logged_at 上次登入时间
@@ -32,9 +31,9 @@ class Admin extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'logged_at'], 'required'],
+            [['admin_name', 'logged_at'], 'required'],
             [['signup_at', 'logged_at'], 'safe'],
-            [['name'], 'string', 'max' => 32],
+            [['admin_name'], 'string', 'max' => 32],
             [['password'], 'string', 'max' => 255],
         ];
     }
@@ -46,7 +45,7 @@ class Admin extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'name' => 'Name',
+            'admin_name' => 'Name',
             'password' => 'Password',
             'signup_at' => 'Signup At',
             'logged_at' => '上次登入时间',

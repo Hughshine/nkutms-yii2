@@ -65,7 +65,7 @@ class Ticket extends \yii\db\ActiveRecord
                 "activity_id",
                 "activity_name" => function($model)
                 {
-                    return $this->activity->name;
+                    return $this->activity->activity_name;
                 },
                 "fetch_time" => "created_at", //抢票时间
                 "serial_number",

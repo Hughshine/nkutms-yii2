@@ -125,14 +125,14 @@ class UserController extends ActiveController
 				->limit(1)
 				->one();
 		if($user2 != null){
-			if($user->name == $user2->name){
+			if($user->user_name == $user2->user_name){
 				break;
 			}
 			return ['code'=>1, 'message'=>'dulpilicate credential'];
 		}
 
 
-		$user->name = $sql_name==null?$user->name:$sql_name;
+		$user->user_name = $sql_name==null?$user->user_name:$sql_name;
 		$user->category = $sql_category==null?$user->category:$sql_category;
 		$user->credential = $sql_credential==null?$user->credential:$sql_credential;
 

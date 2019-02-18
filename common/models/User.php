@@ -1,6 +1,6 @@
 <?php
 
-namespace common\models;
+user_namespace common\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -10,7 +10,7 @@ use yii\web\IdentityInterface;
  * This is the model class for table "tk_user".
  *
  * @property int $id
- * @property string $name
+ * @property string $user_name
  * @property string $wechat_id
  * @property int $category 标记用户类别0-学生1-教职员工2-其他
  * @property string $credential 该用户类别下，他的证件号。web端使用此为账号进行登录
@@ -19,7 +19,7 @@ use yii\web\IdentityInterface;
  * @property string $signup_at
  * @property int $logged_at 使用int类型便于比较操作
  * @property int $expire_at
- * @property int $update_at
+ * @property int $updated_at
  * @property int $allowance 用于限制访问频率
  * @property int $allowance_updated_at
  *
@@ -36,7 +36,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
             [
                 'class' => TimestampBehavior::className(),
                 'createdAtAttribute' => 'signup_at',
-                'updatedAtAttribute' => 'update_at',
+                'updatedAtAttribute' => 'updated_at',
                 // 'value' => new Expression('NOW()'),
             ],
         ];   
@@ -56,9 +56,9 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
     {
         return [
             [['wechat_id', 'credential'], 'required'],
-            [['category', 'logged_at', 'expire_at', 'update_at', 'allowance', 'allowance_updated_at'], 'integer'],
+            [['category', 'logged_at', 'expire_at', 'updated_at', 'allowance', 'allowance_updated_at'], 'integer'],
             [['signup_at'], 'safe'],
-            [['name'], 'string', 'max' => 32],
+            [['user_name'], 'string', 'max' => 32],
             [['wechat_id', 'credential', 'password', 'access_token'], 'string', 'max' => 255],
         ];
     }
@@ -70,7 +70,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
     {
         return [
             'id' => 'ID',
-            'name' => 'Name',
+            'user_name' => 'Name',
             'wechat_id' => 'Wechat ID',
             'category' => '标记用户类别0-学生1-教职员工2-其他',
             'credential' => '该用户类别下，他的证件号。web端使用此为账号进行登录',
@@ -79,7 +79,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
             'signup_at' => 'Signup At',
             'logged_at' => '使用int类型便于比较操作',
             'expire_at' => 'Expire At',
-            'update_at' => 'Update At',
+            'updated_at' => 'Update At',
             'allowance' => '用于限制访问频率',
             'allowance_updated_at' => 'Allowance Updated At',
         ];
@@ -88,7 +88,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
     public function fields(){
         return [
             'user_id' => 'id',
-            'name',
+            'user_name',
             'category' => function($model)
             {
                 switch ($model->category) {

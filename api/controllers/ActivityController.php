@@ -109,7 +109,7 @@ class ActivityController extends ActiveController
 			[
 				'query' => Activity::find() //暂时没有问题
 						->where(['and', 
-						['like','name',$sql_name],
+						['like','activity_name',$sql_name],
 						['category' => $sql_category],
 						['status' => $sql_status],
 						])

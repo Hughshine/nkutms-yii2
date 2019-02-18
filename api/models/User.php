@@ -20,7 +20,7 @@ use yii\filters\RateLimitInterface;
  * @property string $signup_at
  * @property int $logged_at 使用int类型便于比较操作
  * @property int $expire_at
- * @property int $update_at
+ * @property int $updated_at
  * @property int $allowance 用于限制访问频率
  * @property int $allowance_updated_at
  *
@@ -37,7 +37,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
             [
                 'class' => TimestampBehavior::className(),
                 'createdAtAttribute' => 'signup_at',
-                'updatedAtAttribute' => 'update_at',
+                'updatedAtAttribute' => 'updated_at',
                 // 'value' => new Expression('NOW()'),
             ],
         ];   
@@ -57,7 +57,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
     {
         return [
             [['wechat_id'], 'required'],
-            [['category', 'signup_at', 'logged_at', 'expire_at', 'update_at', 'allowance', 'allowance_updated_at'], 'integer'],
+            [['category', 'signup_at', 'logged_at', 'expire_at', 'updated_at', 'allowance', 'allowance_updated_at'], 'integer'],
             [['name'], 'string', 'max' => 32],
             [['wechat_id', 'credential', 'password', 'access_token'], 'string', 'max' => 255],
         ];
@@ -79,7 +79,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
             'signup_at' => 'Signup At',
             'logged_at' => '使用int类型便于比较操作',
             'expire_at' => 'Expire At',
-            'update_at' => 'Update At',
+            'updated_at' => 'Update At',
             'allowance' => '用于限制访问频率',
             'allowance_updated_at' => 'Allowance Updated At',
         ];

@@ -8,7 +8,7 @@ use Yii;
  * This is the model class for table "tk_admin".
  *
  * @property int $id
- * @property string $name
+ * @property string $user_name
  * @property string $password
  * @property string $signup_at
  * @property string $logged_at 上次登入时间
@@ -34,7 +34,7 @@ class Admin extends \yii\db\ActiveRecord
         return [
             [['signup_at', 'logged_at'], 'safe'],
             [['logged_at'], 'required'],
-            [['name'], 'string', 'max' => 32],
+            [['admin_name'], 'string', 'max' => 32],
             [['password'], 'string', 'max' => 255],
         ];
     }
@@ -46,7 +46,7 @@ class Admin extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'name' => 'Name',
+            'admin_name' => 'Name',
             'password' => 'Password',
             'signup_at' => 'Signup At',
             'logged_at' => '上次登入时间',

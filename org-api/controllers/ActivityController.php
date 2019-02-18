@@ -114,7 +114,7 @@ class ActivityController extends ActiveController
 			[
 				'query' => Activity::find() //暂时没有问题
 						->where(['and', 
-						['like','name',$sql_name],
+						['like','activity_name',$sql_name],
 						['category' => $sql_category],
 						['status' => $sql_status],
 						])
@@ -237,7 +237,7 @@ class ActivityController extends ActiveController
 			return ['code'=>1,'message' => 'incomplete paramters'];
 
 		$activity = Activity::find()
-					->where(['name' => $activity_name])
+					->where(['activity_name' => $activity_name])
 					->limit(1)
 					->one();
 
@@ -249,7 +249,7 @@ class ActivityController extends ActiveController
 		$activity = new Activity();
 		//太可怕了
 		$activity->release_by = $org_id;
-		$activity->name = $activity_name;
+		$activity->activity_name = $activity_name;
 		$activity->category = $category;
 		$activity->location = $location;
 		$activity->ticketing_start_at = $ticketing_start_at;
@@ -307,7 +307,7 @@ class ActivityController extends ActiveController
 			return ['code'=>1, 'message' => 'organizer inexists'];
 
 		$activity = Activity::find()
-					->where(['name' => $activity_name])
+					->where(['activity_name' => $activity_name])
 					->limit(1)
 					->one();
 
@@ -346,10 +346,10 @@ class ActivityController extends ActiveController
 
 		
 
-		$activity->name = $activity_name==null?$activity->name:$activity_name;
+		$activity->activity_name = $activity_name==null?$activity->name:$activity_name;
 
 		$activity->category = $category==null?$activity->category:$category;
-		$activity->name = $activity_name==null?$activity->name:$activity_name;
+		// $activity->name = $activity_name==null?$activity->name:$activity_name;
 		$activity->location = $location==null?$activity->location:$location;
 		$activity->ticketing_start_at = $ticketing_start_at==null?$activity->ticketing_start_at:$ticketing_start_at;
 		$activity->ticketing_end_at = $ticketing_end_at==null?$activity->ticketing_end_at:$ticketing_end_at;
