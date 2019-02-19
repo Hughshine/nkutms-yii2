@@ -67,11 +67,11 @@ class TicketController extends ActiveController
 							])
 						->orderBy('created_at DESC'),//根据发布时间逆序排序
 					
-					'pagination' => ['pageSize'=>5],
+					'pagination' => ['pageSize'=>10],
 				]
 			);
 			//TODO: asArray
-			return ['code'=>0,'message'=>'success','data'=> $provider->getModels()];
+			return ['code'=>0,'message'=>'success','data'=> $provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/10+1)];
 		}
 
 		/*

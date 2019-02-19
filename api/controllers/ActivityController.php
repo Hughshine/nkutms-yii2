@@ -56,6 +56,8 @@ class ActivityController extends ActiveController
 	{
 		$modelClass = $this->modelClass;
 
+
+
 		$provider = new ActiveDataProvider(
 			[
 				// 'msg' => 0,
@@ -69,7 +71,7 @@ class ActivityController extends ActiveController
 			]
 		);
 		//TODO: asArray
-		return ['code'=>0,'message'=>'success','data'=>$provider->getModels()];
+		return ['code'=>0,'message'=>'success','data'=>$provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/10+1)];
 	}
 
 	public function actionView($id){
@@ -77,7 +79,7 @@ class ActivityController extends ActiveController
 
 		if($activity == null)
 			return ['code'=>1,'message'=>'activity inexists'];
-		return ['code'=>0,'message'=>'success','data'=>$activity];
+		return ['code'=>0,'message'=>'success','data'=>$activity,'pages'=>intval(($provider->getTotalCount()-1)/20)];
 	}
 	// public function actionValid()
 	// {
@@ -115,11 +117,11 @@ class ActivityController extends ActiveController
 						])
 						->orderBy('release_at DESC'),//根据发布时间逆序排序
 				
-				'pagination' => ['pageSize'=>5],
+				'pagination' => ['pageSize'=>10],
 			]
 		);
 
-		return ['code'=>0,'message'=>'success','data' => $provider->getModels()];
+		return ['code'=>0,'message'=>'success','data' => $provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/10+1)];
 		// return $customer = Activity::find() //暂时没有问题
 		// ->where(['and', 
 		// ['like','name',$sql_name],
@@ -206,7 +208,7 @@ class ActivityController extends ActiveController
 		// $ticket_event->activity_id = $ticket->ticket_id;
 		$ticket_event->activity_id = $ticket->activity_id;
 		$ticket_event->status = 0;
-		$ticket_event->update_at = time();
+		$ticket_event->update_at = time()+7*3600;
 		$ticket_event->operated_by_admin = -1;
 		$ticket_event->save(false);
 

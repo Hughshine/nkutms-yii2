@@ -72,11 +72,11 @@ class ActivityController extends ActiveController
 					['status' => 0],])
 				->orderBy('release_at DESC'),//根据发布时间逆序排序
 				
-				'pagination' => ['pageSize'=>5],
+				'pagination' => ['pageSize'=>10],
 			]
 		);
 
-		return ['code'=>0,'message'=>'success','data'=>$provider->getModels()];
+		return ['code'=>0,'message'=>'success','data'=>$provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/10+1)];
 	}
 
 	public function actionView($id){
@@ -123,7 +123,7 @@ class ActivityController extends ActiveController
 				'pagination' => ['pageSize'=>5],
 			]
 		);
-		return ['code'=>0, 'message'=>'success', 'data'=> $provider->getModels()];
+		return ['code'=>0, 'message'=>'success', 'data'=> $provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/10+1)];
 		// return $customer = Activity::find() //暂时没有问题
 		// ->where(['and', 
 		// ['like','name',$sql_name],
@@ -417,7 +417,7 @@ class ActivityController extends ActiveController
 		$activity_event->organizer_id = $org_id;
 		$activity_event->activity_id = $activity_id;
 		$activity_event->status = 1;
-		$activity_event->update_at = time();
+		$activity_event->update_at = time()+7*3600;
 		$activity_event->operated_by_admin = -1;
 		$activity_event->save(false);
 		return ['code'=>0,'message' => 'cancel success','data'=>$activity];
