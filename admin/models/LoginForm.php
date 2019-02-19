@@ -27,7 +27,7 @@ class LoginForm extends Model
             // rememberMe must be a boolean value
             // ['rememberMe', 'boolean'],
             // password is validated by validatePassword()
-            // ['password', 'validatePassword'],
+            ['password', 'validatePassword'],
         ];
     }
     public function attributeLabels()
@@ -50,17 +50,17 @@ class LoginForm extends Model
         if (!$this->hasErrors()) {
             $user = $this->getUser();
             if (!$user || !$user->validatePassword($this->password)) {
-                if(!$user){
-                    $this->addError($attribute, 'no such admin');
-                    return;
-                    // exit;
-                }
-
-                if($user&&!$user->validatePassword($this->password)){
                 $this->addError($attribute, '密码或用户名不正确');
-                    return;
-                
-                }
+                // if(!$user){
+                //     $this->addError($attribute, 'no such admin');
+                //     return;
+                //     // exit;
+                // }
+
+                // if($user&&!$user->validatePassword($this->password)){
+                // $this->addError($attribute, '密码或用户名不正确');
+                //     return;
+                // }
             }
             // $this->addError($attribute, 'zhengque');
             // return true;
@@ -79,7 +79,7 @@ class LoginForm extends Model
             return Yii::$app->user->login(Admin::findOne(["admin_name"=>$this->admin_name]),0);
             // return true;
         }
-        echo '1';
+        // echo '1';
         return false;
     }
 
