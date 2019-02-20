@@ -48,7 +48,7 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface, RateL
             [['credential'], 'required'],
             [['signup_at'], 'safe'],
             [['name'], 'string', 'max' => 32],
-            [['wechat_id1', 'credential', 'password', 'access_token', 'wechat_id2', 'wechat_id3'], 'string', 'max' => 255],
+            // [['wechat_id1', 'credential', 'password', 'access_token', 'wechat_id2', 'wechat_id3'], 'string', 'max' => 255],
         ];
     }
 
@@ -60,7 +60,7 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface, RateL
         return [
             'id' => 'ID',
             'name' => '应必须填写',
-            'wechat_id1' => '一个社团最多有三个管理者，暂时不考虑一个人管理多个社团',
+            // 'wechat_id1' => '一个社团最多有三个管理者，暂时不考虑一个人管理多个社团',
             'category' => '标记用户类别 0-校级组织，1-学生社团',
             'credential' => '该用户类别下，他的证件号',
             'password' => 'Password',
@@ -71,8 +71,8 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface, RateL
             'expire_at' => 'Expire At',
             'allowance' => '用于限制访问频率',
             'allowance_updated_at' => 'Allowance Updated At',
-            'wechat_id2' => 'Wechat Id2',
-            'wechat_id3' => 'Wechat Id3',
+            // 'wechat_id2' => 'Wechat Id2',
+            // 'wechat_id3' => 'Wechat Id3',
         ];
     }
 

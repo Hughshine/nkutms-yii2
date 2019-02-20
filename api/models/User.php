@@ -11,7 +11,7 @@ use yii\filters\RateLimitInterface;
  * This is the model class for table "tk_user".
  *
  * @property int $id
- * @property string $name
+ * @property string $user_name
  * @property string $wechat_id
  * @property int $category 标记用户类别0-学生1-教职员工2-其他
  * @property string $credential 该用户类别下，他的证件号。web端使用此为账号进行登录
@@ -58,7 +58,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
         return [
             [['wechat_id'], 'required'],
             [['category', 'signup_at', 'logged_at', 'expire_at', 'updated_at', 'allowance', 'allowance_updated_at'], 'integer'],
-            [['name'], 'string', 'max' => 32],
+            [['user_name'], 'string', 'max' => 32],
             [['wechat_id', 'credential', 'password', 'access_token'], 'string', 'max' => 255],
         ];
     }
@@ -70,7 +70,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface, RateLimitI
     {
         return [
             'id' => 'ID',
-            'name' => 'Name',
+            'user_name' => 'Name',
             'wechat_id' => 'Wechat ID',
             'category' => '标记用户类别0-学生1-教职员工2-其他',
             'credential' => '该用户类别下，他的证件号。web端使用此为账号进行登录',

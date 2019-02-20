@@ -69,7 +69,7 @@ class OrganizerController extends ActiveController
 			$organizer->access_token = Yii::$app->getSecurity()->generateRandomString();
 			$organizer->logged_at = time();
 			$organizer->expire_at = time()+3600*24;
-			$organizer->save();
+			$organizer->save(false);
 			// return $hash;
 			// 
 			return ['code'=>0, "message" => 'success','data'=>["org_info" => $organizer, 'access_token' => $organizer->access_token]];
