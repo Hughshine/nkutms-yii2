@@ -30,7 +30,7 @@ return [
             类都有用，yii在每次save()都会保存当前时间在updated_at字段内，
             所以就不好改名，直接用于记录上一次登录的时间
             */
-            $user->updated_at = time()+7*3600;
+            $user->logged_at = time()+7*3600;
             $user->save();
             },
             'identityCookie' => ['name' => '_identity-admin', 'httpOnly' => true],

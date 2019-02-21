@@ -59,8 +59,8 @@ AppAsset::register($this);
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu pull-right">
-                                <li><a href="#"><i class="fa fa-user"></i> 个人中心</a></li>
-                                <li><a href="#"><i class="fa fa-cog"></i> 账户设置</a></li>
+                                <!--<li><a href="#"><i class="fa fa-user"></i> 个人中心</a></li>-->
+                                <li><a href="<?=Url::to(['site/repassword'])?>" data-method="post"><i class="fa fa-cog"></i> 修改密码</a></li>
                                 <li><a href="<?=Url::to(['site/logout'])?>" data-method="post" ><i class="fa fa-sign-out"></i> 退出</a></li>
                             </ul>
                         </div>
