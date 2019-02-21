@@ -17,13 +17,18 @@ $this->params['breadcrumbs'][] = $this->title;
     <p>
         <?= Html::a('更新信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('修改密码', ['repassword', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('删除', ['delete', 'id' => $model->id], [
+        <!--
+        删除操作接口：
+        恢复的话需要尖括号和问号括起来
+        Html::a('删除', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => '确定删除该账号?',
                 'method' => 'post',
             ],
-        ]) ?>
+        ])
+
+        -->
     </p>
 
     <?= DetailView::widget([
@@ -33,6 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'org_name',
             //'auth_key',
             //'password',
+            'credential',
             'wechat_id',
             'category'=>
             [
@@ -58,7 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter'=>['0'=>'无效','10'=>'有效'],
             ],
-            'signup_at:datetime',
+            'created_at:datetime',
             'updated_at:datetime',
             'access_token',
         ],

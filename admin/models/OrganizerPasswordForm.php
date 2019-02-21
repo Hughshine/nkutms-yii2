@@ -5,9 +5,11 @@ use Yii;
 use yii\base\Model;
 use admin\models\Organizer;
 
-/**
- * Signup form
- */
+
+/*用于管理员修改组织者密码的表单
+ *独立于update表单是因为有时候只需要修改密码，不用修改其他信息。
+ * 由于是管理员来修改，所以并不需要验证
+ * */
 class OrganizerPasswordForm extends Model
 {
     public $password;
@@ -29,6 +31,7 @@ class OrganizerPasswordForm extends Model
         [
             [['password','repassword'], 'string', 'min' => 6],
             [['password','repassword'], 'required'],
+            //重复密码必须与密码相等
             ['repassword','compare','compareAttribute'=>'password','message'=>'密码和重复密码不相同'],
         ];
     }
@@ -42,19 +45,14 @@ class OrganizerPasswordForm extends Model
         ];
     }
 
-    /**
-     * Signs organizer up.
-     *
-     * @return organizer|null the saved model or null if saving fails
-     */
+    //向数据库提交修改的密码
     public function repassword($organizer)
     {
-        if (!$this->validate()) 
-        {
+        if (!$this->validate())
             return null;
-        }
         $organizer = $this->org;
         $organizer->setPassword($this->password);
+        //由于之前用了validate方法，所以此次save用false
         return $organizer->save(false);
     }
 }

@@ -4,14 +4,16 @@ namespace admin\models;
 use Yii;
 use yii\base\Model;
 use admin\models\Admin;
-/**
- * Login form
- */
+
+/*从user直接改用于admin的登录，把rememberMe选项删去，
+ * 防止由于自动登录造成的问题
+ *
+ *
+ * */
 class LoginForm extends Model
 {
     public $admin_name;
     public $password;
-    public $rememberMe = false;
 
     private $_user;
 
@@ -24,10 +26,8 @@ class LoginForm extends Model
         return [
             // admin_name and password are both required
             [['admin_name', 'password'], 'required'],
-            // rememberMe must be a boolean value
-            // ['rememberMe', 'boolean'],
             // password is validated by validatePassword()
-            ['password', 'validatePassword'],
+             ['password', 'validatePassword'],
         ];
     }
     public function attributeLabels()
@@ -51,19 +51,7 @@ class LoginForm extends Model
             $user = $this->getUser();
             if (!$user || !$user->validatePassword($this->password)) {
                 $this->addError($attribute, '密码或用户名不正确');
-                // if(!$user){
-                //     $this->addError($attribute, 'no such admin');
-                //     return;
-                //     // exit;
-                // }
-
-                // if($user&&!$user->validatePassword($this->password)){
-                // $this->addError($attribute, '密码或用户名不正确');
-                //     return;
-                // }
             }
-            // $this->addError($attribute, 'zhengque');
-            // return true;
         }
     }
 
@@ -76,10 +64,8 @@ class LoginForm extends Model
     public function login()
     {
         if ($this->validate()) {
-            return Yii::$app->user->login(Admin::findOne(["admin_name"=>$this->admin_name]),0);
-            // return true;
+            return Yii::$app->user->login($this->getUser(),0);
         }
-        // echo '1';
         return false;
     }
 

@@ -7,7 +7,7 @@ use yii\helpers\Html;
 
 $this->title = '修改活动状态：'.$model->activity_name;
 $this->params['breadcrumbs'][] = ['label' => '活动管理', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->activity_name, 'url' => ['view', 'id' => $model->id]];
+$this->params['breadcrumbs'][] = ['label' => $model->act->activity_name, 'url' => ['view', 'id' => $model->act->id]];
 $this->params['breadcrumbs'][] = '修改状态';
 ?>
 <div class="tk-activity-update">

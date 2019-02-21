@@ -5,6 +5,7 @@ namespace admin\controllers;
 use Yii;
 use admin\models\TkActivity;
 use admin\models\TkActivitySearch;
+use admin\models\ActivityUpdateForm;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -35,11 +36,13 @@ class TkActivityController extends Controller
                     ],
                     [//登录用户能访问这个控制器里的方法
                         'allow'=>true,
+                        //可访问的页面名字
                         'actions'=>['index','view','update','delete','create'],
                         'roles'=>['@'],//登录用户
                     ],
                 ],
             ],
+            //目前未知。。。
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -63,6 +66,7 @@ class TkActivityController extends Controller
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
+
     }
 
     /**
@@ -86,60 +90,45 @@ class TkActivityController extends Controller
     public function actionCreate()
     {
         $model = new TkActivity();
-        if ($model->load(Yii::$app->request->post())) 
+        //直接在页面中向模型写入数据，但是时间和一些默认值需要在表单返回后写入
+        if ($model->load(Yii::$app->request->post()))
         {
             $model->start_at=strtotime($model->time_start_stamp);
             $model->end_at=strtotime($model->time_end_stamp);
+            $model->ticketing_start_at=strtotime($model->ticket_start_stamp);
+            $model->ticketing_end_at=strtotime($model->ticket_end_stamp);
             $model->updated_at=$model->release_at=time()+7*3600;
             $model->current_people=0;
             if($model->save())
             {
                 return $this->redirect(['view', 'id' => $model->id]);
             }
-            else
-            {
-                print_r($model->time_start);
-                print_r('\n');
-                print_r($model->time_end);
-                return null;
-            }
-            
         }
         return $this->render('create', [
             'model' => $model,
         ]);
     }
 
-    /**
-     * Updates an existing TkActivity model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+    /*
+     * 更新操作：先通过id找到需要更新的模型，再新建一个表单进行信息的输入，然后显示
+     * 信息输入界面 ，如果提交并且更新成功，返回查看信息页面
      */
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post())) 
+        $updateform =new ActivityUpdateForm($model);
+        if ($updateform->load(Yii::$app->request->post()) &&
+            $updateform->update($model)) 
         {
-            $model->time_start_stamp=$model->start_at;
-            $model->time_end_stamp=$model->end_at;
-            $model->updated_at=time()+7*3600;
-            if($model->save(false))
-                return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['view', 'id' => $model->id]);
         }
-
-        return $this->render('update', ['model' => $model,]);
+        return $this->render('update', [
+            'model' => $updateform,
+        ]);
     }
 
-    /**
-     * Deletes an existing TkActivity model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+    /*删除动作，目前没有接口
+     * */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();

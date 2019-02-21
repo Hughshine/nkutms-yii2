@@ -16,13 +16,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('修改状态', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('删除该用户', ['delete', 'id' => $model->id], [
+        <!--
+        /*
+        删除操作接口，需要尖括号和问号括起来
+        Html::a('删除该用户', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
                 'method' => 'post',
             ],
-        ]) ?>
+        ])*/
+        -->
     </p>
 
     <?= DetailView::widget([

@@ -4,9 +4,8 @@ namespace admin\models;
 use yii\base\Model;
 use admin\models\Organizer;
 
-/**
- * Signup form
- */
+/*用于管理员修改组织者信息
+ * */
 class OrganizerUpdateForm extends Model
 {
     public $org_name;
@@ -49,30 +48,20 @@ class OrganizerUpdateForm extends Model
         return [
         'org_name'=>'组织者名字',
         'status'=>'状态',
-        'time_release'=>'注册时间',
-        'wechat_id'=>'微信号',
-        'activity_total'=>'活动总数',
         'category'=>'分类',
-        'auth_key'=>'自动登录密码',
-        'password'=>'密码',
-        'password_reset_token'=>'重置密码token',
-        'updated_time'=>'更新时间',
-        'access_token'=>'小程序请求发送',
         ];
     }
 
-    /**
-     * Signs organizer up.
-     *
-     * @return organizer|null the saved model or null if saving fails
-     */
+    /*
+     *更新表单，和其他用户类的更新表单差不多
+     * */
     public function update($organizer)
     {
         $changename=false;
         //在这做一个特殊处理暂时改变字符串，这样在改变名字的时候就不会违反名字的唯一键值特性，用一个变量记住是否修改
         if($this->org_name === $organizer->org_name)
         {
-            $this->org_name='default_lyl'.$this->org_name;
+            $this->org_name='prevent_rule_unique'.$this->org_name;
         }
         else
         {
@@ -91,6 +80,6 @@ class OrganizerUpdateForm extends Model
         }
         $organizer->category=$this->category;
         $organizer->status=$this->status;
-        return $organizer->save() ? $organizer : null;
+        return $organizer->save(false) ? $organizer : null;
     }
 }

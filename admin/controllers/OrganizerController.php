@@ -60,7 +60,8 @@ class OrganizerController extends Controller
         $searchModel = new OrganizerSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        $dataProvider->pagination = ['pagesize' => '3'];
+        //index页面的每页条目数pagesize
+        $dataProvider->pagination = ['pagesize' => '10'];
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,

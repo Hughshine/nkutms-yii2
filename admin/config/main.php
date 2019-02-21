@@ -21,12 +21,18 @@ return [
             // 'class' => 'admin\models\Admin',
             'identityClass' => 'admin\models\Admin',
             'enableAutoLogin' => false,
-            //更新登录时间的代码
-            /*'on beforeLogin' => function($event) {
+            //更新登录时间的代码：来源于网络
+            'on beforeLogin' => function($event)
+            {
             $user = $event->identity; //这里的就是Model的实例了
-            $user->last_login = time()+7*3600;
+            /*updated_at在此的意义是上一次登录时间，因为
+            yii中的save()方法需要用到updated_at字段，而该字段对该应用的其他所有
+            类都有用，yii在每次save()都会保存当前时间在updated_at字段内，
+            所以就不好改名，直接用于记录上一次登录的时间
+            */
+            $user->updated_at = time()+7*3600;
             $user->save();
-            },*/
+            },
             'identityCookie' => ['name' => '_identity-admin', 'httpOnly' => true],
         ],
         //路由设置：美化url

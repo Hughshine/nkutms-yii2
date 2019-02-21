@@ -40,6 +40,9 @@ class TkActivitySearch extends TkActivity
      *
      * @return ActiveDataProvider
      */
+    /*面向CSDN编程结果如下：
+     * 原理未知，用于将release_by替换成对应的组织者名字
+     * */
     public function search($params)
     {
         $query = TkActivity::find();

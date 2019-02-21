@@ -34,18 +34,19 @@ AppAsset::register($this);
         <div class="logopanel">
             <h4><a href="#">南开大学学生票务管理系统</a></h2>
         </div><!-- logopanel -->
-        
-        <div class="headerbar">
-            <a id="menuToggle" class="menutoggle"><i class="fa fa-bars"></i></a>
 
-            <div class="searchpanel">
+            <div class="headerbar">
+                <a id="menuToggle" class="menutoggle"><i class="fa fa-bars"></i></a>
+
+            <!--以下是搜索框样式-->
+            <!--<div class="searchpanel">
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="Search for...">
                 <span class="input-group-btn">
                     <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
                 </span>
-                </div><!-- input-group -->
-            </div>
+                </div><!-- input-group
+            </div>-->
 
             <div class="header-right">
                 <ul class="headermenu">

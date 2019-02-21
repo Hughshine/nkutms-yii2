@@ -6,6 +6,9 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model common\models\Organizer */
 /* @var $form yii\widgets\ActiveForm */
+/*
+组织者创建表单的页面输入项目
+*/
 ?>
 
 <div class="organizer-form">
@@ -15,6 +18,8 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'org_name')->textInput()?>
 
     <?= $form->field($model, 'wechat_id')->textInput()?>
+
+    <?= $form->field($model, 'credential')->textInput()?>
 
 	<?= $form->field($model, 'password')->passwordInput() ?>
 
