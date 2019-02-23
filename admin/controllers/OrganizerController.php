@@ -3,7 +3,7 @@
 namespace admin\controllers;
 
 use Yii;
-use admin\models\Organizer;
+use common\models\Organizer;
 use admin\models\OrganizerSearch;
 use admin\models\OrganizerSignupForm;
 use admin\models\OrganizerUpdateForm;
