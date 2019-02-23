@@ -2,45 +2,107 @@
     <a target="_blank">
         <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
     </a>
-    <h1 align="center">南开大学学生活动抢票系统(管理系统/面向小程序的api)</h1>
+    <h1 align="center">南开大学学生活动抢票系统(管理系统/面向微信小程序的api)</h1>
     <br>
 </p>
 
+# 部署方式
 
-DIRECTORY STRUCTURE
--------------------
+- clone 至 web 根目录
 
+- composer install; composer update (建议使用镜像/代理)
+
+- php init (linux/mac)
+
+- 更改apache配置文件，开启并配置rewrite规则。（.htaccess）
+
+- 注意apache用户（组）应给予web目录及以下操作权限
+``` 
+chown -R www-data:www-data /path/to/webserver/www # centos为 apache:apache
+chmod -R g+rw /path/to/webserver/www
 ```
-common
-    config/              contains shared configurations
-    mail/                contains view files for e-mails
-    models/              contains model classes used in both backend and frontend
-    tests/               contains tests for common classes    
-console
-    config/              contains console configurations
-    controllers/         contains console controllers (commands)
-    migrations/          contains database migrations
-    models/              contains console-specific model classes
-    runtime/             contains files generated during runtime
-backend
-    assets/              contains application assets such as JavaScript and CSS
-    config/              contains backend configurations
-    controllers/         contains Web controller classes
-    models/              contains backend-specific model classes
-    runtime/             contains files generated during runtime
-    tests/               contains tests for backend application    
-    views/               contains view files for the Web application
-    web/                 contains the entry script and Web resources
-frontend
-    assets/              contains application assets such as JavaScript and CSS
-    config/              contains frontend configurations
-    controllers/         contains Web controller classes
-    models/              contains frontend-specific model classes
-    runtime/             contains files generated during runtime
-    tests/               contains tests for frontend application
-    views/               contains view files for the Web application
-    web/                 contains the entry script and Web resources
-    widgets/             contains frontend widgets
-vendor/                  contains dependent 3rd-party packages
-environments/            contains environment-based overrides
+
+> 自动部署项目待定
+
+# 项目基本信息
+
+## `Models`
+| Basic Class   | Description              |
+| ------------- | ------------------------ |
+| User          | 抢票者                   |
+| Organizer     | 发布者（不同的学生组织） |
+| Admin         | 管理员                   |
+| Activity      | 活动                     |
+| Ticket        | 票                       |
+| ActivityEvent | 活动事件                 |
+| TicketEvent   | 票务事件                 |
+
+> 数据库设计见db中sql文件
+
+## `模块`
+
+### 1. admin
+
+- 管理员对活动/票务事件进行监控，对用户/组织者信息、活动信息进行修改
+
+### 2. api
+
+- 针对用户（抢票者）设计的api，开放对活动的查询搜索、抢票、退票、绑定/更改个人信息等接口
+
+##### `Controllers`
 ```
+ActivityController => baseurl/activities/...
+    actions
+        index 
+        view 
+        search 
+        ticketing
+
+TicketController => baseurl/tickets/...
+    actions
+        my-tickets
+        search-by-id
+        withdraw
+
+UserController => baseurl/users/...
+    actions
+        wechat-login
+        edit-profile
+```
+
+### 3. org-api
+
+- 针对发布者（学生组织）设计的api，开放发布活动、查看参与人员等接口
+
+##### `Controllers`
+```
+ActivityController => baseurl/activities/...
+    actions
+        index => GET
+        view => GET
+        search 
+        my-activities
+        my-participants
+        add-activity
+        edit-activity
+        cancel-activity
+
+OrganizerController => baseurl/tickets/...
+    actions
+        login
+        edit-profile
+        (signup)
+```
+
+## 注意事项：
+- wechat-login功能暂未检查请求来源，抢票者注册/登录功能不安全
+- 公共类rules可能有冲突，保存时请使用save(false)
+- 数据库表具有冗余列，可以自行取舍（不够标准，还望见谅QAQ）
+- 欢迎大家pr，提几个issue，帮助菜菜的我们~ QwQ！
+
+
+
+
+
+
+
