@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'auth_key',
             //'password',
             'credential',
-            'wechat_id',
+            // 'wechat_id',
             'category'=>
             [
                 'label'=>'类别',

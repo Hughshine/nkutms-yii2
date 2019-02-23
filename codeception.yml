@@ -3,6 +3,9 @@ include:
     - common
     - frontend
     - backend
+    - admin
+    - api
+    - org-api
 paths:
     log: console/runtime/logs
 settings:

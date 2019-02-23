@@ -4,6 +4,9 @@ namespace admin\controllers;
 
 use Yii;
 use admin\models\TkActivity;
+
+use common\models\Organizer;
+
 use admin\models\TkActivitySearch;
 use admin\models\ActivityUpdateForm;
 use yii\web\Controller;

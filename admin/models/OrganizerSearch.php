@@ -5,7 +5,7 @@ namespace admin\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use admin\models\Organizer;
+use common\models\Organizer;
 
 /*除了注释一些不需要的项之外，不敢动。。。
  *

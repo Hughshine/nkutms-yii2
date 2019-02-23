@@ -5,7 +5,7 @@ namespace admin\models;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use admin\models\User;
+use common\models\User;
 /*同理，没怎么敢动
  * 将不需要的行注释掉
  *

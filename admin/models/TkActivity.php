@@ -3,7 +3,7 @@
 namespace admin\models;
 
 
-use admin\models\organizer;
+use common\models\Organizer;
 use Yii;
 
 class TkActivity extends \yii\db\ActiveRecord

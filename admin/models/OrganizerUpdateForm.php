@@ -2,7 +2,7 @@
 namespace admin\models;
 
 use yii\base\Model;
-use admin\models\Organizer;
+use common\models\Organizer;
 
 class OrganizerUpdateForm extends Model
 {

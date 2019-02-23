@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use admin\models\Organizer;
+use common\models\Organizer;
 
 /* @var $this yii\web\View */
 /* @var $model admin\models\TkActivity */

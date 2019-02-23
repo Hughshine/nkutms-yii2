@@ -2,13 +2,12 @@
 namespace admin\models;
 
 use yii\base\Model;
-use admin\models\Organizer;
+use common\models\Organizer;
 
 class OrganizerSignupForm extends Model
 {
     public $id;
     public $org_name;
-    public $wechat_id;
     public $category=0;
     public $credential;
     public $password;
@@ -21,16 +20,9 @@ class OrganizerSignupForm extends Model
         return [
             ['org_name', 'trim'],
             ['org_name', 'required'],
-            ['org_name', 'unique', 'targetClass' => '\admin\models\Organizer', 'message' => '这个名字已经被注册'],
+            ['org_name', 'unique', 'targetClass' => '\common\models\Organizer', 'message' => '这个名字已经被注册'],
             ['org_name', 'string', 'min' => 2, 'max' => 255],
             ['org_name','default','value'=>$this->status],
-
-
-            ['wechat_id', 'trim'],
-            ['wechat_id', 'required'],
-            ['wechat_id', 'string', 'max' => 255],
-            ['wechat_id', 'unique', 'targetClass' => '\admin\models\Organizer', 'message' => '这个微信id已经被注册'],
-            ['wechat_id','default','value'=>$this->status],
 
 
             ['password', 'required'],
@@ -46,7 +38,7 @@ class OrganizerSignupForm extends Model
 
             ['credential','required'],
             ['credential','integer'],
-            ['credential', 'unique', 'targetClass' => '\admin\models\Organizer', 'message' => '这个证书号已经被注册'],
+            ['credential', 'unique', 'targetClass' => '\common\models\Organizer', 'message' => '这个证书号已经被注册'],
             ];
     }
 
@@ -55,7 +47,6 @@ class OrganizerSignupForm extends Model
         return [
         'org_name'=>'组织者名字',
         'status'=>'状态',
-        'wechat_id'=>'微信号',
         'credential'=>'证书号',
         'category'=>'分类',
         'password'=>'密码',
@@ -74,7 +65,6 @@ class OrganizerSignupForm extends Model
         $organizer = new Organizer();
         $organizer->org_name = $this->org_name;
         $organizer->category=$this->category;
-        $organizer->wechat_id = $this->wechat_id;
         $organizer->credential = $this->credential;
         $organizer->setPassword($this->password);
         $organizer->generateAuthKey();//原理不明，保留就对了，据说是用于自动登录的

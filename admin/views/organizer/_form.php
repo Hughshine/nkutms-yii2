@@ -17,8 +17,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'org_name')->textInput()?>
 
-    <?= $form->field($model, 'wechat_id')->textInput()?>
-
     <?= $form->field($model, 'credential')->textInput()?>
 
 	<?= $form->field($model, 'password')->passwordInput() ?>

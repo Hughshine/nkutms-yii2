@@ -3,6 +3,8 @@ namespace admin\models;
 
 use yii\base\Model;
 use admin\models\TkActivity;
+use common\models\Organizer;
+
 
 class ActivityUpdateForm extends Model
 {
@@ -104,7 +106,7 @@ class ActivityUpdateForm extends Model
             //其他要求
             ['activity_name', 'trim'],//目前还不知道这个是干啥的
 
-            ['id', 'exist', 'targetClass' => 'admin\models\Organizer', 'message' => '该组织者不存在'],
+            ['id', 'exist', 'targetClass' => 'common\models\Organizer', 'message' => '该组织者不存在'],
 
             ];
 

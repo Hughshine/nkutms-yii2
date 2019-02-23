@@ -3,7 +3,7 @@ namespace admin\models;
 
 use Yii;
 use yii\base\Model;
-use admin\models\Organizer;
+use common\models\Organizer;
 
 
 class OrganizerPasswordForm extends Model

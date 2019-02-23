@@ -4,6 +4,7 @@ namespace admin\models;
 use Yii;
 use yii\base\Model;
 use admin\models\Admin;
+use common\models\Organizer;
 
 
 /*用于管理员修改密码的表单

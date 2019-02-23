@@ -5,7 +5,7 @@ use yii\grid\GridView;
 use admin\models\Organizer;
 
 /* @var $this yii\web\View */
-/* @var $searchModel common\models\TkActivitySearch */
+/* @var $searchModel admin\models\TkActivitySearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = '活动管理';

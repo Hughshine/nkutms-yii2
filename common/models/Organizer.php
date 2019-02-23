@@ -48,7 +48,8 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
             [['credential'], 'required'],
             [['signup_at'], 'safe'],
             [['org_name'], 'string', 'max' => 32],
-            [['wechat_id1', 'credential', 'password', 'access_token', 'wechat_id2', 'wechat_id3'], 'string', 'max' => 255],
+            [['credential', 'password', 'access_token'], 'string', 'max' => 255],
+            // [['wechat_id1', 'credential', 'password', 'access_token', 'wechat_id2', 'wechat_id3'], 'string', 'max' => 255],
         ];
     }
 
@@ -60,7 +61,7 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
         return [
             'id' => 'ID',
             'org_name' => '应必须填写',
-            'wechat_id1' => '一个社团最多有三个管理者，暂时不考虑一个人管理多个社团',
+            // 'wechat_id1' => '一个社团最多有三个管理者，暂时不考虑一个人管理多个社团',
             'category' => '标记用户类别 0-校级组织，1-学生社团',
             'credential' => '该用户类别下，他的证件号',
             'password' => 'Password',
@@ -71,8 +72,8 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
             'expire_at' => 'Expire At',
             'allowance' => '用于限制访问频率',
             'allowance_updated_at' => 'Allowance Updated At',
-            'wechat_id2' => 'Wechat Id2',
-            'wechat_id3' => 'Wechat Id3',
+            // 'wechat_id2' => 'Wechat Id2',
+            // 'wechat_id3' => 'Wechat Id3',
         ];
     }
 
@@ -123,31 +124,146 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return $this->access_token = Yii::$app->security->generateRandomString();
     }
-    
 
-    public static function findIdentityByAccessToken($token, $type = null)
-    {
-        return static::find(['access_token' => $token])
-        ->where(['>','expire_at',time()])//失效时间
-        ->limit(1)
-        ->one();
-    }
 
+
+    /**
+     * {@inheritdoc}
+     */
     public static function findIdentity($id)
     {
         return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
     }
 
+    //上一个方法的copy，但是不检查状态是否有效，用于管理员查找对应组织者时更全面
     public static function findIdentity_admin($id)
     {
         return static::findOne(['id' => $id]);
     }
 
-    public function getId(){ return $this->id; }
+    /**
+     * {@inheritdoc}
+     */
+    public static function findIdentityByAccessToken($token, $type = null)
+    {
+        throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
+    }
 
-    public function validateAuthKey($authKey){}
+    /**
+     * Finds user by org_name
+     *
+     * @param string $org_name
+     * @return static|null
+     */
+    public static function findByUsername($org_name)
+    {
+        return static::findOne(['org_name' => $org_name, 'status' => self::STATUS_ACTIVE]);
+    }
 
-    public function getAuthKey(){}
+    /**
+     * Finds user by password reset token
+     *
+     * @param string $token password reset token
+     * @return static|null
+     */
+    public static function findByPasswordResetToken($token)
+    {
+        if (!static::isPasswordResetTokenValid($token)) {
+            return null;
+        }
+
+        return static::findOne([
+            'password_reset_token' => $token,
+            'status' => self::STATUS_ACTIVE,
+        ]);
+    }
+
+    /**
+     * Finds out if password reset token is valid
+     *
+     * @param string $token password reset token
+     * @return bool
+     */
+    public static function isPasswordResetTokenValid($token)
+    {
+        if (empty($token)) {
+            return false;
+        }
+
+        $timestamp = (int) substr($token, strrpos($token, '_') + 1);
+        $expire = Yii::$app->params['user.passwordResetTokenExpire'];
+        return $timestamp + $expire >= time();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getId()
+    {
+        return $this->getPrimaryKey();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getAuthKey()
+    {
+        return $this->auth_key;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validateAuthKey($authKey)
+    {
+        return $this->getAuthKey() === $authKey;
+    }
+
+    /**
+     * Validates password
+     *
+     * @param string $password password to validate
+     * @return bool if password provided is valid for current user
+     */
+    public function validatePassword($password)
+    {
+        return Yii::$app->security->validatePassword($password, $this->password);
+    }
+
+    /**
+     * Generates password hash from password and sets it to the model
+     *
+     * @param string $password
+     */
+    public function setPassword($password)
+    {
+        $this->password = Yii::$app->security->generatePasswordHash($password);
+    }
+
+    /**
+     * Generates "remember me" authentication key
+     */
+    public function generateAuthKey()
+    {
+        $this->auth_key = Yii::$app->security->generateRandomString();
+    }
+
+    /**
+     * Generates new password reset token
+     */
+    public function generatePasswordResetToken()
+    {
+        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
+    }
+
+    /**
+     * Removes password reset token
+     */
+    public function removePasswordResetToken()
+    {
+        $this->password_reset_token = null;
+    }
+
 
     public function editAndSaveOrganizer($organizer,$org_id,$org_name,$category,$credential,$newpassword)
     {
