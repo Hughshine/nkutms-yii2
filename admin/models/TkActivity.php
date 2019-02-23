@@ -67,9 +67,7 @@ class TkActivity extends \yii\db\ActiveRecord
             ['category','default','value'=>'0'],
             ['current_people','default','value'=>'0'],
             ['status', 'default', 'value' => self::STATUS_UNAUDITED],
-
             //['org_name','safe'],
-
             ['time_start_stamp', 'compare','compareValue'=>date('Y-m-d H:i' , time()+7*3600), 'operator' => '>','message'=>'不能早于当前的时间'],
             ['ticket_start_stamp', 'compare','compareValue'=>date('Y-m-d H:i' , time()+7*3600), 'operator' => '>','message'=>'不能早于当前的时间'],
             ['time_end_stamp', 'compare','compareAttribute'=>'time_start_stamp', 'operator' => '>','message'=>'结束时间不能早于开始时间'],
@@ -105,7 +103,9 @@ class TkActivity extends \yii\db\ActiveRecord
             'location'=>'活动地点',
         ];
     }
-
+    /*原理未知，用于在活动index页面中将release_by字段替换成对应的组织者名字
+     * 具体功能应该是在对应的Search类里得到组织者类的具体记录
+     * */
     public function getOrganizer()
     {
         return $this->hasOne(Organizer::className(),['id'=>'release_by']);

@@ -62,11 +62,9 @@ class OrganizerSignupForm extends Model
         ];
     }
 
-    /**
-     * Signs organizer up.
-     *
-     * @return organizer|null the saved model or null if saving fails
-     */
+    /*
+     * 创建一个组织者
+     * */
     public function signup()
     {
         if (!$this->validate()) {
@@ -79,7 +77,7 @@ class OrganizerSignupForm extends Model
         $organizer->wechat_id = $this->wechat_id;
         $organizer->credential = $this->credential;
         $organizer->setPassword($this->password);
-        $organizer->generateAuthKey();        
+        $organizer->generateAuthKey();//原理不明，保留就对了，据说是用于自动登录的
         return $organizer->save() ? $organizer : null;
     }
 

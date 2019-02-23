@@ -70,6 +70,7 @@ class Organizer extends ActiveRecord implements IdentityInterface
         return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
     }
 
+    //上一个方法的copy，但是不检查状态是否有效，用于管理员查找对应组织者时更全面
     public static function findIdentity_admin($id)
     {
         return static::findOne(['id' => $id]);

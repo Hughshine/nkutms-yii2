@@ -6,8 +6,9 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model common\models\Organizer */
 /* @var $form yii\widgets\ActiveForm */
+/*管理员修改组织者信息表单页面项目
+ * */
 ?>
-
 <div class="organizer-form">
 
     <?php $form = ActiveForm::begin(); ?>

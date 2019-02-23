@@ -36,7 +36,6 @@ use yii\bootstrap\ActiveForm;
                         <i class="fa fa-lock"></i></span>{input}
                     </div>', 
                     ])->passwordInput()->label(false)?>
-                <!--<?= $form->field($model, 'rememberMe')->checkbox() ?>-->
                 <div class="form-group">
                     <?= Html::submitButton('登录', ['class' => 'btn btn-primary btn-quirk btn-block', 'name' => 'login-button']) ?>
                 </div>

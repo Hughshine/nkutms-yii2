@@ -4,7 +4,6 @@ namespace admin\models;
 use yii\base\Model;
 use admin\models\Organizer;
 
-
 class OrganizerUpdateForm extends Model
 {
     public $org_name;
@@ -51,18 +50,16 @@ class OrganizerUpdateForm extends Model
         ];
     }
 
-    /**
-     * Signs organizer up.
-     *
-     * @return organizer|null the saved model or null if saving fails
-     */
+    /*
+     *更新表单，和其他用户类的更新表单差不多
+     * */
     public function update($organizer)
     {
         $changename=false;
         //在这做一个特殊处理暂时改变字符串，这样在改变名字的时候就不会违反名字的唯一键值特性，用一个变量记住是否修改
         if($this->org_name === $organizer->org_name)
         {
-            $this->org_name='default_lyl'.$this->org_name;
+            $this->org_name='prevent_rule_unique'.$this->org_name;
         }
         else
         {
@@ -81,6 +78,6 @@ class OrganizerUpdateForm extends Model
         }
         $organizer->category=$this->category;
         $organizer->status=$this->status;
-        return $organizer->save() ? $organizer : null;
+        return $organizer->save(false) ? $organizer : null;
     }
 }

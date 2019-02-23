@@ -39,6 +39,7 @@ class UserController extends Controller
                     ],
                 ],
             ],
+            //目前未知。。。。
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -47,6 +48,8 @@ class UserController extends Controller
             ],
         ];
     }
+
+    //下面的我没碰，magic
 
     /**
      * Lists all User models.

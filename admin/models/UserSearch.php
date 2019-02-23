@@ -6,7 +6,10 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use admin\models\User;
-
+/*同理，没怎么敢动
+ * 将不需要的行注释掉
+ *
+ * */
 /**
  * UserSearch represents the model behind the search form of `common\models\User`.
  */
@@ -61,17 +64,17 @@ class UserSearch extends User
         $query->andFilterWhere([
             'id' => $this->id,
             'status' => $this->status,
-            'signup_at' => $this->signup_at,
-            'updated_at' => $this->updated_at,
+            //'signup_at' => $this->signup_at,
+            //'updated_at' => $this->updated_at,
             'category' => $this->category,
-            'credential' => $this->credential,
+            //'credential' => $this->credential,
         ]);
 
         $query->andFilterWhere(['like', 'user_name', $this->user_name])
-            ->andFilterWhere(['like', 'auth_key', $this->auth_key])
-            ->andFilterWhere(['like', 'password', $this->password])
+            /*->andFilterWhere(['like', 'auth_key', $this->auth_key])
+            ->andFilterWhere(['like', 'password', $this->password])*/
             ->andFilterWhere(['like', 'wechat_id', $this->wechat_id])
-            ->andFilterWhere(['like', 'access_token', $this->access_token]);
+            /*->andFilterWhere(['like', 'access_token', $this->access_token])*/;
 
         return $dataProvider;
     }

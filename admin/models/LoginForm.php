@@ -4,11 +4,11 @@ namespace admin\models;
 use Yii;
 use yii\base\Model;
 use admin\models\Admin;
+
 class LoginForm extends Model
 {
     public $admin_name;
     public $password;
-    public $rememberMe = false;
 
     private $_user;
 
@@ -21,8 +21,6 @@ class LoginForm extends Model
         return [
             // admin_name and password are both required
             [['admin_name', 'password'], 'required'],
-            // rememberMe must be a boolean value
-            // ['rememberMe', 'boolean'],
             // password is validated by validatePassword()
              ['password', 'validatePassword'],
         ];

@@ -6,6 +6,8 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use admin\models\LoginForm;
+use admin\models\Admin;
+use admin\models\AdminPasswordForm;
 
 /**
  * Site controller
@@ -31,7 +33,7 @@ class SiteController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['logout', 'index','error'],
+                        'actions' => ['logout', 'index','error','repassword'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -71,6 +73,26 @@ class SiteController extends Controller
     }
 
     /**
+     *
+     *
+     *
+     */
+    public function actionRepassword()
+    {
+        if (Yii::$app->user->isGuest)
+            return $this->render('site/login');
+        $model = Yii::$app->user->identity;
+        $passwordform =new AdminPasswordForm($model);
+        if ($passwordform->load(Yii::$app->request->post()) &&$passwordform->repassword($model))
+        {
+            return $this->redirect('index');
+        }
+        return $this->render('repassword', [
+            'model' => $passwordform,
+        ]);
+    }
+
+    /**
      * Login action.
      *
      * @return string
@@ -89,7 +111,6 @@ class SiteController extends Controller
             return $this->goBack();
         } else {
             $model->password = '';
-
             return $this->render('login', [
                 'model' => $model,
             ]);

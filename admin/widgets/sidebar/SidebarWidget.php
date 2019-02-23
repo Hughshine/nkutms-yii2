@@ -2,7 +2,7 @@
 namespace admin\widgets\sidebar;
 
 /**
- * 后台siderbar插件
+ * 后台siderbar插件：左边的
  */
 use Yii;
 use yii\base\Widget;

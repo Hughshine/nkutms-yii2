@@ -7,6 +7,9 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use admin\models\Organizer;
 
+/*除了注释一些不需要的项之外，不敢动。。。
+ *
+ * */
 /**
  * OrganizerSearch represents the model behind the search form of `common\models\Organizer`.
  */
@@ -18,8 +21,9 @@ class OrganizerSearch extends Organizer
     public function rules()
     {
         return [
-            [['id', 'category', 'status', 'signup_at','updated_at'], 'integer'],
-            [['org_name', 'auth_key', 'password', 'password_reset_token', 'wechat_id', 'access_token'], 'safe'],
+            //修改记录，在此加了credential
+            [['id', 'category', 'status', 'signup_at','updated_at','credential',], 'integer'],
+            [['org_name', 'auth_key', 'password', 'password_reset_token','credential', 'wechat_id', 'access_token'], 'safe'],
         ];
     }
 
@@ -62,14 +66,17 @@ class OrganizerSearch extends Organizer
             'id' => $this->id,
             'category' => $this->category,
             'status' => $this->status,
+            //修改记录：添加了下一行
+            'credential' => $this->credential,
             //'signup_time' => $this->signup_time,
         ]);
 
+        //修改记录：将不需要的行注释掉
         $query->andFilterWhere(['like', 'org_name', $this->org_name])
-            ->andFilterWhere(['like', 'auth_key', $this->auth_key])
-            ->andFilterWhere(['like', 'password', $this->password])
+            /*->andFilterWhere(['like', 'auth_key', $this->auth_key])
+            ->andFilterWhere(['like', 'password', $this->password])*/
             ->andFilterWhere(['like', 'wechat_id', $this->wechat_id])
-            ->andFilterWhere(['like', 'access_token', $this->access_token]);
+            /*->andFilterWhere(['like', 'access_token', $this->access_token])*/;
 
         return $dataProvider;
     }

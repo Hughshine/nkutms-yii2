@@ -24,6 +24,8 @@ $this->title = '组织者管理';
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
+            /*以下可以修改在view页面能看到的项目
+             * */
             'id',
             'org_name',
             'credential',

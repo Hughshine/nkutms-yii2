@@ -5,6 +5,7 @@ use Yii;
 use yii\base\Model;
 use admin\models\Organizer;
 
+
 class OrganizerPasswordForm extends Model
 {
     public $password;
@@ -26,6 +27,7 @@ class OrganizerPasswordForm extends Model
         [
             [['password','repassword'], 'string', 'min' => 6],
             [['password','repassword'], 'required'],
+            //重复密码必须与密码相等
             ['repassword','compare','compareAttribute'=>'password','message'=>'密码和重复密码不相同'],
         ];
     }
@@ -39,19 +41,14 @@ class OrganizerPasswordForm extends Model
         ];
     }
 
-    /**
-     * Signs organizer up.
-     *
-     * @return organizer|null the saved model or null if saving fails
-     */
+    //向数据库提交修改的密码
     public function repassword($organizer)
     {
-        if (!$this->validate()) 
-        {
+        if (!$this->validate())
             return null;
-        }
         $organizer = $this->org;
         $organizer->setPassword($this->password);
+        //由于之前用了validate方法，所以此次save用false
         return $organizer->save(false);
     }
 }

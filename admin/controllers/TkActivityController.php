@@ -36,11 +36,13 @@ class TkActivityController extends Controller
                     ],
                     [//登录用户能访问这个控制器里的方法
                         'allow'=>true,
+                        //可访问的页面名字
                         'actions'=>['index','view','update','delete','create'],
                         'roles'=>['@'],//登录用户
                     ],
                 ],
             ],
+            //目前未知。。。
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -88,7 +90,8 @@ class TkActivityController extends Controller
     public function actionCreate()
     {
         $model = new TkActivity();
-        if ($model->load(Yii::$app->request->post())) 
+        //直接在页面中向模型写入数据，但是时间和一些默认值需要在表单返回后写入
+        if ($model->load(Yii::$app->request->post()))
         {
             $model->start_at=strtotime($model->time_start_stamp);
             $model->end_at=strtotime($model->time_end_stamp);
@@ -106,12 +109,9 @@ class TkActivityController extends Controller
         ]);
     }
 
-    /**
-     * Updates an existing TkActivity model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+    /*
+     * 更新操作：先通过id找到需要更新的模型，再新建一个表单进行信息的输入，然后显示
+     * 信息输入界面 ，如果提交并且更新成功，返回查看信息页面
      */
     public function actionUpdate($id)
     {
@@ -140,13 +140,8 @@ class TkActivityController extends Controller
         ]);
     }
 
-    /**
-     * Deletes an existing TkActivity model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+    /*删除动作，目前没有接口
+     * */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
