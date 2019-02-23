@@ -34,7 +34,7 @@ class UserController extends Controller
                     ],
                     [//登录用户能访问这个控制器里的方法
                         'allow'=>true,
-                        'actions'=>['index','update','view','delete'],
+                        'actions'=>['index','update','view'],
                         'roles'=>['@'],//登录用户
                     ],
                 ],

@@ -37,7 +37,7 @@ class OrganizerController extends Controller
                     ],
                     [//登录用户能访问这个控制器里的方法
                         'allow'=>true,
-                        'actions'=>['index','update','create','repassword','delete','view'],
+                        'actions'=>['index','update','create','repassword','view'],
                         'roles'=>['@'],//登录用户
                     ],
                 ],

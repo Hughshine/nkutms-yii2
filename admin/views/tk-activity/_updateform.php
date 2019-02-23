@@ -30,7 +30,7 @@ use kartik\datetime\DateTimePicker;
 
 
 
-    <?= $form->field($model, 'id')->textInput()?>
+    <?= $form->field($model, 'release_by')->textInput()?>
 
 	<?= $form->field($model, 'time_start_stamp')->widget(DateTimePicker::classname(), 
         [ 

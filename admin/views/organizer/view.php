@@ -64,9 +64,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter'=>['0'=>'无效','10'=>'有效'],
             ],
-            'created_at:datetime',
+            //'created_at:datetime',
             'updated_at:datetime',
-            'access_token',
+            //'access_token',
         ],
     ]) ?>
 
