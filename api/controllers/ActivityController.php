@@ -166,7 +166,7 @@ class ActivityController extends ActiveController
 
 		$ticket = Ticket::generateAndWriteNewTicket($user_id,$activity_id,$current_serial,0);
 
-		TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,0,-1)
+		TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,0,-1);
 
 		return ['code'=> 0, 'message' => 'success', 'data' => $ticket];
 	}
