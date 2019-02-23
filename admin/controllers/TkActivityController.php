@@ -40,7 +40,7 @@ class TkActivityController extends Controller
                     [//登录用户能访问这个控制器里的方法
                         'allow'=>true,
                         //可访问的页面名字
-                        'actions'=>['index','view','update','delete','create'],
+                        'actions'=>['index','view','update','create'],
                         'roles'=>['@'],//登录用户
                     ],
                 ],
