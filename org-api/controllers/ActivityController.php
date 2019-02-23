@@ -6,7 +6,7 @@ use yii\rest\ActiveController;
 use yii\data\ActiveDataProvider;
 use common\models\Activity;
 // use common\models\User;
-use orgapi\models\Ticket;
+use common\models\Ticket;
 // use common\models\TicketEvent;
 use common\models\Organizer;
 use common\models\ActivityEvent;
@@ -17,7 +17,9 @@ use yii\filters\RateLimiter;
 
 // use yii\behaviors\TimestampBehavior;
 
-
+/**
+ * 
+ */
 class ActivityController extends ActiveController
 {
 	public $modelClass = 'common\models\Activity';
@@ -31,7 +33,7 @@ class ActivityController extends ActiveController
  
         // 需要进行认证的action
         $authActions = ['my-activities',
-        				'my-partipicipants',
+        				'my-participants',
         				'add-activity',
         				'edit-activity',
         				'cancel-activity'
@@ -58,6 +60,13 @@ class ActivityController extends ActiveController
 		return $actions;
 	}
 
+	/**
+	 * API
+	 * http:GET /activities
+	 * params: 无
+	 * discription: 按照标准json返回格式，10为一组，返回当前有效活动
+	 * @return JSON ValidActivities
+	 */
 	public function actionIndex()
 	{
 		$modelClass = $this->modelClass;
@@ -79,6 +88,14 @@ class ActivityController extends ActiveController
 		return ['code'=>0,'message'=>'success','data'=>$provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/10+1)];
 	}
 
+	/**
+	 * API
+	 * http: GET /activities/view?id=x
+	 * params: id
+	 * discription: 查询某具体活动
+	 * @param  [int] $id [活动id]
+	 * @return [array]     [该activity信息]
+	 */
 	public function actionView($id){
 		$activity = Activity::find()->where(['id'=>$id])->limit(1)->one();
 
@@ -86,18 +103,14 @@ class ActivityController extends ActiveController
 			return ['code'=>1,'message'=>'activity inexists'];
 		return ['code'=>0,'message'=>'success','data'=>$activity];
 	}
-	// // public function actionValid()
-	// // {
-	// // 	return $customer = Activity::find() //暂时没有问题
-	// // 	->where(['and',
-	// // 	['category' => 0],
-	// // 	['status' => 0],
-	// // 	])
-	// // 	->orderBy('release_at DESC')//根据发布时间逆序排序
-	// // 	// ->asArray() //会破坏fields
-	// // 	->all();
-	// // }
 
+	/**
+	 * API
+	 * http: POST /activities/search
+	 * params: name, category, status
+	 * discription: 按活动名称，类别，效果，对活动进行搜索，其中活动名称是相似检索。
+	 * @return [array] [符合的活动]
+	 */
 	public function actionSearch()
 	{
 
@@ -124,20 +137,13 @@ class ActivityController extends ActiveController
 			]
 		);
 		return ['code'=>0, 'message'=>'success', 'data'=> $provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/10+1)];
-		// return $customer = Activity::find() //暂时没有问题
-		// ->where(['and', 
-		// ['like','name',$sql_name],
-		// ['category' => $sql_category],
-		// ['status' => $sql_status],
-		// ])
-		// ->orderBy('release_at DESC')//根据发布时间逆序排序
-		// // ->asArray() //会破坏fields
-		// ->all();
 	}
 
-	/*
-	 POST /activities/my-activities
-	 para: org_id
+	/**
+	 * API
+	 * POST /activities/my-activities
+	 * params: org_id
+	 * discription: 查看某组织者发布的全部活动
 	 */
 	public function actionMyActivities()
 	{
@@ -160,10 +166,12 @@ class ActivityController extends ActiveController
 				->all()];
 	}
 
-	/*
-	 POST /activities/my-activities
-	 para: org_id,activity_id
-	 return tickets(Lists)
+	/**
+	 * API
+	 * POST /activities/my-participants
+	 * params: org_id,activity_id
+	 * return tickets(Lists)
+	 * discription: 组织者查看某个自己的某个activity的全部参与者
 	 */
 	public function actionMyParticipants()
 	{
@@ -202,9 +210,9 @@ class ActivityController extends ActiveController
 				->all()];
 
 	}
-	/*
-		POST /activities/add-activity
-		para: 
+	/**
+	 * POST /activities/add-activity
+	   params: 
 			org_id 
 			activity_name 
 			category
@@ -215,13 +223,11 @@ class ActivityController extends ActiveController
 			end_at
 			max_people
 			intro
+		discription: 传入参数，新建活动。不允许发布相同名称的活动。
 	 */
 	public function actionAddActivity()
 	{
 		$request = Yii::$app->request;
-
-
-
 		$org_id = $request->post('org_id');
 		$activity_name = $request->post('activity_name');
 		$category= $request->post('category');
@@ -246,30 +252,9 @@ class ActivityController extends ActiveController
 
 
 
-		$activity = new Activity();
-		//太可怕了
-		$activity->release_by = $org_id;
-		$activity->activity_name = $activity_name;
-		$activity->category = $category;
-		$activity->location = $location;
-		$activity->ticketing_start_at = $ticketing_start_at;
-		$activity->ticketing_end_at = $ticketing_end_at;
-		$activity->start_at = $start_at;
-		$activity->end_at = $end_at;
-		$activity->release_at = time();
-		$activity->max_people = $max_people;
-		$activity->introduction = $intro;
-		$activity->current_people = 0;
-		$activity->current_serial = 1;
-		$activity->save(false);
+		$activity = Activity::generateAndWriteNewActivity($org_id,$activity_name,$category,$location,$ticketing_start_at,$ticketing_end_at,$start_at,$end_at,$max_people,$intro);
 
-		$activity_event = new ActivityEvent();
-		$activity_event->organizer_id = $org_id;
-		$activity_event->activity_id = $activity->id;
-		$activity_event->status = 0;
-		$activity_event->update_at = time();
-		$activity_event->operated_by_admin = -1;
-		$activity_event->save(false);
+		ActivityEvent::generateAndWriteNewActivityEvent($org_id, $activity->id, 0, -1);
 
 		return ['code'=>0, 'message' => 'success', 'data' => $activity];
 	}
@@ -344,20 +329,7 @@ class ActivityController extends ActiveController
 
 
 
-		
-
-		$activity->activity_name = $activity_name==null?$activity->name:$activity_name;
-
-		$activity->category = $category==null?$activity->category:$category;
-		// $activity->name = $activity_name==null?$activity->name:$activity_name;
-		$activity->location = $location==null?$activity->location:$location;
-		$activity->ticketing_start_at = $ticketing_start_at==null?$activity->ticketing_start_at:$ticketing_start_at;
-		$activity->ticketing_end_at = $ticketing_end_at==null?$activity->ticketing_end_at:$ticketing_end_at;
-		$activity->start_at = $start_at==null?$activity->start_at:$start_at;
-		$activity->end_at = $end_at==null?$activity->end_at:$end_at;
-		$activity->max_people = $max_people==null?$activity->max_people:$max_people;
-		$activity->introduction = $intro==null?$activity->introduction:$intro;
-		$activity->save(false);
+		Activity::editAndSaveActivity($activity,$activity_name,$category,$location,$ticketing_start_at,$ticketing_end_at,$start_at,$end_at,$max_people,$intro);
 
 		return ['code'=>0,'message' => 'success' , 'data'=>$activity];
 	}
@@ -406,20 +378,8 @@ class ActivityController extends ActiveController
 		$activity->status = 1;
 		$activity->save(false);
 
-		$activity_event = new ActivityEvent();
+		ActivityEvent::generateAndWriteNewActivityEvent($org_id, $activity_id, 1, -1);
 
-		// 'id' => 'ID',
-  //           'organizer_id' => 'Organizer ID',
-  //           'activity_id' => 'Activity ID',
-  //           'status' => '0-发布1-取消',
-  //           'update_at' => 'Update At',
-  //           'operated_by_admin' => '-1时，非管理员操作',
-		$activity_event->organizer_id = $org_id;
-		$activity_event->activity_id = $activity_id;
-		$activity_event->status = 1;
-		$activity_event->update_at = time()+7*3600;
-		$activity_event->operated_by_admin = -1;
-		$activity_event->save(false);
 		return ['code'=>0,'message' => 'cancel success','data'=>$activity];
 	}
 }

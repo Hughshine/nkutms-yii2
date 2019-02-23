@@ -19,7 +19,7 @@ class SidebarWidget extends Menu
     public function init()
     {
         $this->items = [
-            ['label' =>'<i class="fa fa-dashboard"></i><span>仪表盘</span>','url'=>['site/index']],
+            //['label' =>'<i class="fa fa-dashboard"></i><span>仪表盘</span>','url'=>['site/index']],
             ['label' =>'<a href=""><i class="fa fa-th-list"></i><span>活动管理</span></a>','options'=>['class'=>'nav-parent'],'items'=>[
                     ['label'=>'活动事件管理','url'=>['tk-activity/index'],'items'=>[
                         ['label'=>'创建活动','url'=>['post/create'],'visible'=>false],

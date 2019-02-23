@@ -25,6 +25,7 @@ class Organizer extends ActiveRecord implements IdentityInterface
         'org_name'=>'组织者名称',
         'status'=>'状态',
         'signup_at'=>'注册时间',
+        'created_at'=>'注册时间',
         'logged_at'=>'上一次登录时间',
         'updated_at'=>'上一次更新时间',
         'expire_at'=>'控制api认证时间',

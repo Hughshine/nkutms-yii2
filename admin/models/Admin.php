@@ -7,17 +7,6 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 
-/**
- * Admin model
- *
- * @property integer $_id 管理员id
- * @property string $admin_name 管理员名字
- * @property string $password 管理员密码
- * @property string $password_reset_token 重置密码token
- * @property string $auth_key 自动登录密码
- * @property integer $status 状态
- * @property integer $signup_time 注册时间
- */
 class Admin extends ActiveRecord implements IdentityInterface
 {
     const STATUS_DELETED = 0;

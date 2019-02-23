@@ -16,14 +16,14 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('修改状态', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('删除此活动', ['delete', 'id' => $model->id], [
+        <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <!--?= Html::a('删除此活动', ['delete', 'id' => $model->id], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Are you sure you want to delete this item?',
                 'method' => 'post',
             ],
-        ]) ?>
+        ]) ?-->
     </p>
 
     <?= DetailView::widget([
@@ -54,8 +54,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             'introduction',
+            'location',
             'max_people',
             'current_people',
+            'current_serial',
             'start_at:datetime',
             'end_at:datetime',
             'release_by'=>
@@ -74,8 +76,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         return $organizer->org_name.';ID:'.$organizer->id;
                 },
             ],
+            'ticketing_start_at:datetime',
+            'ticketing_end_at:datetime',
             'release_at:datetime',
             'updated_at:datetime',
+
         ],
     ]) ?>
 

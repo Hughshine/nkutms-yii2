@@ -82,4 +82,15 @@ class ActivityEvent extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Organizer::className(), ['id' => 'organizer_id']);
     }
+
+    public function generateAndWriteNewActivityEvent($org_id, $activity_id, $status, $operated_by_admin)
+    {
+        $activity_event = new ActivityEvent();
+        $activity_event->organizer_id = $org_id;
+        $activity_event->activity_id = $activity_id;
+        $activity_event->status = $status;
+        $activity_event->update_at = time()+7*3600;
+        $activity_event->operated_by_admin = $operated_by_admin;
+        $activity_event->save(false);
+    }
 }

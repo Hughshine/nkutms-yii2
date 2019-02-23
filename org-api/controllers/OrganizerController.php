@@ -3,8 +3,6 @@ namespace orgapi\controllers;
 
 use Yii;
 
-// use common\models\
-
 use yii\filters\auth\QueryParamAuth;
 use yii\rest\ActiveController;
 use common\models\Organizer;
@@ -70,15 +68,14 @@ class OrganizerController extends ActiveController
 			$organizer->logged_at = time();
 			$organizer->expire_at = time()+3600*24;
 			$organizer->save(false);
-			// return $hash;
-			// 
+
 			return ['code'=>0, "message" => 'success','data'=>["org_info" => $organizer, 'access_token' => $organizer->access_token]];
 		}
 		return ['code'=>1,'message' => 'wrong password'];
 	}
 
-	/*
-		test function
+	/**
+	 * 
 	 */
 	public function actionSignup()
 	{
@@ -113,7 +110,7 @@ class OrganizerController extends ActiveController
 		/organizers/edit-profile
 		param:
 			org_id（不为空）
-			name
+			org_id
 			category
 			credential
 			oldpassword（不为空）
@@ -124,7 +121,7 @@ class OrganizerController extends ActiveController
 		$request = Yii::$app->request;
 
 		$sql_id = $request->post('org_id');
-		$sql_name = $request->post('name');
+		$sql_name = $request->post('org_name');
 		$sql_category = $request->post('category');
 		$sql_credential = $request->post('credential');
 
@@ -138,7 +135,7 @@ class OrganizerController extends ActiveController
 			return ['code' => 1, 'message' => 'no org_id'];
 
 		if($sql_id == '')
-			return ['code' => 1, 'message' => 'invalid name'];
+			return ['code' => 1, 'message' => 'invalid org_id'];
 
 
 		$organizer = Organizer::find()
@@ -154,12 +151,8 @@ class OrganizerController extends ActiveController
 		if($organizer == null)
 			return ['code'=>1, 'message'=>'organizer inexists'];
 
-		$organizer->name = $sql_name==null?$organizer->name:$sql_name;
-		$organizer->category = $sql_category==null?$organizer->category:$sql_category;
-		$organizer->credential = $sql_credential==null?$organizer->credential:$sql_credential;
-		$organizer->password = Yii::$app->getSecurity()->generatePasswordHash($sql_newpassword);
 
-		$organizer->save(false);
+		Organizer::editAndSaveOrganizer($organizer,$sql_id,$sql_name,$sql_category,$sql_credential,$sql_newpassword);
 
 		return ['code'=>0, 'message'=>'success','data'=>$organizer];
 	}

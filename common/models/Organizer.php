@@ -127,20 +127,12 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
 
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        
-        //findIdentityByAccessToken()方法的实现是系统定义的
-        //例如，一个简单的场景，当每个用户只有一个access token, 可存储access token 到user表的access_token列中， 方法可在User类中简单实现，如下所示：
         return static::find(['access_token' => $token])
-        ->where(['>','expire_at',time()])
+        ->where(['>','expire_at',time()])//失效时间
         ->limit(1)
         ->one();
-        //return static::findOne(['id' => 1]);
-        //throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
-        
-        
-        //  throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
     }
-    // 
+
     public static function findIdentity($id)
     {
         return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
@@ -156,4 +148,15 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
     public function validateAuthKey($authKey){}
 
     public function getAuthKey(){}
+
+    public function editAndSaveOrganizer($organizer,$org_id,$org_name,$category,$credential,$newpassword)
+    {
+        $organizer->org_id = $org_id==null?$organizer->org_id:$org_id;
+        $organizer->org_name = $category==null?$organizer->org_name:$org_name;
+        $organizer->category = $category==null?$organizer->category:$category;
+        $organizer->credential = $credential==null?$organizer->credential:$credential;
+        $organizer->password = Yii::$app->getSecurity()->generatePasswordHash($newpassword);
+
+        $organizer->save(false);
+    }
 }

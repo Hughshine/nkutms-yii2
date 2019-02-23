@@ -111,4 +111,16 @@ class Ticket extends \yii\db\ActiveRecord
     {
         return $this->hasMany(TicketEvent::className(), ['ticket_id' => 'id']);
     }
+
+    public function generateAndWriteNewTicket($user_id,$activity_id,$current_serial,$status)
+    {
+        $ticket = new Ticket();
+        $ticket->user_id = $user_id;
+        $ticket->activity_id = $activity_id;
+        $ticket->created_at = time()+7*3600;
+        $ticket->serial_number = $current_serial;
+        $ticket->status = 0;
+        $ticket->save(false);
+        return $ticket;
+    }
 }

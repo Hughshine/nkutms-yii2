@@ -6,6 +6,8 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\Expression;
 use yii\web\IdentityInterface;
+use yii\filters\RateLimitInterface;
+
 /**
  * This is the model class for table "tk_user".
  *
@@ -26,8 +28,12 @@ use yii\web\IdentityInterface;
  * @property Ticket[] $tkTickets
  * @property TicketEvent[] $tkTicketEvents
  */
-class User extends \yii\db\ActiveRecord  implements IdentityInterface
+class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimitInterface
 {
+
+    const STATUS_DELETED = 0;
+    const STATUS_ACTIVE = 10;
+
     //TODO
     public function behaviors()
     {
@@ -55,11 +61,13 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
     public function rules()
     {
         return [
-            [['wechat_id', 'credential'], 'required'],
+            [['wechat_id', 'credential'], 'required'],//不同
             [['category', 'logged_at', 'expire_at', 'updated_at', 'allowance', 'allowance_updated_at'], 'integer'],
             [['signup_at'], 'safe'],
             [['user_name'], 'string', 'max' => 32],
             [['wechat_id', 'credential', 'password', 'access_token'], 'string', 'max' => 255],
+            ['status', 'default', 'value' => self::STATUS_ACTIVE],
+            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
         ];
     }
 
@@ -109,6 +117,9 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
             'credential',
         ];
     }
+
+    public function getId(){ return $this->id; /*$this->getPrimaryKey()*/}
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -147,11 +158,143 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface
         //  throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
     }
     // 
-    public static function findIdentity($id){}
+    public static function findIdentity($id)
+    {
+        return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
+    }
 
-    public function getId(){ return $this->id; }
+    /**
+     * Finds user by user_name
+     *
+     * @param string $user_name
+     * @return static|null
+     */
+    public static function findByUsername($user_name)
+    {
+        return static::findOne(['user_name' => $user_name, 'status' => self::STATUS_ACTIVE]);
+    }
 
-    public function validateAuthKey($authKey){}
+    /**
+     * Finds user by password reset token
+     *
+     * @param string $token password reset token
+     * @return static|null
+     */
+    public static function findByPasswordResetToken($token)
+    {
+        if (!static::isPasswordResetTokenValid($token)) {
+            return null;
+        }
 
-    public function getAuthKey(){}
+        return static::findOne([
+            'password_reset_token' => $token,
+            'status' => self::STATUS_ACTIVE,
+        ]);
+    }
+
+    /**
+     * Finds out if password reset token is valid
+     *
+     * @param string $token password reset token
+     * @return bool
+     */
+    public static function isPasswordResetTokenValid($token)
+    {
+        if (empty($token)) {
+            return false;
+        }
+
+        $timestamp = (int) substr($token, strrpos($token, '_') + 1);
+        $expire = Yii::$app->params['user.passwordResetTokenExpire'];
+        return $timestamp + $expire >= time();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function validateAuthKey($authKey)
+    {
+        return $this->getAuthKey() === $authKey;
+    }
+
+    /**
+     * Validates password
+     *
+     * @param string $password password to validate
+     * @return bool if password provided is valid for current user
+     */
+    public function validatePassword($password)
+    {
+        return Yii::$app->security->validatePassword($password, $this->password);
+    }
+
+    /**
+     * Generates password hash from password and sets it to the model
+     *
+     * @param string $password
+     */
+    public function setPassword($password)
+    {
+        $this->password = Yii::$app->security->generatePasswordHash($password);
+    }
+
+    /**
+     * Generates "remember me" authentication key
+     */
+    public function generateAuthKey()
+    {
+        $this->auth_key = Yii::$app->security->generateRandomString();
+    }
+
+    /**
+     * Generates new password reset token
+     */
+    public function generatePasswordResetToken()
+    {
+        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
+    }
+
+    /**
+     * Removes password reset token
+     */
+    public function removePasswordResetToken()
+    {
+        $this->password_reset_token = null;
+    }
+
+    public function getAuthKey()
+    {
+        return $this->auth_key;
+    }
+
+    // allowance => 控制api访问次数
+    public function getRateLimit($request, $action)
+    {
+        return [2,1];
+    }
+
+    public function loadAllowance($request, $action)
+    {
+        return [$this->allowance, $this->allowance_updated_at];
+    }
+
+    public function saveAllowance($request,$action,$allowance,$timestamp)
+    {
+        // echo $allowance;
+        // echo $timestamp;
+        $this->allowance = $allowance;
+        $this->allowance_updated_at = $timestamp;//time();
+        $this->save();
+    }
+
+    public function editAndSaveUser($user,$name,$category,$credential)
+    {
+        $user->user_name = $name==null?$user->user_name:$name;
+        $user->category = $category==null?$user->category:$category;
+        $user->credential = $credential==null?$user->credential:$credential;
+
+        $user->save(false);
+
+        return $user;
+    }
 }

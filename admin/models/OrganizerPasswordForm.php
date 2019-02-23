@@ -5,9 +5,6 @@ use Yii;
 use yii\base\Model;
 use admin\models\Organizer;
 
-/**
- * Signup form
- */
 class OrganizerPasswordForm extends Model
 {
     public $password;

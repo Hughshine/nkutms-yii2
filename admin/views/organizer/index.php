@@ -26,9 +26,10 @@ $this->title = '组织者管理';
 
             'id',
             'org_name',
+            'credential',
             //'auth_key',
             //'password',
-            'wechat_id',
+            //'wechat_id',
             'category'=>
             [
                 'label'=>'用户类别',

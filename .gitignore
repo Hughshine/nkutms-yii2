@@ -1,3 +1,6 @@
+#zip file
+*.zip
+
 # yii console commands
 /yii
 /yii_test

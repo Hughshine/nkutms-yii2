@@ -1,6 +1,7 @@
 <?php
 
 namespace orgapi\models;
+//已弃用
 
 use Yii;
 use common\models\Activity;
@@ -67,12 +68,12 @@ class Ticket extends \yii\db\ActiveRecord
                 "user_id",
                 "user_name" => function($model)
                 {
-                    return $model->user->name;
+                    return $model->user->user_name;
                 },
                 // "activity_id",
                 "activity_name" => function($model)
                 {
-                    return $this->activity->name;
+                    return $this->activity->activity_name;
                 },
                 "fetch_time" => "created_at", //抢票时间
                 "status" => function($model)

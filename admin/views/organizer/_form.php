@@ -16,6 +16,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'wechat_id')->textInput()?>
 
+    <?= $form->field($model, 'credential')->textInput()?>
+
 	<?= $form->field($model, 'password')->passwordInput() ?>
 
 	<?= $form->field($model, 'category')->dropDownList(['0'=>'校级组织','1'=>'学生社团' ])?>

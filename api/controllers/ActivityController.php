@@ -56,8 +56,6 @@ class ActivityController extends ActiveController
 	{
 		$modelClass = $this->modelClass;
 
-
-
 		$provider = new ActiveDataProvider(
 			[
 				// 'msg' => 0,
@@ -81,33 +79,17 @@ class ActivityController extends ActiveController
 			return ['code'=>1,'message'=>'activity inexists'];
 		return ['code'=>0,'message'=>'success','data'=>$activity,'pages'=>intval(($provider->getTotalCount()-1)/20)];
 	}
-	// public function actionValid()
-	// {
-	// 	return $customer = Activity::find() //暂时没有问题
-	// 	->where(['and',
-	// 	['category' => 0],
-	// 	['status' => 0],
-	// 	])
-	// 	->orderBy('release_at DESC')//根据发布时间逆序排序
-	// 	// ->asArray() //会破坏fields
-	// 	->all();
-	// }
 
 	public function actionSearch()
 	{
 
 		$request = Yii::$app->request;
-		/*
-			根据传入的活动名称、类别、状态进行搜索 根据发布时间逆序排序
-			其中活动名称是相似检索
-		 */
 		$sql_name = $request->post('name','');   
 		$sql_category = $request->post('category',0);   
 		$sql_status = $request->post('status',0);   
 
 
-		$provider = new ActiveDataProvider(//暂时不增加message,前端通过返回的码判断
-
+		$provider = new ActiveDataProvider(
 			[
 				'query' => Activity::find() //暂时没有问题
 						->where(['and', 
@@ -122,15 +104,6 @@ class ActivityController extends ActiveController
 		);
 
 		return ['code'=>0,'message'=>'success','data' => $provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/10+1)];
-		// return $customer = Activity::find() //暂时没有问题
-		// ->where(['and', 
-		// ['like','name',$sql_name],
-		// ['category' => $sql_category],
-		// ['status' => $sql_status],
-		// ])
-		// ->orderBy('release_at DESC')//根据发布时间逆序排序
-		// // ->asArray() //会破坏fields
-		// ->all();
 	}
 
 	/*
@@ -174,7 +147,6 @@ class ActivityController extends ActiveController
 		if($current_people > $activity->max_people)
 			return ['code'=> 1, 'message'=>'已达上限'];
 
-		// return ['1'=>($user!=null),'2'=>($activity!=null)];
 		$ticket = Ticket::find()
 				->where([
 					'activity_id' => $activity_id,
@@ -191,27 +163,10 @@ class ActivityController extends ActiveController
 		$activity->current_serial++;
 		$activity->save(false);
 
-		$ticket = new Ticket();
-		$ticket->user_id = $user_id;
-		$ticket->activity_id = $activity_id;
-		$ticket->created_at = time();
-		$ticket->serial_number = $current_serial;
-		$ticket->status = 0;
-		$ticket->save(false);
 
+		$ticket = Ticket::generateAndWriteNewTicket($user_id,$activity_id,$current_serial,0);
 
-		// return 
-
-		$ticket_event  = new TicketEvent();
-		$ticket_event->ticket_id = $ticket->id;
-		$ticket_event->user_id = $ticket->user_id;
-		// $ticket_event->activity_id = $ticket->ticket_id;
-		$ticket_event->activity_id = $ticket->activity_id;
-		$ticket_event->status = 0;
-		$ticket_event->update_at = time()+7*3600;
-		$ticket_event->operated_by_admin = -1;
-		$ticket_event->save(false);
-
+		TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,0,-1)
 
 		return ['code'=> 0, 'message' => 'success', 'data' => $ticket];
 	}

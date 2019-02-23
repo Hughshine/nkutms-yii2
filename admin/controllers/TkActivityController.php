@@ -5,6 +5,7 @@ namespace admin\controllers;
 use Yii;
 use admin\models\TkActivity;
 use admin\models\TkActivitySearch;
+use admin\models\ActivityUpdateForm;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -63,6 +64,7 @@ class TkActivityController extends Controller
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
+
     }
 
     /**
@@ -90,20 +92,14 @@ class TkActivityController extends Controller
         {
             $model->start_at=strtotime($model->time_start_stamp);
             $model->end_at=strtotime($model->time_end_stamp);
+            $model->ticketing_start_at=strtotime($model->ticket_start_stamp);
+            $model->ticketing_end_at=strtotime($model->ticket_end_stamp);
             $model->updated_at=$model->release_at=time()+7*3600;
             $model->current_people=0;
             if($model->save())
             {
                 return $this->redirect(['view', 'id' => $model->id]);
             }
-            else
-            {
-                print_r($model->time_start);
-                print_r('\n');
-                print_r($model->time_end);
-                return null;
-            }
-            
         }
         return $this->render('create', [
             'model' => $model,
@@ -119,18 +115,29 @@ class TkActivityController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        /*$model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post())) 
         {
             $model->time_start_stamp=$model->start_at;
             $model->time_end_stamp=$model->end_at;
             $model->updated_at=time()+7*3600;
-            if($model->save(false))
+            if($model->save(false))//此处需要将false去掉
                 return $this->redirect(['view', 'id' => $model->id]);
         }
 
-        return $this->render('update', ['model' => $model,]);
+        return $this->render('update', ['model' => $model,]);*/
+
+        $model = $this->findModel($id);
+        $updateform =new ActivityUpdateForm($model);
+        if ($updateform->load(Yii::$app->request->post()) &&
+            $updateform->update($model)) 
+        {
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+        return $this->render('update', [
+            'model' => $updateform,
+        ]);
     }
 
     /**

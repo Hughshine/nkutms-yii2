@@ -37,7 +37,7 @@ class TicketController extends ActiveController
         $behaviors['authenticator'] = [
                 'class' => QueryParamAuth::className()
         ];
-        //设置不再请求头返回速率限制信息
+        //设置请求头不返回速率限制信息
         // $behaviors['rateLimiter']['enableRateLimitHeaders'] = false;
         
         return $behaviors;
@@ -46,10 +46,7 @@ class TicketController extends ActiveController
 		public function actionMyTickets()
 		{	
 			$request = Yii::$app->request;
-		/*
-			根据传入的活动名称、类别、状态进行搜索 根据发布时间逆序排序
-			其中活动名称是相似检索
-		 */
+
 			$sql_id = $request->post('user_id');   
 
 			if($sql_id == null)
@@ -63,7 +60,7 @@ class TicketController extends ActiveController
 					'query' => $modelClass::find()
 						->where(['and',
 							['user_id' => $sql_id]
-							// ,['status' => 0]
+							,['status' => 0]
 							])
 						->orderBy('created_at DESC'),//根据发布时间逆序排序
 					
@@ -108,6 +105,11 @@ class TicketController extends ActiveController
 			{
 				return ['code' => 1, 'message' => 'ticket do not exist'];
 			}
+			
+			if($ticket->status != 0)
+			{
+				return ['code' => 1, 'message' => 'invalid ticket'];
+			}
 
 			$ticket -> status = 1;
 			$ticket->save(false);
@@ -119,13 +121,7 @@ class TicketController extends ActiveController
 			$activity->current_people--;
 			$activity->save(false);
 
-			$ticket_event = new TicketEvent();
-			$ticket_event->ticket_id = $ticket->id;
-			$ticket_event->user_id = $ticket->user_id;		
-			$ticket_event->activity_id = $ticket->activity_id;
-			$ticket_event->status = 1;
-			$ticket_event->update_at = time();
-			$ticket_event->save(false);
+			TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,1,-1)
 
 			return ['code' => 0, 'message' => 'success', 'data' => $ticket];
 		}

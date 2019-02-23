@@ -94,4 +94,16 @@ class TicketEvent extends \yii\db\ActiveRecord
     {
         return $this->hasOne(TkUser::className(), ['id' => 'user_id']);
     }
+
+    public function generateAndWriteNewTicketEvent($id,$user_id,$activity_id,$status)
+    {
+        $ticket_event  = new TicketEvent();
+        $ticket_event->ticket_id = $id;
+        $ticket_event->user_id = $user_id;
+        $ticket_event->activity_id = $ticket->activity_id;
+        $ticket_event->status = $status;
+        $ticket_event->update_at = time()+7*3600;
+        $ticket_event->operated_by_admin = -1;
+        $ticket_event->save(false);
+    }
 }

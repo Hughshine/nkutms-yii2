@@ -4,9 +4,7 @@ namespace admin\models;
 use yii\base\Model;
 use admin\models\Organizer;
 
-/**
- * Signup form
- */
+
 class OrganizerUpdateForm extends Model
 {
     public $org_name;
@@ -49,15 +47,7 @@ class OrganizerUpdateForm extends Model
         return [
         'org_name'=>'组织者名字',
         'status'=>'状态',
-        'time_release'=>'注册时间',
-        'wechat_id'=>'微信号',
-        'activity_total'=>'活动总数',
         'category'=>'分类',
-        'auth_key'=>'自动登录密码',
-        'password'=>'密码',
-        'password_reset_token'=>'重置密码token',
-        'updated_time'=>'更新时间',
-        'access_token'=>'小程序请求发送',
         ];
     }
 
