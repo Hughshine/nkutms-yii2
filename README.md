@@ -10,11 +10,17 @@
 
 - clone 至 web 根目录
 
-- composer update (建议使用镜像/代理)
+- composer install; composer update (建议使用镜像/代理)
 
 - php init (linux/mac)
 
 - 更改apache配置文件，开启并配置rewrite规则。（.htaccess）
+
+- 注意apache用户（组）应给予web目录及以下操作权限
+``` 
+chown -R www-data:www-data /path/to/webserver/www # centos为 apache:apache
+chmod -R g+rw /path/to/webserver/www
+```
 
 > 自动部署项目待定
 
