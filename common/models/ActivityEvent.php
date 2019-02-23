@@ -23,6 +23,8 @@ class ActivityEvent extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
+    public $activity_name;
+    public $org_name;
     public static function tableName()
     {
         return 'tk_activity_event';
@@ -39,7 +41,7 @@ class ActivityEvent extends \yii\db\ActiveRecord
             [['update_at'], 'safe'],
             [['status'], 'string', 'max' => 1],
             [['activity_id'], 'exist', 'skipOnError' => true, 'targetClass' => Activity::className(), 'targetAttribute' => ['activity_id' => 'id']],
-            [['operated_by_admin'], 'exist', 'skipOnError' => true, 'targetClass' => Admin::className(), 'targetAttribute' => ['operated_by_admin' => 'id']],
+            [['operated_by_admin'], 'exist', 'skipOnError' => true, 'targetClass' => 'admin\models\Admin', 'targetAttribute' => ['operated_by_admin' => 'id']],
             [['organizer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Organizer::className(), 'targetAttribute' => ['organizer_id' => 'id']],
         ];
     }
@@ -51,11 +53,11 @@ class ActivityEvent extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'organizer_id' => 'Organizer ID',
-            'activity_id' => 'Activity ID',
-            'status' => '0-发布1-取消',
-            'update_at' => 'Update At',
-            'operated_by_admin' => '-1时，非管理员操作',
+            'organizer_id' => '发布者ID',
+            'activity_id' => '活动ID',
+            'status' => '状态',
+            'update_at' => '发生时间',
+            'operated_by_admin' => '上一次操作的管理员ID',
         ];
     }
 

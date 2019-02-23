@@ -25,6 +25,8 @@ class TicketEvent extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
+    public $user_name;
+    public $activity_name;
     public static function tableName()
     {
         return 'tk_ticket_event';
@@ -40,10 +42,10 @@ class TicketEvent extends \yii\db\ActiveRecord
             [['status'], 'required'],
             [['update_at'], 'safe'],
             [['status'], 'string', 'max' => 1],
-            [['activity_id'], 'exist', 'skipOnError' => true, 'targetClass' => TkActivity::className(), 'targetAttribute' => ['activity_id' => 'id']],
-            [['operated_by_admin'], 'exist', 'skipOnError' => true, 'targetClass' => TkAdmin::className(), 'targetAttribute' => ['operated_by_admin' => 'id']],
-            [['ticket_id'], 'exist', 'skipOnError' => true, 'targetClass' => TkTicket::className(), 'targetAttribute' => ['ticket_id' => 'id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => TkUser::className(), 'targetAttribute' => ['user_id' => 'id']],
+            [['activity_id'], 'exist', 'skipOnError' => true, 'targetClass' => 'admin\models\TkActivity', 'targetAttribute' => ['activity_id' => 'id']],
+            [['operated_by_admin'], 'exist', 'skipOnError' => true, 'targetClass' => 'admin\models\Admin', 'targetAttribute' => ['operated_by_admin' => 'id']],
+            [['ticket_id'], 'exist', 'skipOnError' => true, 'targetClass' => 'common\models\Ticket', 'targetAttribute' => ['ticket_id' => 'id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => 'common\models\User', 'targetAttribute' => ['user_id' => 'id']],
         ];
     }
 
@@ -54,12 +56,12 @@ class TicketEvent extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'ticket_id' => 'Ticket ID',
-            'user_id' => 'User ID',
-            'activity_id' => 'Activity ID',
-            'status' => '0-发布1-取消',
-            'update_at' => 'Update At',
-            'operated_by_admin' => '-1时，非管理员操作',
+            'ticket_id' => '票 ID',
+            'user_id' => '票持有者 ID',
+            'activity_id' => '活动 ID',
+            'status' => '状态',//'0-发布1-取消'
+            'update_at' => '发生时间',
+            'operated_by_admin' => '操作管理员 ID',
         ];
     }
 
@@ -68,7 +70,7 @@ class TicketEvent extends \yii\db\ActiveRecord
      */
     public function getActivity()
     {
-        return $this->hasOne(TkActivity::className(), ['id' => 'activity_id']);
+        return $this->hasOne(Activity::className(), ['id' => 'activity_id']);
     }
 
     /**
@@ -76,7 +78,7 @@ class TicketEvent extends \yii\db\ActiveRecord
      */
     public function getOperatedByAdmin()
     {
-        return $this->hasOne(TkAdmin::className(), ['id' => 'operated_by_admin']);
+        return $this->hasOne(admin\models\Admin::className(), ['id' => 'operated_by_admin']);
     }
 
     /**
@@ -84,7 +86,7 @@ class TicketEvent extends \yii\db\ActiveRecord
      */
     public function getTicket()
     {
-        return $this->hasOne(TkTicket::className(), ['id' => 'ticket_id']);
+        return $this->hasOne(Ticket::className(), ['id' => 'ticket_id']);
     }
 
     /**
@@ -92,7 +94,7 @@ class TicketEvent extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(TkUser::className(), ['id' => 'user_id']);
+        return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
     public function generateAndWriteNewTicketEvent($id,$user_id,$activity_id,$status,$operated_by_admin)

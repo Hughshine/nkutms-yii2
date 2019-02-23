@@ -30,6 +30,7 @@ use Yii;
  */
 class Activity extends \yii\db\ActiveRecord
 {
+
     /**
      * {@inheritdoc}
      */
@@ -75,6 +76,12 @@ class Activity extends \yii\db\ActiveRecord
             'current_serial' => '用于产生票务的序列号',
             'pic_url' => '暂不支持传入图片',
         ];
+    }
+
+    //用于admin端查找活动的名称
+    public static function findIdentity_admin($id)
+    {
+        return static::findOne(['id' => $id]);
     }
 
     /**

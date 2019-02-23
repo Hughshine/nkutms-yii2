@@ -162,6 +162,11 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
     {
         return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
     }
+    //用于admin端查找User
+    public static function findIdentity_admin($id)
+    {
+        return static::findOne(['id' => $id]);
+    }
 
     /**
      * Finds user by user_name

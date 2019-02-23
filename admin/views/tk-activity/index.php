@@ -57,6 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'current_people',
             'start_at:datetime',
             'end_at:datetime',
+            'org_name'=>
             [
                 'attribute' => 'org_name',
                 'label'=>'发布者名称',

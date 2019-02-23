@@ -50,6 +50,11 @@ class Admin extends ActiveRecord implements IdentityInterface
         return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
     }
 
+    public static function findIdentity_admin($id)
+    {
+        return static::findOne(['id' => $id]);
+    }
+
     /**
      * {@inheritdoc}
      */
