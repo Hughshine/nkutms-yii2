@@ -75,7 +75,7 @@ class OrganizerSearch extends Organizer
         $query->andFilterWhere(['like', 'org_name', $this->org_name])
             /*->andFilterWhere(['like', 'auth_key', $this->auth_key])
             ->andFilterWhere(['like', 'password', $this->password])*/
-            ->andFilterWhere(['like', 'wechat_id', $this->wechat_id])
+            //->andFilterWhere(['like', 'wechat_id', $this->wechat_id])
             /*->andFilterWhere(['like', 'access_token', $this->access_token])*/;
 
         return $dataProvider;

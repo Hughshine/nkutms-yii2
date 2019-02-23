@@ -73,7 +73,7 @@ class ActivityEventSearch extends ActivityEvent
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            '{{%tk_activity_event}}.id' => $this->id,
             //'organizer_id' => $this->organizer_id,
             //'activity_id' => $this->activity_id,
             'update_at' => $this->update_at,
@@ -82,8 +82,8 @@ class ActivityEventSearch extends ActivityEvent
             'operated_by_admin' => $this->operated_by_admin,
         ]);
 
-        $query->andFilterWhere(['like', 'activity_name', $this->activity_name]);
-        $query->andFilterWhere(['like', 'org_name', $this->activity_name]);
+        $query->andFilterWhere(['like', 'activity_name', $this->activity_name])
+            ->andFilterWhere(['like', 'org_name', $this->org_name]);
 
         return $dataProvider;
     }

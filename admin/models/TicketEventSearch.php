@@ -19,7 +19,7 @@ class TicketEventSearch extends TicketEvent
     {
         return [
             [['id', 'ticket_id', 'user_id', 'activity_id', 'update_at', 'operated_by_admin'], 'integer'],
-            [['status','user_name','activity'], 'safe'],
+            [['status','user_name','activity_name'], 'safe'],
         ];
     }
 
@@ -74,7 +74,7 @@ class TicketEventSearch extends TicketEvent
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'id' => $this->id,
+            '{{%tk_ticket_event}}.id' => $this->id,
             'ticket_id' => $this->ticket_id,
             'user_name' => $this->user_name,
             'activity_name' => $this->activity_name,
@@ -82,8 +82,8 @@ class TicketEventSearch extends TicketEvent
             'operated_by_admin' => $this->operated_by_admin,
         ]);
 
-        $query->andFilterWhere(['like', 'user_name', $this->status]);
-        $query->andFilterWhere(['like', 'activity_name', $this->status]);
+        $query->andFilterWhere(['like', 'user_name', $this->user_name])
+            ->andFilterWhere(['like', 'activity_name', $this->activity_name]);
 
         return $dataProvider;
     }
