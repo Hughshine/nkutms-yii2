@@ -22,7 +22,7 @@ class ActivityUpdateForm extends Model
     public $ticket_start_stamp;
     public $ticket_end_stamp;
     public $location;
-    public $id;
+    public $release_by;
     public $max_people;
     public $current_serial;
     public $act;
@@ -43,7 +43,7 @@ class ActivityUpdateForm extends Model
         $this->time_end_stamp=date('Y-m-d H:i' , $activity->end_at);
         $this->ticket_start_stamp=date('Y-m-d H:i' , $activity->ticketing_start_at);
         $this->ticket_end_stamp=date('Y-m-d H:i' , $activity->ticketing_end_at);
-        $this->id=$activity->release_by;
+        $this->release_by=$activity->release_by;
         $this->max_people=$activity->max_people;
         $this->current_serial=$activity->current_serial;
         //记录这个表单对应的活动
@@ -57,7 +57,7 @@ class ActivityUpdateForm extends Model
                 [
                     'activity_name',
                     'introduction',
-                    'id',
+                    'release_by',
                     'time_start_stamp',
                     'time_end_stamp',
                     'ticket_start_stamp',
@@ -72,7 +72,7 @@ class ActivityUpdateForm extends Model
                 [
                     'max_people',
                     'current_serial',
-                    'id',
+                    'release_by',
                 ], 
                 'integer'
             ],
@@ -90,12 +90,9 @@ class ActivityUpdateForm extends Model
             ['time_end_stamp','default','value'=>$this->time_end_stamp],
             ['ticket_start_stamp','default','value'=>$this->ticket_start_stamp],
             ['ticket_end_stamp','default','value'=>$this->ticket_end_stamp],
-            ['id','default','value'=>$this->id],
+            ['release_by','default','value'=>$this->release_by],
 
             //比较要求
-            ['time_start_stamp', 'compare','compareValue'=>date('Y-m-d H:i' , time()+7*3600), 'operator' => '>','message'=>'不能早于当前的时间'],
-            ['ticket_start_stamp', 'compare','compareValue'=>date('Y-m-d H:i' , time()+7*3600), 'operator' => '>','message'=>'不能早于当前的时间'],
-
             ['time_end_stamp', 'compare','compareAttribute'=>'time_start_stamp', 'operator' => '>','message'=>'结束时间不能早于开始时间'],
             ['ticket_end_stamp', 'compare','compareAttribute'=>'ticket_start_stamp', 'operator' => '>','message'=>'结束时间不能早于开始时间'],
 
@@ -106,7 +103,8 @@ class ActivityUpdateForm extends Model
             //其他要求
             ['activity_name', 'trim'],//去掉空格
 
-            ['id', 'exist', 'targetClass' => 'common\models\Organizer', 'message' => '该组织者不存在'],
+            //外键要求
+            [['release_by'], 'exist', 'skipOnError' => false, 'targetClass' => 'common\models\Organizer', 'targetAttribute' => ['release_by' => 'id']],
 
             ];
 
@@ -118,7 +116,7 @@ class ActivityUpdateForm extends Model
         return [
         'activity_name'=>'活动名字',
         'status'=>'状态',
-        'id'=>'发布者ID',
+        'release_by'=>'发布者ID',
         'introduction'=>'活动介绍',
         'category'=>'活动分类',
         'time_start_stamp'=>'活动开始时间',
@@ -164,7 +162,7 @@ class ActivityUpdateForm extends Model
         $activity->category=$this->category;
         $activity->status=$this->status;
         $activity->location=$this->location;
-        $activity->release_by=$this->id;
+        $activity->release_by=$this->release_by;
         $activity->current_serial=$this->current_serial;
         $activity->max_people=$this->max_people;
         $activity->introduction=$this->introduction;

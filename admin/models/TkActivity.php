@@ -73,6 +73,9 @@ class TkActivity extends \yii\db\ActiveRecord
             ['time_end_stamp', 'compare','compareAttribute'=>'time_start_stamp', 'operator' => '>','message'=>'结束时间不能早于开始时间'],
             ['ticket_end_stamp', 'compare','compareAttribute'=>'ticket_start_stamp', 'operator' => '>','message'=>'结束时间不能早于开始时间'],
 
+            //外键要求
+            [['release_by'], 'exist', 'skipOnError' => false, 'targetClass' => 'common\models\Organizer', 'targetAttribute' => ['release_by' => 'id']],
+
         ];
     }
 
