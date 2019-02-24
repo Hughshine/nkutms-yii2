@@ -47,7 +47,7 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface, RateL
             [['category', 'logged_at', 'updated_at', 'expire_at', 'allowance', 'allowance_updated_at'], 'integer'],
             [['credential'], 'required'],
             [['signup_at'], 'safe'],
-            [['org_,name'], 'string', 'max' => 32],
+            [['org_name'], 'string', 'max' => 32],
             // [['wechat_id1', 'credential', 'password', 'access_token', 'wechat_id2', 'wechat_id3'], 'string', 'max' => 255],
         ];
     }
