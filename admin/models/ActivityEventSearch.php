@@ -82,9 +82,6 @@ class ActivityEventSearch extends ActivityEvent
             'operated_by_admin' => $this->operated_by_admin,
         ]);
 
-        $query->andFilterWhere(['like', 'activity_name', $this->activity_name])
-            ->andFilterWhere(['like', 'org_name', $this->org_name]);
-
         return $dataProvider;
     }
 }

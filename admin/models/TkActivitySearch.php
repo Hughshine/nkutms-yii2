@@ -15,7 +15,6 @@ class TkActivitySearch extends TkActivity
     /**
      * @inheritdoc
      */
-    public $org_name;
     public function rules()
     {
         return [

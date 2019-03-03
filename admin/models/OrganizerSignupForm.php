@@ -67,6 +67,7 @@ class OrganizerSignupForm extends Model
         $organizer->category=$this->category;
         $organizer->credential = $this->credential;
         $organizer->setPassword($this->password);
+        $organizer->updated_at=$organizer->created_at=$organizer->signup_at=time()+7*3600;
         $organizer->generateAuthKey();//原理不明，保留就对了，据说是用于自动登录的
         return $organizer->save() ? $organizer : null;
     }

@@ -76,14 +76,11 @@ class TicketEventSearch extends TicketEvent
         $query->andFilterWhere([
             '{{%tk_ticket_event}}.id' => $this->id,
             'ticket_id' => $this->ticket_id,
-            'user_name' => $this->user_name,
-            'activity_name' => $this->activity_name,
+            //'user_name' => $this->user_name,
+            //'activity_name' => $this->activity_name,
             'update_at' => $this->update_at,
             'operated_by_admin' => $this->operated_by_admin,
         ]);
-
-        $query->andFilterWhere(['like', 'user_name', $this->user_name])
-            ->andFilterWhere(['like', 'activity_name', $this->activity_name]);
 
         return $dataProvider;
     }
