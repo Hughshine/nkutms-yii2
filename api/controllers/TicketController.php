@@ -121,7 +121,7 @@ class TicketController extends ActiveController
 			$activity->current_people--;
 			$activity->save(false);
 
-			TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,1,-1)
+			TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,1,-1);
 
 			return ['code' => 0, 'message' => 'success', 'data' => $ticket];
 		}

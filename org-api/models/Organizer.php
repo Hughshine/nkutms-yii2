@@ -11,7 +11,7 @@ use yii\filters\RateLimitInterface;
  * This is the model class for table "tk_organizer".
  *
  * @property int $id
- * @property string $org_,name 应必须填写
+ * @property string $org_name 应必须填写
  * @property string $wechat_id1 一个社团最多有三个管理者，暂时不考虑一个人管理多个社团
  * @property int $category 标记用户类别 0-校级组织，1-学生社团
  * @property string $credential 该用户类别下，他的证件号
@@ -47,7 +47,7 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface, RateL
             [['category', 'logged_at', 'updated_at', 'expire_at', 'allowance', 'allowance_updated_at'], 'integer'],
             [['credential'], 'required'],
             [['signup_at'], 'safe'],
-            [['org_,name'], 'string', 'max' => 32],
+            [['org_name'], 'string', 'max' => 32],
             // [['wechat_id1', 'credential', 'password', 'access_token', 'wechat_id2', 'wechat_id3'], 'string', 'max' => 255],
         ];
     }
@@ -59,7 +59,7 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface, RateL
     {
         return [
             'id' => 'ID',
-            'org_,name' => '应必须填写',
+            'org_name' => '应必须填写',
             // 'wechat_id1' => '一个社团最多有三个管理者，暂时不考虑一个人管理多个社团',
             'category' => '标记用户类别 0-校级组织，1-学生社团',
             'credential' => '该用户类别下，他的证件号',
@@ -80,7 +80,7 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface, RateL
     {
         return [
             "id",
-            "org_name" => "org_,name",
+            "org_name" => "org_name",
             "credential",
             // "access_token": null,
             // "signup_at",
