@@ -9,12 +9,19 @@ $params = array_merge(
 return [
     'id' => 'app-frontend',
     'basePath' => dirname(__DIR__),
+    'language' => 'zh-CN',
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',
         ],
+        //路由设置：美化url
+        'urlManager' =>
+            [
+                'enablePrettyUrl' => true,
+                'showScriptName' => false,
+            ],
         'user' => [
             'identityClass' => 'common\models\User',
             'enableAutoLogin' => true,
