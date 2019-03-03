@@ -1,18 +1,17 @@
 <?php
-namespace frontend\models;
+namespace backend\models;
 
 use Yii;
 use yii\base\Model;
-use common\models\User;
+use common\models\Organizer;
 
 class LoginForm extends Model
 {
-    public $user_name;
+    public $org_name;
     public $password;
     public $rememberMe = true;
-    public $verifyCode;
 
-    private $_user;
+    private $org;
 
 
     /**
@@ -22,23 +21,20 @@ class LoginForm extends Model
     {
         return [
             // user_name and password are both required
-            [['user_name', 'password'], 'required'],
+            [['org_name', 'password'], 'required'],
             // rememberMe must be a boolean value
             ['rememberMe', 'boolean'],
             // password is validated by validatePassword()
              ['password', 'validatePassword'],
-
-            ['verifyCode', 'captcha'],
         ];
     }
     public function attributeLabels()
     {
         return 
         [
-            'user_name'=>'用户名',
+            'org_name'=>'用户名',
             'password'=>'密码',
             'rememberMe'=>'记住登录状态',
-            'verifyCode' => '验证码',
         ];
     }
     /**
@@ -79,10 +75,9 @@ class LoginForm extends Model
      */
     protected function getUser()
     {
-        if ($this->_user === null) {
-            $this->_user = User::findOne(["user_name"=>$this->user_name]);
+        if ($this->org === null) {
+            $this->org = Organizer::findOne(["org_name"=>$this->org_name]);
         }
-
-        return $this->_user;
+        return $this->org;
     }
 }
