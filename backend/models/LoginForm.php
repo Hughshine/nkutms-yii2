@@ -69,7 +69,7 @@ class LoginForm extends Model
     }
 
     /**
-     * Finds user by [[user_name]]
+     * Finds user by [[org_name]]
      *
      * @return User|null
      */
