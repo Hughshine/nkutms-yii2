@@ -6,6 +6,10 @@ namespace admin\models;
 use common\models\Organizer;
 use Yii;
 
+/*
+ * 在此直接用作表单模型,因为admin里只需管它的创建
+ *
+ * */
 class TkActivity extends \yii\db\ActiveRecord
 {
     const STATUS_UNAUDITED  = 0;//未审核状态
