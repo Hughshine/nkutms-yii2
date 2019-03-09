@@ -45,11 +45,11 @@ class Activity extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['release_by', 'category', 'status', 'start_at', 'updated_at', 'current_people', 'max_people', 'current_serial'], 'integer'],
+            [['release_by', 'category', 'status', 'start_at','end_at', 'updated_at', 'current_people', 'max_people', 'current_serial'], 'integer'],
             [['release_at'], 'safe'],
             [['activity_name'], 'string', 'max' => 32],
             [['location'], 'string', 'max' => 64],
-            [['end_at', 'introduction', 'pic_url'], 'string', 'max' => 255],
+            [[ 'introduction',], 'string', 'max' => 255],
             [['release_by'], 'exist', 'skipOnError' => true, 'targetClass' => Organizer::className(), 'targetAttribute' => ['release_by' => 'id']],
         ];
     }
@@ -74,7 +74,7 @@ class Activity extends \yii\db\ActiveRecord
             'current_people' => 'Current People',
             'max_people' => 'Max People',
             'current_serial' => '用于产生票务的序列号',
-            'pic_url' => '暂不支持传入图片',
+            'pic_url' => '图片',
         ];
     }
 
