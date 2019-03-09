@@ -124,7 +124,7 @@ class OrganizerController extends Controller
     {
         $model = $this->findModel($id);
         $passwordform =new OrganizerPasswordForm($model);
-        if ($passwordform->load(Yii::$app->request->post()) &&$passwordform->repassword($model)) 
+        if ($passwordform->load(Yii::$app->request->post()) &&$passwordform->repassword())
         {
             return $this->redirect(['view', 'id' => $model->id]);
         }

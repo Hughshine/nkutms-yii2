@@ -1,10 +1,15 @@
 <?php
 use yii\widgets\Breadcrumbs;
 use dmstr\widgets\Alert;
-
+/*
+ * 暂时还用不上...留着可能以后有用
+ *
+ *
+ * */
 ?>
 <div class="content-wrapper">
     <section class="content-header">
+        <br />
         <?php if (isset($this->blocks['content-header'])) { ?>
             <h1><?= $this->blocks['content-header'] ?></h1>
         <?php } else { ?>
@@ -20,13 +25,15 @@ use dmstr\widgets\Alert;
                 } ?>
             </h1>
         <?php } ?>
-
+        <br />
+        <div align="left">
         <?=
         Breadcrumbs::widget(
             [
                 'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
             ]
         ) ?>
+        </div>
     </section>
 
     <section class="content">

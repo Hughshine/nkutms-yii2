@@ -1,23 +1,21 @@
 <?php
 
+/* @var $this yii\web\View */
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-
-/* @var $this yii\web\View */
-/* @var $model common\models\Organizer */
-/* @var $form yii\widgets\ActiveForm */
-/*
-管理员修改组织者密码的表单页面项目
-*/
+$this->title = '修改密码:'.$model->org->org_name;
+$this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="col-lg-8">
-<div class="organizer-form">
 
+<div class="col-lg-8">
+<div class="admin-form">
     <?php $form = ActiveForm::begin(); ?>
+
+    <?= $form->field($model, 'oldPassword')->passwordInput()?>
 
     <?= $form->field($model, 'password')->passwordInput()?>
 
-    <?= $form->field($model, 'repassword')->passwordInput()?>
+    <?= $form->field($model, 'rePassword')->passwordInput()?>
 
     <div class="form-group">
         <?= Html::submitButton('确认修改', ['class' => 'btn btn-success']) ?>

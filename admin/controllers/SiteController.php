@@ -6,7 +6,6 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use admin\models\LoginForm;
-use admin\models\Admin;
 use admin\models\AdminPasswordForm;
 
 /**
@@ -74,7 +73,7 @@ class SiteController extends Controller
 
     /**
      *
-     *
+     *修改密码
      *
      */
     public function actionRepassword()
@@ -83,7 +82,7 @@ class SiteController extends Controller
             return $this->render('site/login');
         $model = Yii::$app->user->identity;
         $passwordform =new AdminPasswordForm($model);
-        if ($passwordform->load(Yii::$app->request->post()) &&$passwordform->repassword($model))
+        if ($passwordform->load(Yii::$app->request->post()) &&$passwordform->repassword())
         {
             return $this->redirect('index');
         }

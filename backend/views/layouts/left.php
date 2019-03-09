@@ -4,18 +4,21 @@
 
         <!-- Sidebar user panel -->
         <div class="user-panel">
-            <div class="pull-left image">
-                <img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="img-circle" alt="User Image"/>
-            </div>
             <div class="pull-left info">
-                <p>Alexander Pierce</p>
+                <p>欢迎回来:</p>
+                <p><?=$this->params['org_name'] ?></p>
 
-                <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+                <!--<p><i class="fa fa-circle text-success"></i> 在线</p>-->
             </div>
+            <div class="pull-right image" style="height:40px;width:40px">
+
+                <!--<img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="img-circle" alt="User Image"/>-->
+            </div>
+
         </div>
 
         <!-- search form -->
-        <form action="#" method="get" class="sidebar-form">
+        <!--这里放搜索框<form action="#" method="get" class="sidebar-form">
             <div class="input-group">
                 <input type="text" name="q" class="form-control" placeholder="Search..."/>
               <span class="input-group-btn">
@@ -23,15 +26,42 @@
                 </button>
               </span>
             </div>
-        </form>
+        </form>-->
         <!-- /.search form -->
 
         <?= dmstr\widgets\Menu::widget(
             [
                 'options' => ['class' => 'sidebar-menu tree', 'data-widget'=> 'tree'],
                 'items' => [
-                    ['label' => 'Menu Yii2', 'options' => ['class' => 'header']],
-                    ['label' => 'Gii', 'icon' => 'file-code-o', 'url' => ['/gii']],
+                    ['label' => '菜单', 'options' => ['class' => 'header']],
+                    [
+                        'label' => '活动',
+                        'icon' => 'server',
+                        'url' => '#',
+                        'items' => [
+                            ['label' => '活动列表', 'icon' => 'file-excel-o', 'url' => ['activity/index']],
+                            [
+                                'label' => '我的',
+                                'icon' => 'user-circle-o',
+                                'url' => '#',
+                                'items' => [
+                                    ['label' => '已发布活动', 'icon' => 'file-excel-o', 'url' => ['activity/mine'],],
+                                    ['label' => '发布一个活动', 'icon' => 'file-word-o', 'url' => ['activity/create'],],
+                                    /*[
+                                        'label' => 'Level Two',
+                                        'icon' => 'circle-o',
+                                        'url' => '#',
+                                        'items' => [
+                                            ['label' => 'Level Three', 'icon' => 'circle-o', 'url' => '#',],
+                                            ['label' => 'Level Three', 'icon' => 'circle-o', 'url' => '#',],
+                                        ],
+                                    ],*/
+                                ],
+                            ],
+                        ],
+                    ],
+                    ['label' => '修改密码', 'icon' => 'user-secret', 'url' => ['site/password'],],
+                    /*['label' => 'Gii', 'icon' => 'file-code-o', 'url' => ['/gii']],
                     ['label' => 'Debug', 'icon' => 'dashboard', 'url' => ['/debug']],
                     ['label' => 'Login', 'url' => ['site/login'], 'visible' => Yii::$app->user->isGuest],
                     [
@@ -59,7 +89,7 @@
                                 ],
                             ],
                         ],
-                    ],
+                    ],*/
                 ],
             ]
         ) ?>

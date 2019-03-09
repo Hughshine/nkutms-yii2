@@ -2,15 +2,15 @@
 namespace backend\controllers;
 
 use Yii;
-use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use backend\models\LoginForm;
+use backend\models\PasswordForm;
 
 /**
  * Site controller
  */
-class SiteController extends Controller
+class SiteController extends BaseController
 {
     /**
      * {@inheritdoc}
@@ -32,7 +32,7 @@ class SiteController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['logout', 'index','error'],
+                        'actions' => ['logout', 'index','error','create','password'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -69,10 +69,45 @@ class SiteController extends Controller
         if (Yii::$app->user->isGuest) {
             return $this->redirect('site/login');
         }
-        $this->layout='main.php';
-
+        $this->viewAction();
         return $this->render('index');
     }
+
+    /*
+     * 修改密码
+     * */
+    public function actionPassword()
+    {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect('site/login');
+        }
+        $this->viewAction();
+        $model = Yii::$app->user->identity;
+        $passwordForm =new PasswordForm($model);
+        if ($passwordForm->load(Yii::$app->request->post()) &&$passwordForm->repassword())
+        {
+            return $this->redirect('index');
+        }
+        return $this->render('password', [
+            'model' => $passwordForm,
+        ]);
+    }
+    /*
+     public function actionRepassword()
+    {
+        if (Yii::$app->user->isGuest)
+            return $this->render('site/login');
+        $model = Yii::$app->user->identity;
+        $passwordform =new AdminPasswordForm($model);
+        if ($passwordform->load(Yii::$app->request->post()) &&$passwordform->repassword($model))
+        {
+            return $this->redirect('index');
+        }
+        return $this->render('repassword', [
+            'model' => $passwordform,
+        ]);
+    }
+     */
 
     /**
      * Login action.
@@ -85,7 +120,6 @@ class SiteController extends Controller
             return $this->goHome();
         }
         $this->layout='main-login.php';
-
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post())&&$model->login()) {
             return $this->redirect('index');
@@ -95,6 +129,16 @@ class SiteController extends Controller
                 'model' => $model,
             ]);
         }
+    }
+
+
+    private function viewAction()
+    {
+        $this->layout='main.php';
+        $view=Yii::$app->view;
+        $org=Yii::$app->user->identity;
+        $view->params['org_name']=$org->org_name;
+        $view->params['created_at']=$org->created_at;
     }
 
     /**

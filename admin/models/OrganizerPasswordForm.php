@@ -42,13 +42,12 @@ class OrganizerPasswordForm extends Model
     }
 
     //向数据库提交修改的密码
-    public function repassword($organizer)
+    public function repassword()
     {
         if (!$this->validate())
             return null;
-        $organizer = $this->org;
-        $organizer->setPassword($this->password);
+        $this->org->setPassword($this->password);
         //由于之前用了validate方法，所以此次save用false
-        return $organizer->save(false);
+        return $this->org->save(false);
     }
 }

@@ -58,14 +58,13 @@ class AdminPasswordForm extends Model
     }
 
     //向数据库提交修改的密码
-    public function repassword($adm)
+    public function repassword()
     {
         if (!$this->validate())
             return null;
-        $adm = $this->admin;
-        $adm->setPassword($this->password);
+        $this->admin->setPassword($this->password);
         //由于之前用了validate方法，所以此次save用false
         //在此save会更新updated_at字段
-        return $adm->save(false);
+        return $this->admin->save(false);
     }
 }

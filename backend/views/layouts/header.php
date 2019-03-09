@@ -7,7 +7,7 @@ use yii\helpers\Html;
 
 <header class="main-header">
 
-    <?= Html::a('<span class="logo-mini">APP</span><span class="logo-lg">' . Yii::$app->name . '</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
+    <?= Html::a('<span class="logo-mini">菜单</span><span class="logo-lg">' . '南开大学组织端' . '</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
 
     <nav class="navbar navbar-static-top" role="navigation">
 
@@ -20,6 +20,7 @@ use yii\helpers\Html;
             <ul class="nav navbar-nav">
 
                 <!-- Messages: style can be found in dropdown.less-->
+                <!--
                 <li class="dropdown messages-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <i class="fa fa-envelope-o"></i>
@@ -28,9 +29,8 @@ use yii\helpers\Html;
                     <ul class="dropdown-menu">
                         <li class="header">You have 4 messages</li>
                         <li>
-                            <!-- inner menu: contains the actual data -->
                             <ul class="menu">
-                                <li><!-- start message -->
+                                <li>
                                     <a href="#">
                                         <div class="pull-left">
                                             <img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="img-circle"
@@ -43,7 +43,6 @@ use yii\helpers\Html;
                                         <p>Why not buy a new awesome theme?</p>
                                     </a>
                                 </li>
-                                <!-- end message -->
                                 <li>
                                     <a href="#">
                                         <div class="pull-left">
@@ -100,7 +99,8 @@ use yii\helpers\Html;
                         </li>
                         <li class="footer"><a href="#">See All Messages</a></li>
                     </ul>
-                </li>
+                </li>-->
+                <!--历史信息栏
                 <li class="dropdown notifications-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <i class="fa fa-bell-o"></i>
@@ -109,7 +109,6 @@ use yii\helpers\Html;
                     <ul class="dropdown-menu">
                         <li class="header">You have 10 notifications</li>
                         <li>
-                            <!-- inner menu: contains the actual data -->
                             <ul class="menu">
                                 <li>
                                     <a href="#">
@@ -142,9 +141,9 @@ use yii\helpers\Html;
                         </li>
                         <li class="footer"><a href="#">View all</a></li>
                     </ul>
-                </li>
+                </li>-->
                 <!-- Tasks: style can be found in dropdown.less -->
-                <li class="dropdown tasks-menu">
+                <!--这里是工作信息提示栏<li class="dropdown tasks-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <i class="fa fa-flag-o"></i>
                         <span class="label label-danger">9</span>
@@ -152,9 +151,8 @@ use yii\helpers\Html;
                     <ul class="dropdown-menu">
                         <li class="header">You have 9 tasks</li>
                         <li>
-                            <!-- inner menu: contains the actual data -->
                             <ul class="menu">
-                                <li><!-- Task item -->
+                                <li>
                                     <a href="#">
                                         <h3>
                                             Design some buttons
@@ -169,8 +167,7 @@ use yii\helpers\Html;
                                         </div>
                                     </a>
                                 </li>
-                                <!-- end task item -->
-                                <li><!-- Task item -->
+                                <li>
                                     <a href="#">
                                         <h3>
                                             Create a nice theme
@@ -185,8 +182,7 @@ use yii\helpers\Html;
                                         </div>
                                     </a>
                                 </li>
-                                <!-- end task item -->
-                                <li><!-- Task item -->
+                                <li>
                                     <a href="#">
                                         <h3>
                                             Some task I need to do
@@ -201,8 +197,7 @@ use yii\helpers\Html;
                                         </div>
                                     </a>
                                 </li>
-                                <!-- end task item -->
-                                <li><!-- Task item -->
+                                <li>
                                     <a href="#">
                                         <h3>
                                             Make beautiful transitions
@@ -217,34 +212,33 @@ use yii\helpers\Html;
                                         </div>
                                     </a>
                                 </li>
-                                <!-- end task item -->
+
                             </ul>
                         </li>
                         <li class="footer">
                             <a href="#">View all tasks</a>
                         </li>
                     </ul>
-                </li>
+                </li>-->
                 <!-- User Account: style can be found in dropdown.less -->
 
                 <li class="dropdown user user-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <!--这里可以放头像<img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="user-image" alt="User Image"/>-->
-                        <span class="hidden-xs">hahaha</span>
+                        <span class="hidden-xs"><?= $this->params['org_name']; ?></span>
                     </a>
                     <ul class="dropdown-menu">
                         <!-- User image -->
-                        <li class="user-header">
-                            <img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="img-circle"
-                                 alt="User Image"/>
-
+                        <li class="user-header" style="height:100px">
+                            <!--这里可以放头像<img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="img-circle"
+                                 alt="User Image"/>-->
                             <p>
-                                Alexander Pierce - Web Developer
-                                <small>Member since Nov. 2012</small>
+                                <?= $this->params['org_name']?>
+                                <small><?='账号创建于'.date('Y-m-d H:i:s', $this->params['created_at'] )?></small>
                             </p>
                         </li>
                         <!-- Menu Body -->
-                        <li class="user-body">
+                        <!--这里放一些按钮<li class="user-body">
                             <div class="col-xs-4 text-center">
                                 <a href="#">Followers</a>
                             </div>
@@ -254,15 +248,21 @@ use yii\helpers\Html;
                             <div class="col-xs-4 text-center">
                                 <a href="#">Friends</a>
                             </div>
-                        </li>
+                        </li>-->
                         <!-- Menu Footer-->
                         <li class="user-footer">
                             <div class="pull-left">
-                                <a href="#" class="btn btn-default btn-flat">Profile</a>
+                                <?= Html::a(
+                                    '<i class="fa fa-user-secret"></i> 修改密码',
+                                    ['site/password'],
+                                    ['data-method' => 'post', 'class' => 'btn btn-default btn-flat']
+                                ) ?>
+                                <!--<a href="#" class="fa fa-user-secret" >  修改资料</a>-->
                             </div>
                             <div class="pull-right">
+
                                 <?= Html::a(
-                                    'Sign out',
+                                    '<i class="fa fa-sign-out"></i> 退出',
                                     ['site/logout'],
                                     ['data-method' => 'post', 'class' => 'btn btn-default btn-flat']
                                 ) ?>
@@ -270,10 +270,9 @@ use yii\helpers\Html;
                         </li>
                     </ul>
                 </li>
-
                 <!-- User Account: style can be found in dropdown.less -->
                 <li>
-                    <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                    <!--<a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>-->
                 </li>
             </ul>
         </div>

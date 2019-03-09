@@ -32,7 +32,7 @@ AppAsset::register($this);
 <header>
     <div class="headerpanel">
         <div class="logopanel">
-            <h4><a href="#">南开大学学生票务管理系统</a></h2>
+            <h4><a href="#">南开大学学生票务管理系统</a></h4>
         </div><!-- logopanel -->
 
             <div class="headerbar">
@@ -45,7 +45,7 @@ AppAsset::register($this);
                 <span class="input-group-btn">
                     <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
                 </span>
-                </div><!-- input-group
+                </div>
             </div>-->
 
             <div class="header-right">
