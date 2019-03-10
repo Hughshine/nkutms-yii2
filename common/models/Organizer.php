@@ -46,6 +46,7 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
         return [
             [['category', 'logged_at', 'updated_at', 'expire_at', 'allowance', 'allowance_updated_at'], 'integer'],
             [['credential'], 'required'],
+            [['credential'], 'unique'],
             [['signup_at'], 'safe'],
             [['org_name'], 'string', 'max' => 32],
             [['credential', 'password', 'access_token'], 'string', 'max' => 255],
@@ -61,7 +62,6 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
         return [
             'id' => 'ID',
             'org_name' => '名称',
-            // 'wechat_id1' => '一个社团最多有三个管理者，暂时不考虑一个人管理多个社团',
             'category' => '标记用户类别 0-校级组织，1-学生社团',
             'credential' => '证件号',
             'password' => '密码',
@@ -72,8 +72,6 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
             'expire_at' => 'Expire At',
             'allowance' => '用于限制访问频率',
             'allowance_updated_at' => 'Allowance Updated At',
-            // 'wechat_id2' => 'Wechat Id2',
-            // 'wechat_id3' => 'Wechat Id3',
         ];
     }
 
@@ -158,6 +156,11 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
     public static function findByUsername($org_name)
     {
         return static::findOne(['org_name' => $org_name, 'status' => self::STATUS_ACTIVE]);
+    }
+
+    public static function findByCredential($cre)
+    {
+        return static::findOne(['credential' => $cre, 'status' => self::STATUS_ACTIVE]);
     }
 
     /**
