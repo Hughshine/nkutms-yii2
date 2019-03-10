@@ -23,8 +23,6 @@ use kartik\datetime\DateTimePicker;
 
     <?= $form->field($model, 'max_people')->textInput() ?>
 
-    <?= $form->field($model, 'current_serial')->textInput() ?>
-
     <?= $form->field($model, 'time_start_stamp')->widget(DateTimePicker::classname(), 
         [ 
           'options' => ['placeholder' => ''], 

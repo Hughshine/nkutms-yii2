@@ -138,7 +138,7 @@ class ActivityUpdateForm extends Model
         //在这做一个特殊处理暂时改变字符串，这样在改变名字的时候就不会违反名字的唯一键值特性，用一个变量记住是否修改
         if($this->activity_name === $activity->activity_name)
         {
-            $this->activity_name='default_lyl'.$this->activity_name;
+            $this->activity_name='prevent_rule_unique'.$this->activity_name;
         }
         else
         {

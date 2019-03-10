@@ -102,6 +102,7 @@ class TkActivityController extends Controller
             $model->ticketing_end_at=strtotime($model->ticket_end_stamp);
             $model->updated_at=$model->release_at=time()+7*3600;
             $model->current_people=0;
+            $model->current_serial=1;
             if($model->save())
             {
                 return $this->redirect(['view', 'id' => $model->id]);
