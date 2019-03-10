@@ -30,9 +30,9 @@ $fieldOptions2 = [
         <?php $form = ActiveForm::begin(['id' => 'login-form', 'enableClientValidation' => false]); ?>
 
         <?= $form
-            ->field($model, 'org_name', $fieldOptions1)
+            ->field($model, 'credential', $fieldOptions1)
             ->label(false)
-            ->textInput(['placeholder' => $model->getAttributeLabel('org_name')]) ?>
+            ->textInput(['placeholder' => $model->getAttributeLabel('credential')]) ?>
 
         <?= $form
             ->field($model, 'password', $fieldOptions2)

@@ -8,11 +8,9 @@
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use kartik\datetime\DateTimePicker;
-$this->title = '活动发布';
-$this->params['breadcrumbs'][] = '活动发布';
-
+$this->title = '活动信息修改';
+$this->params['breadcrumbs'][] = '活动信息修改';
 ?>
-
 <div class="row">
     <div class = "col-lg-9">
         <div class ="panel-body">
@@ -77,7 +75,7 @@ $this->params['breadcrumbs'][] = '活动发布';
             ?>
 
             <div class="form-group">
-                <?= Html::submitButton('创建', ['class' => 'btn btn-success']) ?>
+                <?= Html::submitButton('修改', ['class' => 'btn btn-success']) ?>
             </div>
 
             <?php ActiveForm::end(); ?>

@@ -30,7 +30,7 @@ class ActivityWidget extends Widget
         {
             $curPage=Yii::$app->request->get('page',1);
             $cond=['=','status',Activity::STATUS_APPROVED];
-            $res=ActivityFrom::getList($cond,$curPage,$this->limit,['end_at'=>SORT_DESC]);
+            $res=ActivityFrom::getList($cond,$curPage,$this->limit,['ticketing_end_at'=>SORT_DESC]);
             $result['title']=$this->title?:"最新活动";
             $result['more']=Url::to(['activity/index']);
             $result['body']=$res['data']?:[];

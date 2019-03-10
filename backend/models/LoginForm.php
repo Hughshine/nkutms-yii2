@@ -7,7 +7,7 @@ use common\models\Organizer;
 
 class LoginForm extends Model
 {
-    public $org_name;
+    public $credential;
     public $password;
     public $rememberMe = true;
 
@@ -21,7 +21,7 @@ class LoginForm extends Model
     {
         return [
             // user_name and password are both required
-            [['org_name', 'password'], 'required'],
+            [['credential', 'password'], 'required'],
             // rememberMe must be a boolean value
             ['rememberMe', 'boolean'],
             // password is validated by validatePassword()
@@ -32,7 +32,7 @@ class LoginForm extends Model
     {
         return 
         [
-            'org_name'=>'用户名',
+            'credential'=>'证书号',
             'password'=>'密码',
             'rememberMe'=>'记住登录状态',
         ];
@@ -49,7 +49,7 @@ class LoginForm extends Model
         if (!$this->hasErrors()) {
             $user = $this->getUser();
             if (!$user || !$user->validatePassword($this->password)) {
-                $this->addError($attribute, '密码或用户名不正确');
+                $this->addError($attribute, '密码或证书号不正确');
             }
         }
     }
@@ -76,7 +76,7 @@ class LoginForm extends Model
     protected function getUser()
     {
         if ($this->org === null) {
-            $this->org = Organizer::findOne(["org_name"=>$this->org_name]);
+            $this->org = Organizer::findOne(["credential"=>$this->credential]);
         }
         return $this->org;
     }

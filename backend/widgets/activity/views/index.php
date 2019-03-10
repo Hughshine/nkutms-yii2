@@ -22,7 +22,7 @@ use yii\widgets\LinkPager;
                 <div class="col-lg-10 btn-group">
                     <h1><a href="<?=Url::to(['activity/view','id'=>$list['id']])?>"><?=$list['activity_name']?></a></h1>
                     <span class="activity-tags">
-                        <span class="fa fa-user-o"></span><a href="<?=Url::to(['member/index','id'=>$list['release_by']])?>"><?=$list['releaseBy']['org_name']?></a>&nbsp;
+                        <span class="fa fa-user-o"></span><a href="<?=Url::to(['site/view','id'=>$list['release_by']])?>"><?=$list['releaseBy']['org_name']?></a>&nbsp;
                         <?php if($list['current_people']>=$list['max_people']):?>
                             <span class="fa fa-user-times"></span><?=$list['current_people']?>/<?=$list['max_people']?>
                         <?php else:?>

@@ -7,18 +7,24 @@ use common\models\Organizer;
 /* @var $this yii\web\View */
 /* @var $model admin\models\TkActivity */
 
-$this->title = $model->activity_name;
+$this->title = '修改活动信息';
 $this->params['breadcrumbs'][] = ['label' => '活动列表', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+$this->params['breadcrumbs'][] = $model->activity_name;
 ?>
 <div class="row">
     <div class="col-lg-1">
 
     </div>
     <div class="tk-activity-view col-lg-10">
-
-        <h1><?= Html::encode($this->title) ?></h1>
-
+        <div class="row">
+            <h1><?= Html::encode($model->activity_name) ?>
+            <?php if($model->release_by==Yii::$app->user->id
+                &&$model->status!=\common\models\Activity::STATUS_APPROVED
+                &&$model->start_at>time()+7*3600):?>
+                <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+            <?php endif;?>
+            </h1>
+        </div>
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [

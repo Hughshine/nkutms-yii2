@@ -31,6 +31,7 @@ class ActivityFrom extends ActiveRecord
     public $location;
     public $max_people;
     public $status;
+    public $release_by;
     public $lastError;
     public function rules()
     {
@@ -132,7 +133,7 @@ class ActivityFrom extends ActiveRecord
             $model->location=$this->location;
             $model->introduction=$this->introduction;
             $model->max_people=$this->max_people;
-            $model->current_serial=0;
+            $model->current_serial=1;
             $model->activity_name=$this->activity_name;
             $model->category=$this->category;
 
@@ -144,6 +145,60 @@ class ActivityFrom extends ActiveRecord
              * */
             $transaction->commit();
             return $model;
+        }
+        catch(\Exception $e)
+        {
+            $transaction->rollBack();
+            $this->lastError=$e->getMessage();
+            return null;
+        }
+    }
+
+    //更新活动信息
+    public function infoUpdate($activity)
+    {
+        $changeName=false;
+        //在这做一个特殊处理暂时改变字符串，这样在改变名字的时候就不会违反名字的唯一键值特性，用一个变量记住是否修改
+        if($this->activity_name === $activity->activity_name)
+            $this->activity_name='prevent_rule_unique'.$this->activity_name;
+        else
+            $changeName=true;
+        if (!$this->validate()) {
+            if(!$changeName)
+                $this->activity_name=$activity->activity_name;
+            return null;
+        }
+        if($changeName)
+            $activity->activity_name = $this->activity_name;
+        else
+            $this->activity_name=$activity->activity_name;
+
+        $transaction=Yii::$app->db->beginTransaction();
+        try
+        {
+            $activity->category=$this->category;
+            $activity->status=$this->status;
+            if($this->status==Activity::STATUS_APPROVED)
+                $activity->release_at=time()+7*3600;
+            $activity->location=$this->location;
+            $activity->release_by=$this->release_by;
+            $activity->current_serial=$this->current_serial;
+            $activity->max_people=$this->max_people;
+            $activity->introduction=$this->introduction;
+            $activity->start_at=strtotime($this->time_start_stamp);
+            $activity->end_at=strtotime($this->time_end_stamp);
+            $activity->updated_at=time()+7*3600;
+            $activity->ticketing_start_at=strtotime($this->ticket_start_stamp);
+            $activity->ticketing_end_at=strtotime($this->ticket_end_stamp);
+            $activity->current_people=0;
+            $activity->current_serial=1;
+            if(!$activity->save())
+                throw new \Exception('活动修改失败!');
+            /*
+             * 此处可以写一个afterCreate方法来处理创建后事务
+             * */
+            $transaction->commit();
+            return $activity;
         }
         catch(\Exception $e)
         {
@@ -167,8 +222,6 @@ class ActivityFrom extends ActiveRecord
             ->orderBy($sortOrder);
         //获取分页信息
         $res=$model->getPages($query,$curPage,$pageSize);
-        //格式化
-        //$res['data']=self::formatList($res['data']);
         return $res;
     }
 
@@ -198,12 +251,4 @@ class ActivityFrom extends ActiveRecord
         return $data;
     }
 
-    //数据格式化
-    public static function formatList($data)
-    {
-        foreach($data as &$list) {
-            $list['org_name'] = $list['release_by']['org_name'];
-        }
-        return $data;
-    }
 }
