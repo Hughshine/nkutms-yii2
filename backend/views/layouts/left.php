@@ -46,7 +46,7 @@
                                 'url' => '#',
                                 'items' => [
                                     ['label' => '已发布活动', 'icon' => 'file-excel-o', 'url' => ['activity/mine'],],
-                                    ['label' => '发布一个活动', 'icon' => 'file-word-o', 'url' => ['activity/create'],],
+                                    ['label' => '发布一个活动', 'icon' => 'file-word-o', 'url' => ['activity/create'],]
                                     /*[
                                         'label' => 'Level Two',
                                         'icon' => 'circle-o',
@@ -60,6 +60,7 @@
                             ],
                         ],
                     ],
+                    ['label' => '我的资料', 'icon' => 'user', 'url' => ['site/view'],],
                     ['label' => '修改密码', 'icon' => 'user-secret', 'url' => ['site/password'],],
                     /*['label' => 'Gii', 'icon' => 'file-code-o', 'url' => ['/gii']],
                     ['label' => 'Debug', 'icon' => 'dashboard', 'url' => ['/debug']],

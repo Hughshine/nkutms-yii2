@@ -2,6 +2,7 @@
 namespace admin\models;
 
 use yii\base\Model;
+use common\models\Activity;
 use admin\models\TkActivity;
 use common\models\Organizer;
 
@@ -161,6 +162,8 @@ class ActivityUpdateForm extends Model
 
         $activity->category=$this->category;
         $activity->status=$this->status;
+        if($this->status==Activity::STATUS_APPROVED)
+            $activity->release_at=time()+7*3600;
         $activity->location=$this->location;
         $activity->release_by=$this->release_by;
         $activity->current_serial=$this->current_serial;

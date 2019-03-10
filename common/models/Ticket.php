@@ -49,11 +49,11 @@ class Ticket extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'user_id' => 'User ID',
-            'activity_id' => 'Activity ID',
-            'created_at' => 'Created At',
-            'serial_number' => 'Serial Number',
-            'status' => ' 0-有效，1-已退回withdraw，2-过期, 3 - 未知',
+            'user_id' => '持有者ID',
+            'activity_id' => '活动ID',
+            'created_at' => '字段创建时间',
+            'serial_number' => '序列号',
+            'status' => '状态',//' 0-有效，1-已退回withdraw，2-过期, 3 - 未知',
         ];
     }
 

@@ -28,8 +28,6 @@ $this->params['breadcrumbs'][] = '活动发布';
 
             <?= $form->field($model, 'max_people')->textInput() ?>
 
-            <?= $form->field($model, 'current_serial')->textInput() ?>
-
             <?= $form->field($model, 'time_start_stamp')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
@@ -86,5 +84,14 @@ $this->params['breadcrumbs'][] = '活动发布';
         </div>
     </div>
     <div class ="col-lg-3">
+        <div class="panel-title box-title">
+            <span>注意事项</span>
+        </div>
+        <div class="panel-body">
+            <p>1.xxxx</p>
+            <p>2.xxxx</p>
+            <p>3.xxxx</p>
+
+        </div>
     </div>
 </div>

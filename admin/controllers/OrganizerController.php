@@ -134,7 +134,7 @@ class OrganizerController extends Controller
     }
 
 
-    /**
+    /*
      * Deletes an existing Organizer model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id

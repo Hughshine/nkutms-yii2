@@ -30,7 +30,9 @@ use Yii;
  */
 class Activity extends \yii\db\ActiveRecord
 {
-
+    const STATUS_UNAUDITED  = 0;//未审核状态
+    const STATUS_APPROVED = 1;//已批准状态
+    const STATUS_REJECTED= 2;//被驳回状态
     /**
      * {@inheritdoc}
      */
@@ -61,19 +63,22 @@ class Activity extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'activity_name' => 'Name',
-            'release_by' => 'organizer/-id',
-            'category' => '标记用户类别0-正常1-取消2-结束',
-            'status' => '该用户类别下，他的证件号',
-            'location' => 'Location',
-            'release_at' => 'Release At',
-            'start_at' => 'Start At',
-            'end_at' => 'End At',
-            'updated_at' => 'Update At',
+            'activity_name' => '活动名称',
+            'release_by' => '发布者ID',
+            'category' => '活动类别',
+            'status' => '证件号',
+            'location' => '活动地点',
+            'release_at' => '发布时间',
+            'start_at' => '活动开始时间',
+            'end_at' => '活动结束时间',
+            'ticketing_start_at'=>'票务开始时间',
+            'ticketing_end_at'=>'票务结束时间',
+            'updated_at' => '字段更新时间',
+            'created_at'=>'字段创建时间',
             'introduction' => '介绍',
-            'current_people' => 'Current People',
-            'max_people' => 'Max People',
-            'current_serial' => '用于产生票务的序列号',
+            'current_people' => '当前人数',
+            'max_people' => '最大人数',
+            'current_serial' => '票务的序列号',
             'pic_url' => '图片',
         ];
     }
@@ -218,4 +223,6 @@ class Activity extends \yii\db\ActiveRecord
     // {
 
     // }
+
+
 }

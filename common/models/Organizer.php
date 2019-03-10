@@ -60,13 +60,13 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return [
             'id' => 'ID',
-            'org_name' => '应必须填写',
+            'org_name' => '名称',
             // 'wechat_id1' => '一个社团最多有三个管理者，暂时不考虑一个人管理多个社团',
             'category' => '标记用户类别 0-校级组织，1-学生社团',
             'credential' => '证件号',
             'password' => '密码',
             'access_token' => 'Access Token',
-            'signup_at' => 'Signup At',
+            'signup_at' => '注册时间',
             'logged_at' => '上一次登录时间',
             'updated_at' => '上一次更新时间',
             'expire_at' => 'Expire At',

@@ -40,7 +40,7 @@ class TkActivityController extends Controller
                     [//登录用户能访问这个控制器里的方法
                         'allow'=>true,
                         //可访问的页面名字
-                        'actions'=>['index','view','create'],
+                        'actions'=>['index','view','create','update'],
                         'roles'=>['@'],//登录用户
                     ],
                 ],
@@ -164,7 +164,6 @@ class TkActivityController extends Controller
         if (($model = TkActivity::findOne($id)) !== null) {
             return $model;
         }
-
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

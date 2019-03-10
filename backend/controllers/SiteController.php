@@ -4,8 +4,10 @@ namespace backend\controllers;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
+use common\models\Organizer;
 use backend\models\LoginForm;
 use backend\models\PasswordForm;
+use yii\web\NotFoundHttpException;
 
 /**
  * Site controller
@@ -32,7 +34,7 @@ class SiteController extends BaseController
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['logout', 'index','error','create','password'],
+                        'actions' => ['logout', 'index','error','password','view'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -122,6 +124,7 @@ class SiteController extends BaseController
         $this->layout='main-login.php';
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post())&&$model->login()) {
+
             return $this->redirect('index');
         } else {
             $model->password = '';
@@ -150,5 +153,24 @@ class SiteController extends BaseController
     {
         Yii::$app->user->logout();
         return $this->goHome();
+    }
+
+    public function actionView()
+    {
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect('site/login');
+        }
+        $this->viewAction();
+        return $this->render('view', [
+            'model' => Yii::$app->user->identity,
+        ]);
+    }
+
+    protected function findModel($id)
+    {
+        if (($model = Organizer::findOne($id)) !== null) {
+            return $model;
+        }
+        throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

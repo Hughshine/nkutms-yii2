@@ -110,9 +110,7 @@ class TkActivity extends \yii\db\ActiveRecord
             'location'=>'活动地点',
         ];
     }
-    /*原理未知，用于在活动index页面中将release_by字段替换成对应的组织者名字
-     * 具体功能应该是在对应的Search类里得到组织者类的具体记录
-     * */
+
     public function getOrganizer()
     {
         return $this->hasOne(Organizer::className(),['id'=>'release_by']);

@@ -11,10 +11,11 @@ namespace  backend\models;
  * */
 
 use Yii;
-use yii\base\Model;
 use common\models\Activity;
+use yii\db\ActiveRecord;
+use common\models\Organizer;
 
-class ActivityFrom extends Model
+class ActivityFrom extends ActiveRecord
 {
     const STATUS_UNAUDITED  = 0;//未审核状态
     const STATUS_APPROVED = 1;//已批准状态
@@ -30,7 +31,7 @@ class ActivityFrom extends Model
     public $location;
     public $max_people;
     public $status;
-    public $current_serial;
+    public $lastError;
     public function rules()
     {
         return
@@ -55,7 +56,6 @@ class ActivityFrom extends Model
                         'category',
                         'status',
                         'max_people',
-                        'current_serial',
                     ],
                     'integer'
                 ],
@@ -75,6 +75,17 @@ class ActivityFrom extends Model
                 ['ticket_end_stamp', 'compare','compareAttribute'=>'ticket_start_stamp', 'operator' => '>','message'=>'结束时间不能早于开始时间'],
 
             ];
+    }
+
+    public static function tableName()
+    {
+        return '{{%tk_activity}}';
+    }
+
+    //关系名称
+    public function getReleaseBy()
+    {
+        return $this->hasOne(Organizer::className(), ['id' => 'release_by']);
     }
 
     public function attributeLabels()
@@ -100,33 +111,99 @@ class ActivityFrom extends Model
         ];
     }
 
+    //创建一个活动
     public function create()
     {
         if (!$this->validate()) {
             return null;
         }
-
-        /*$organizer->org_name = $this->org_name;
-        $organizer->category=$this->category;
-        $organizer->credential = $this->credential;
-        $organizer->setPassword($this->password);
-        $organizer->updated_at=$organizer->created_at=$organizer->signup_at=time()+7*3600;
-        $organizer->generateAuthKey();//原理不明，保留就对了，据说是用于自动登录的*/
         $model = new Activity();
-        $model->start_at=strtotime($this->time_start_stamp);
-        $model->end_at=strtotime($this->time_end_stamp);
-        $model->ticketing_start_at=strtotime($this->ticket_start_stamp);
-        $model->ticketing_end_at=strtotime($this->ticket_end_stamp);
-        $model->updated_at=$model->release_at=time()+7*3600;
-        $model->current_people=0;
-        $model->release_by=Yii::$app->user->identity->id;
-        $model->status=self::STATUS_UNAUDITED;
-        $model->location=$this->location;
-        $model->introduction=$this->introduction;
-        $model->max_people=$this->max_people;
-        $model->current_serial=$this->current_serial;
-        $model->activity_name=$this->activity_name;
-        $model->category=$this->category;
-        return $model->save() ? $model : null;
+        $transaction=Yii::$app->db->beginTransaction();
+        try
+        {
+            $model->start_at=strtotime($this->time_start_stamp);
+            $model->end_at=strtotime($this->time_end_stamp);
+            $model->ticketing_start_at=strtotime($this->ticket_start_stamp);
+            $model->ticketing_end_at=strtotime($this->ticket_end_stamp);
+            $model->updated_at=$model->release_at=time()+7*3600;
+            $model->current_people=0;
+            $model->release_by=Yii::$app->user->identity->id;
+            $model->status=self::STATUS_UNAUDITED;
+            $model->location=$this->location;
+            $model->introduction=$this->introduction;
+            $model->max_people=$this->max_people;
+            $model->current_serial=0;
+            $model->activity_name=$this->activity_name;
+            $model->category=$this->category;
+
+            if(!$model->save())
+            throw new \Exception('活动发布失败!');
+
+            /*
+             * 此处可以写一个afterCreate方法来处理创建后事务
+             * */
+            $transaction->commit();
+            return $model;
+        }
+        catch(\Exception $e)
+        {
+            $transaction->rollBack();
+            $this->lastError=$e->getMessage();
+            return null;
+        }
+    }
+
+    public function getList($cond,$curPage = 1,$pageSize = 5,$sortOrder=['id'=>SORT_DESC])
+    {
+        $model=new ActivityFrom();
+        $select= ['id','activity_name','release_by','release_at',
+                        'introduction','max_people','current_people',
+                        'location','status','start_at','end_at',
+                        'ticketing_start_at','ticketing_end_at'];
+        $query=$model->find()
+            ->select($select)
+            ->where($cond)
+            ->with('releaseBy')
+            ->orderBy($sortOrder);
+        //获取分页信息
+        $res=$model->getPages($query,$curPage,$pageSize);
+        //格式化
+        //$res['data']=self::formatList($res['data']);
+        return $res;
+    }
+
+    //获取分页数据
+    public function getPages($query,$curPage=1,$pageSize=10,$search=null)
+    {
+        if($search)$query=$query->andFilterWhere($search);
+        $data['count']=$query->count();
+        if(!$data['count'])
+            return ['count'=>0,'curPage'=>1,'pageSize'=>$pageSize,'start'=>0,'end'=>0,'data'=>[]];
+        //防止页数超过总数
+        $curPage=(ceil($data['count']/$pageSize)<$curPage)?
+            ceil($data['count']/$pageSize):$curPage;
+        $data['curPage']=$curPage;
+        //每页显示条数
+        $data['pageSize']=$pageSize;
+        //起始页
+        $data['start']=($curPage-1)*$pageSize+1;
+        //末页
+        $data['end']=(ceil($data['count']/$pageSize)==$curPage)?
+            $data['count']:($curPage-1)*$pageSize+$pageSize;
+        //取数据
+        $data['data']=$query
+            ->offset(($curPage-1)*$pageSize)
+            ->limit($pageSize)
+            ->asArray()->all();
+        return $data;
+    }
+
+    //数据格式化
+    public static function formatList($data)
+    {
+        foreach($data as &$list) {
+            $list['org_name'] = $list['release_by']['org_name'];
+        }
+        return $data;
     }
 }
