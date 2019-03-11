@@ -47,12 +47,20 @@ class Activity extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['release_by', 'category', 'status', 'start_at','end_at', 'updated_at', 'current_people', 'max_people', 'current_serial'], 'integer'],
-            [['release_at'], 'safe'],
+            [['release_by', 'category', 'status', 'start_at','end_at', 'updated_at',
+                'current_people', 'max_people', 'current_serial','ticketing_start_at',
+                'ticketing_end_at','release_at']
+                , 'integer'],
             [['activity_name'], 'string', 'max' => 32],
             [['location'], 'string', 'max' => 64],
-            [[ 'introduction',], 'string', 'max' => 255],
+            [['introduction',], 'string', 'max' => 255],
+            [['activity_name'], 'unique'],
+            ['status', 'in', 'range' => [self::STATUS_UNAUDITED, self::STATUS_APPROVED,self::STATUS_REJECTED]],
+            ['category', 'in', 'range' => [0,1]],
             [['release_by'], 'exist', 'skipOnError' => true, 'targetClass' => Organizer::className(), 'targetAttribute' => ['release_by' => 'id']],
+            ['current_people', 'compare','compareAttribute'=>'max_people', 'operator' => '<=','message'=>'活动参与人数不能大于活动最大人数'],
+            ['start_at', 'compare','compareAttribute'=>'end_at', 'operator' => '<','message'=>'活动开始时间不能早于结束时间'],
+            ['ticketing_start_at', 'compare','compareAttribute'=>'ticketing_end_at', 'operator' => '<','message'=>'票务开始时间不能早于结束时间'],
         ];
     }
 

@@ -23,12 +23,8 @@ use kartik\datetime\DateTimePicker;
 
     <?= $form->field($model, 'max_people')->textInput()?>
 
-    <?= $form->field($model, 'current_serial')->textInput()?>
-
     <?= $form->field($model, 'status')->
     	dropDownList(['0'=>'未审核','1'=>'通过','2'=>'驳回' ])?>
-
-
 
     <?= $form->field($model, 'release_by')->textInput()?>
 

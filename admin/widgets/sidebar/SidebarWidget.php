@@ -22,9 +22,6 @@ class SidebarWidget extends Menu
             //['label' =>'<i class="fa fa-dashboard"></i><span>仪表盘</span>','url'=>['site/index']],
             ['label' =>'<a href=""><i class="fa fa-th-list"></i><span>活动票务管理</span></a>','options'=>['class'=>'nav-parent'],'items'=>[
                     ['label'=>'活动管理','url'=>['tk-activity/index'],],
-                    ['label'=>'活动事件管理','url'=>['activity-event/index'],],
-                ['label'=>'票务事件管理','url'=>['ticket-event/index']],
-                    /*['label'=>'标签管理','url'=>['tag/index']],*/
                 ]
             ],
             ['label' =>'<a href=""><i class="fa fa-user"></i><span>用户管理</span></a>','options'=>['class'=>'nav-parent'],'items'=>[
