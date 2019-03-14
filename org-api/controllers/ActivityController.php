@@ -9,7 +9,7 @@ use common\models\Activity;
 use common\models\Ticket;
 // use common\models\TicketEvent;
 use common\models\Organizer;
-use common\models\ActivityEvent;
+// use common\models\ActivityEvent;
 
 // use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
@@ -254,7 +254,7 @@ class ActivityController extends ActiveController
 
 		$activity = Activity::generateAndWriteNewActivity($org_id,$activity_name,$category,$location,$ticketing_start_at,$ticketing_end_at,$start_at,$end_at,$max_people,$intro);
 
-		ActivityEvent::generateAndWriteNewActivityEvent($org_id, $activity->id, 0, -1);
+		// ActivityEvent::generateAndWriteNewActivityEvent($org_id, $activity->id, 0, -1);
 
 		return ['code'=>0, 'message' => 'success', 'data' => $activity];
 	}
@@ -378,7 +378,7 @@ class ActivityController extends ActiveController
 		$activity->status = 1;
 		$activity->save(false);
 
-		ActivityEvent::generateAndWriteNewActivityEvent($org_id, $activity_id, 1, -1);
+		// ActivityEvent::generateAndWriteNewActivityEvent($org_id, $activity_id, 1, -1);
 
 		return ['code'=>0,'message' => 'cancel success','data'=>$activity];
 	}
