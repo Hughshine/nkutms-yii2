@@ -70,6 +70,11 @@ return [
                 ],
                 [
                     'class' => 'yii\rest\UrlRule',
+                    'controller' => 'user',
+                    'extraPatterns' => ['POST bind-credential' => 'bind-credential'],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
                     'controller' => 'activity',
                     'extraPatterns' => ['POST ticketing' => 'ticketing'],
                 ],
