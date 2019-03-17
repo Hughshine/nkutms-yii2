@@ -47,8 +47,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     'filter'=>['0'=>'无效','10'=>'有效'],
                 ],
                 //'created_at:datetime',
-                'updated_at:datetime',
-                'logged_at:datetime',
+                'updated_at'=>
+                    [
+                        'label'=>'资料更新时间',
+                        'attribute'=>'updated_at',
+                        'value' => function ($data) {
+                                return date('Y-m-d:H:i:s',($data->updated_at));
+                        },
+                    ],
                 //'access_token',
             ],
         ]) ?>
