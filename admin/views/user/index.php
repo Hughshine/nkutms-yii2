@@ -39,7 +39,7 @@ $this->title = '用户管理';
                 'filter'=>['0'=>'无效','10'=>'有效'],
             ],
             //'updated_time:datetime',
-            'wechat_id',
+            'credential',
             'category'=>
             [
                 'label'=>'用户类别',
@@ -47,11 +47,7 @@ $this->title = '用户管理';
                 'value'=>
                 function($model)
                 {
-                    if ($model->category==0)
-                        return '学生';
-                    if ($model->category==1)
-                        return '教职员工';
-                    return '其他';
+                    return USER_CATEGORY[$model->category];
                 },
                 'filter'=>['0'=>'学生','1'=>'教职员工','2'=>'其他'],
             ],

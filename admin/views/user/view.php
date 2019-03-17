@@ -56,11 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=>
                 function($model)
                 {
-                    if ($model->category==0)
-                        return '学生';
-                    if ($model->category==1)
-                        return '教职员工';
-                    return '其他';
+                    return USER_CATEGORY[$model->category];
                 },
             ],
             'credential',

@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'activity_name')->textInput() ?>
 
-                <?= $form->field($model, 'category')->dropDownList(['0'=>'暂无分类','1'=>'文体活动' ])?>
+                <?= $form->field($model, 'category')->dropDownList(ACT_CATEGORY)?>
 
                 <?= $form->field($model, 'introduction')->textInput(['maxlength' => true]) ?>
 

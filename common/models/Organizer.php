@@ -28,6 +28,13 @@ use yii\web\IdentityInterface;
  *
  * @property ActivityEvent[] $tkActivityEvents
  */
+
+//定义组织者的分类常量
+define('ORG_CATEGORY',
+    [
+        '0'=>'ORG_0','1'=>'ORG_1','2'=>'ORG_2','3'=>'ORG_3'
+    ]);
+
 class Organizer extends ActiveRecord implements IdentityInterface
 {
     const STATUS_DELETED = 0;

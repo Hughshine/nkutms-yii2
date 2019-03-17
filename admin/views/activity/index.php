@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=>
                 function($model)
                 {
-                    return ($model->status==1)?'文体活动':'暂无分类';
+                    return ACT_CATEGORY[$model->category];
                 },
                 'filter'=>['0'=>'暂无分类','1'=>'文体活动'],
             ],

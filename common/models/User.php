@@ -28,6 +28,12 @@ use yii\filters\RateLimitInterface;
  * @property Ticket[] $tkTickets
  * @property TicketEvent[] $tkTicketEvents
  */
+
+//定义活动的分类常量
+define('USER_CATEGORY',
+    [
+        '0'=>'USER_0','1'=>'USER_1','2'=>'USER_2','3'=>'USER_3'
+    ]);
 class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimitInterface
 {
 
@@ -81,13 +87,14 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
             'user_name' => '名字',
             'wechat_id' => '微信 ID',
             'category' => '标记用户类别0-学生1-教职员工2-其他',
-            'credential' => '证件号',
+            'credential' => '账号',
             'password' => '密码',
             'access_token' => 'Access Token',
             'created_at' => '注册时间',
             'logged_at' => '上一次登录时间',
             'expire_at' => 'Expire At',
             'updated_at' => 'Update At',
+            'status' => '状态',
             'allowance' => '用于限制访问频率',
             'allowance_updated_at' => 'Allowance Updated At',
         ];

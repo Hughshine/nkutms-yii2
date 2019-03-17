@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = '修改状态';
 
                 <?= $form->field($model, 'activity_name')->textInput()?>
 
-                <?= $form->field($model, 'category')->dropDownList(['0'=>'暂无分类','1'=>'文体活动' ])?>
+                <?= $form->field($model, 'category')->dropDownList(ACT_CATEGORY)?>
 
                 <?= $form->field($model, 'introduction')->textInput()?>
 
@@ -36,30 +36,6 @@ $this->params['breadcrumbs'][] = '修改状态';
                 dropDownList(['0'=>'未审核','1'=>'通过','2'=>'驳回' ])?>
 
                 <?= $form->field($model, 'release_by')->textInput()?>
-
-                <?= $form->field($model, 'time_start_stamp')->widget(DateTimePicker::classname(),
-                    [
-                        'options' => ['placeholder' => ''],
-                        'pluginOptions' =>
-                            [
-                                'autoclose' => true,
-                                'todayHighlight' => true,
-                                //'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
-                            ]
-                    ]);
-                ?>
-
-                <?= $form->field($model, 'time_end_stamp')->widget(DateTimePicker::classname(),
-                    [
-                        'options' => ['placeholder' => ''],
-                        'pluginOptions' =>
-                            [
-                                'autoclose' => true,
-                                'todayHighlight' => true,
-                                //'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
-                            ]
-                    ]);
-                ?>
 
                 <?= $form->field($model, 'ticket_start_stamp')->widget(DateTimePicker::classname(),
                     [
@@ -74,6 +50,30 @@ $this->params['breadcrumbs'][] = '修改状态';
                 ?>
 
                 <?= $form->field($model, 'ticket_end_stamp')->widget(DateTimePicker::classname(),
+                    [
+                        'options' => ['placeholder' => ''],
+                        'pluginOptions' =>
+                            [
+                                'autoclose' => true,
+                                'todayHighlight' => true,
+                                //'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
+                            ]
+                    ]);
+                ?>
+
+                <?= $form->field($model, 'time_start_stamp')->widget(DateTimePicker::classname(),
+                    [
+                        'options' => ['placeholder' => ''],
+                        'pluginOptions' =>
+                            [
+                                'autoclose' => true,
+                                'todayHighlight' => true,
+                                //'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
+                            ]
+                    ]);
+                ?>
+
+                <?= $form->field($model, 'time_end_stamp')->widget(DateTimePicker::classname(),
                     [
                         'options' => ['placeholder' => ''],
                         'pluginOptions' =>

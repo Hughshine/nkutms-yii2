@@ -30,12 +30,20 @@ use yii\db\ActiveRecord;
  * @property Ticket[] $tkTickets
  * @property TicketEvent[] $tkTicketEvents
  */
+//定义活动的分类常量
+define('ACT_CATEGORY',
+    [
+        '0'=>'ACT_0','1'=>'ACT_1','2'=>'ACT_2','3'=>'ACT_3'
+    ]);
+
 class Activity extends ActiveRecord
 {
     const STATUS_UNAUDITED  = 0;//未审核状态
     const STATUS_APPROVED = 1;//已批准状态
     const STATUS_REJECTED= 2;//被驳回状态
     public $org_name;//用于admin端查找发布者名字
+
+
     /**
      * {@inheritdoc}
      */

@@ -39,9 +39,7 @@ $this->title = '组织者管理';
                 'value'=>
                 function($model)
                 {
-                    if ($model->category==0)
-                        return '校级组织';
-                    return '学生社团';
+                    return ORG_CATEGORY[$model->category];
                 },
                 'filter'=>['0'=>'校级组织','1'=>'学生社团'],
             ],

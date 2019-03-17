@@ -81,7 +81,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=>
                 function($model)
                 {
-                    return ($model->category==1)?'文体活动':'暂无分类';
+                    return ACT_CATEGORY[$model->category];
                 },
             ],
             'status'=>
@@ -126,9 +126,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 {
                     $organizer=Organizer::findIdentity_admin($model->release_by);
                     if(!$organizer)
-                    {
                         return '未找到发布者'.'ID:'.$model->release_by;
-                    }
                     else
                         return $organizer->org_name.';ID:'.$organizer->id;
                 },

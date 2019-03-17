@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = '注册';
 
             <?= $form->field($model, 'rePassword')->passwordInput() ?>
 
-            <?= $form->field($model, 'category')->dropDownList(['0'=>'校级组织','1'=>'学生社团' ])?>
+            <?= $form->field($model, 'category')->dropDownList(ORG_CATEGORY)?>
 
             <?= $form->field($model, 'status')->dropDownList(['0'=>'无效','10'=>'有效'])?>
 
