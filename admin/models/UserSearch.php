@@ -21,7 +21,7 @@ class UserSearch extends User
     public function rules()
     {
         return [
-            [['id', 'status', 'signup_at', 'updated_at', 'category', 'credential'], 'integer'],
+            [['id', 'status', 'created_at', 'updated_at', 'category', 'credential'], 'integer'],
             [['user_name', 'auth_key', 'password', 'wechat_id', 'access_token'], 'safe'],
         ];
     }

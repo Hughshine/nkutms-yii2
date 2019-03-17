@@ -32,7 +32,7 @@ class LoginForm extends Model
     {
         return 
         [
-            'credential'=>'证书号',
+            'credential'=>'账号',
             'password'=>'密码',
             'rememberMe'=>'记住登录状态',
         ];
@@ -62,7 +62,8 @@ class LoginForm extends Model
      */
     public function login()
     {
-        if ($this->validate()) {
+        if ($this->validate())
+        {
             return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
         }
         return false;

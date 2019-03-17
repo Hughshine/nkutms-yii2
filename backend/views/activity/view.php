@@ -5,7 +5,7 @@ use yii\widgets\DetailView;
 use common\models\Organizer;
 
 /* @var $this yii\web\View */
-/* @var $model admin\models\TkActivity */
+/* @var $model admin\models\NOW */
 
 $this->title = '修改活动信息';
 $this->params['breadcrumbs'][] = ['label' => '活动列表', 'url' => ['index']];
@@ -57,8 +57,22 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                 'max_people',
                 'current_people',
                 'current_serial',
-                'start_at:datetime',
-                'end_at:datetime',
+                'start_at'=>
+                    [
+                        'label'=>'活动开始时间',
+                        'attribute'=>'updated_at',
+                        'value' => function ($model) {
+                                return date('Y-m-d:H:i:s',($model->updated_at));
+                            },
+                    ],
+                'end_at'=>
+                    [
+                        'label'=>'活动结束时间',
+                        'attribute'=>'updated_at',
+                        'value' => function ($model) {
+                            return date('Y-m-d:H:i:s',($model->updated_at));
+                        },
+                    ],
                 'release_by'=>
                     [
                         'label'=>'发布者',
@@ -75,9 +89,30 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                                     return $organizer->org_name;
                             },
                     ],
-                'ticketing_start_at:datetime',
-                'ticketing_end_at:datetime',
-                'release_at:datetime',
+                'ticketing_start_at:'=>
+                    [
+                        'label'=>'票务开始时间',
+                        'attribute'=>'updated_at',
+                        'value' => function ($model) {
+                            return date('Y-m-d:H:i:s',($model->updated_at));
+                        },
+                    ],
+                'ticketing_end_at:'=>
+                    [
+                        'label'=>'票务结束时间',
+                        'attribute'=>'updated_at',
+                        'value' => function ($model) {
+                            return date('Y-m-d:H:i:s',($model->updated_at));
+                        },
+                    ],
+                'release_at'=>
+                    [
+                        'label'=>'发布时间',
+                        'attribute'=>'updated_at',
+                        'value' => function ($model) {
+                            return date('Y-m-d:H:i:s',($model->updated_at));
+                        },
+                    ],
 
             ],
         ]) ?>

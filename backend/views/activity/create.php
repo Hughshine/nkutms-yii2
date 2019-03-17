@@ -28,30 +28,6 @@ $this->params['breadcrumbs'][] = '活动发布';
 
             <?= $form->field($model, 'max_people')->textInput() ?>
 
-            <?= $form->field($model, 'time_start_stamp')->widget(DateTimePicker::classname(),
-                [
-                    'options' => ['placeholder' => ''],
-                    'pluginOptions' =>
-                        [
-                            'autoclose' => true,
-                            'todayHighlight' => true,
-                            'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
-                        ]
-                ]);
-            ?>
-
-            <?= $form->field($model, 'time_end_stamp')->widget(DateTimePicker::classname(),
-                [
-                    'options' => ['placeholder' => ''],
-                    'pluginOptions' =>
-                        [
-                            'autoclose' => true,
-                            'todayHighlight' => true,
-                            'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
-                        ]
-                ]);
-            ?>
-
             <?= $form->field($model, 'ticket_start_stamp')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
@@ -76,6 +52,30 @@ $this->params['breadcrumbs'][] = '活动发布';
                 ]);
             ?>
 
+            <?= $form->field($model, 'time_start_stamp')->widget(DateTimePicker::classname(),
+                [
+                    'options' => ['placeholder' => ''],
+                    'pluginOptions' =>
+                        [
+                            'autoclose' => true,
+                            'todayHighlight' => true,
+                            'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
+                        ]
+                ]);
+            ?>
+
+            <?= $form->field($model, 'time_end_stamp')->widget(DateTimePicker::classname(),
+                [
+                    'options' => ['placeholder' => ''],
+                    'pluginOptions' =>
+                        [
+                            'autoclose' => true,
+                            'todayHighlight' => true,
+                            'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
+                        ]
+                ]);
+            ?>
+
             <div class="form-group">
                 <?= Html::submitButton('创建', ['class' => 'btn btn-success']) ?>
             </div>
@@ -85,12 +85,13 @@ $this->params['breadcrumbs'][] = '活动发布';
     </div>
     <div class ="col-lg-3">
         <div class="panel-title box-title">
-            <span>注意事项</span>
+            <h2>注意事项</h2>
         </div>
         <div class="panel-body">
-            <p>1.xxxx</p>
-            <p>2.xxxx</p>
-            <p>3.xxxx</p>
+            <h3>1.票务开始时间要早于票务结束时间</h3>
+            <h3>2.活动开始时间要早于活动结束时间</h3>
+            <h3>3.票务结束时间要早于活动开始时间</h3>
+            <h3>4.活动地点确认正确</h3>
 
         </div>
     </div>

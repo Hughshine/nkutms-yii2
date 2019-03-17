@@ -64,9 +64,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             'credential',
-            'signup_at:datetime',
-            'updated_at:datetime',
-            'access_token',
+            'created_at'=>
+            [
+                'label'=>'记录创建时间',
+                'attribute'=>'created_at',
+                'value' => function ($data) {
+                        return date('Y-m-d:H:i:s',($data->created_at));
+                    },
+            ],
+            'updated_at'=>
+            [
+                'label'=>'记录更新时间',
+                'attribute'=>'updated_at',
+                'value' => function ($data) {
+                        return date('Y-m-d:H:i:s',($data->updated_at));
+                    },
+            ],
+            //'access_token',
         ],
     ]) ?>
 

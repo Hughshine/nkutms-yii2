@@ -12,7 +12,14 @@ class Admin extends ActiveRecord implements IdentityInterface
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
 
-
+    public function rules()
+    {
+        return
+            [
+                [['admin_name'], 'required',],
+                [['password','rePassword',], 'string', 'min' => 6,'on'=>['RePassword']],
+            ];
+    }
     /**
      * {@inheritdoc}
      */
@@ -27,7 +34,15 @@ class Admin extends ActiveRecord implements IdentityInterface
     public function behaviors()
     {
         return [
-            TimestampBehavior::className(),
+            [
+                'class' => TimestampBehavior::className(),//自动填充时间字段功能
+                'attributes' => [
+                    //当插入时填充created_at和updated_at
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    //当更新时填充updated_at
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                ],
+            ],
         ];
     }
 

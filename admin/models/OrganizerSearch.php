@@ -22,7 +22,7 @@ class OrganizerSearch extends Organizer
     {
         return [
             //修改记录，在此加了credential
-            [['id', 'category', 'status', 'signup_at','updated_at','credential',], 'integer'],
+            [['id', 'category', 'status', 'created_at','updated_at','credential',], 'integer'],
             [['org_name', 'auth_key', 'password', 'password_reset_token','credential', 'wechat_id', 'access_token'], 'safe'],
         ];
     }

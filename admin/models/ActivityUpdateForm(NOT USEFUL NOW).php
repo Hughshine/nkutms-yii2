@@ -3,7 +3,7 @@ namespace admin\models;
 
 use yii\base\Model;
 use common\models\Activity;
-use admin\models\TkActivity;
+use admin\models\NOW;
 use common\models\Organizer;
 
 
@@ -12,7 +12,6 @@ class ActivityUpdateForm extends Model
     const STATUS_UNAUDITED  = 0;//未审核状态
     const STATUS_APPROVED = 1;//已批准状态
     const STATUS_REJECTED= 2;//被驳回状态
-
 
     public $activity_name;
     public $category;
@@ -78,7 +77,7 @@ class ActivityUpdateForm extends Model
                 'integer'
             ],
             //唯一性要求
-            ['activity_name', 'unique', 'targetClass' => '\admin\models\TkActivity', 'message' => '这个名字已经被注册'],
+            ['activity_name', 'unique', 'targetClass' => '\admin\models\TkActivity(NOT USEFUL NOW)', 'message' => '这个名字已经被注册'],
 
             //格式要求
             [['activity_name', 'introduction','location'], 'string','min'=>'2', 'max' => 255],

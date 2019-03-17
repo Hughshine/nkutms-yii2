@@ -18,7 +18,7 @@ use yii\filters\RateLimitInterface;
  * @property string $credential 该用户类别下，他的证件号。web端使用此为账号进行登录
  * @property string $password
  * @property string $access_token
- * @property string $signup_at
+ * @property string $created_at
  * @property int $logged_at 使用int类型便于比较操作
  * @property int $expire_at
  * @property int $updated_at
@@ -41,7 +41,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
             // Other behaviors
             [
                 'class' => TimestampBehavior::className(),
-                'createdAtAttribute' => 'signup_at',
+                'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
                 // 'value' => new Expression('NOW()'),
             ],
@@ -61,9 +61,9 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
     public function rules()
     {
         return [
-            [['wechat_id', 'credential'], 'required'],//不同
-            [['category', 'logged_at', 'expire_at', 'updated_at', 'allowance', 'allowance_updated_at'], 'integer'],
-            [['signup_at'], 'safe'],
+            [['wechat_id', 'credential'], 'required'],
+            [['id','created_at','category', 'logged_at', 'expire_at', 'updated_at', 'allowance', 'allowance_updated_at'], 'integer'],
+            [['credential','wechat_id'],'unique'],
             [['user_name'], 'string', 'max' => 32],
             [['wechat_id', 'credential', 'password', 'access_token'], 'string', 'max' => 255],
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
@@ -84,7 +84,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
             'credential' => '证件号',
             'password' => '密码',
             'access_token' => 'Access Token',
-            'signup_at' => '注册时间',
+            'created_at' => '注册时间',
             'logged_at' => '上一次登录时间',
             'expire_at' => 'Expire At',
             'updated_at' => 'Update At',

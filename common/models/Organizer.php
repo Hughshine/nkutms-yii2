@@ -3,6 +3,8 @@ namespace common\models;
 
 use Yii;
 
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 
 /**
@@ -15,7 +17,7 @@ use yii\web\IdentityInterface;
  * @property string $credential 该用户类别下，他的证件号
  * @property string $password
  * @property string $access_token
- * @property string $signup_at
+ * @property string $created_at
  * @property int $logged_at 使用int类型便于比较操作
  * @property int $updated_at
  * @property int $expire_at
@@ -26,10 +28,12 @@ use yii\web\IdentityInterface;
  *
  * @property ActivityEvent[] $tkActivityEvents
  */
-class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
+class Organizer extends ActiveRecord implements IdentityInterface
 {
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
+    const CATEGORY_SCHOOL_ORG = 0;
+    const CATEGORY_STUDENT_ORG = 1;
     /**
      * {@inheritdoc}
      */
@@ -38,19 +42,69 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
         return 'tk_organizer';
     }
 
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::className(),//自动填充时间字段功能
+                'attributes' => [
+                    //当插入时填充created_at和updated_at
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    //当更新时填充updated_at
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                ],
+            ],
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['category', 'logged_at', 'updated_at', 'expire_at', 'allowance', 'allowance_updated_at'], 'integer'],
-            [['credential'], 'required'],
-            [['credential'], 'unique'],
-            [['signup_at'], 'safe'],
+            [
+                [
+                    'org_name',
+                    'credential',
+                    'password',
+                    'category',
+                    'status',
+                ],
+                'required',
+            ],
+            [
+                [
+                    'allowance',
+                    'allowance_updated_at',
+                    'category',
+                    'created_at',
+                    'expire_at',
+                    'logged_at',
+                    'status',
+                    'updated_at',
+                ],
+                'integer',
+            ],
+
+            [['credential',], 'unique'],
+
+            [
+                'status', 'in', 'range' =>
+                    [
+                        self::STATUS_ACTIVE, self::STATUS_DELETED
+                    ],
+            ],
+            [
+                'category', 'in', 'range' =>
+                    [
+                        self::CATEGORY_SCHOOL_ORG,self::CATEGORY_STUDENT_ORG
+                    ],
+            ],
+
             [['org_name'], 'string', 'max' => 32],
+
             [['credential', 'password', 'access_token'], 'string', 'max' => 255],
-            // [['wechat_id1', 'credential', 'password', 'access_token', 'wechat_id2', 'wechat_id3'], 'string', 'max' => 255],
         ];
     }
 
@@ -63,10 +117,10 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
             'id' => 'ID',
             'org_name' => '名称',
             'category' => '标记用户类别 0-校级组织，1-学生社团',
-            'credential' => '证件号',
+            'credential' => '账号',
             'password' => '密码',
             'access_token' => 'Access Token',
-            'signup_at' => '注册时间',
+            'created_at' => '注册时间',
             'logged_at' => '上一次登录时间',
             'updated_at' => '上一次更新时间',
             'expire_at' => 'Expire At',
@@ -82,7 +136,7 @@ class Organizer extends \yii\db\ActiveRecord implements IdentityInterface
             "org_name" => "org_name",
             "credential",
             // "access_token": null,
-            // "signup_at",
+            // "created_at",
             "logged_at",
             // "updated_at": 0,
             // "expire_at": 0,

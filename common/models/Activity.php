@@ -3,6 +3,8 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "{{%tk_activity}}".
@@ -28,11 +30,12 @@ use Yii;
  * @property Ticket[] $tkTickets
  * @property TicketEvent[] $tkTicketEvents
  */
-class Activity extends \yii\db\ActiveRecord
+class Activity extends ActiveRecord
 {
     const STATUS_UNAUDITED  = 0;//未审核状态
     const STATUS_APPROVED = 1;//已批准状态
     const STATUS_REJECTED= 2;//被驳回状态
+    public $org_name;//用于admin端查找发布者名字
     /**
      * {@inheritdoc}
      */
@@ -47,20 +50,70 @@ class Activity extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['release_by', 'category', 'status', 'start_at','end_at', 'updated_at',
-                'current_people', 'max_people', 'current_serial','ticketing_start_at',
-                'ticketing_end_at','release_at']
-                , 'integer'],
+            [
+                [
+                    'activity_name',
+                    'category',
+                    'current_people',
+                    'current_serial',
+                    'introduction' ,
+                    'location',
+                    'max_people',
+                    'release_by',
+                    'start_at', 'end_at',
+                    'status',
+                    'ticketing_start_at', 'ticketing_end_at',
+                ],
+                'required',
+            ],
+            [
+                [
+                    'release_by',
+                    'category',
+                    'status',
+                    'start_at', 'end_at',
+                    'current_people',
+                    'max_people',
+                    'current_serial',
+                    'ticketing_start_at', 'ticketing_end_at',
+                    'release_at'
+                ]
+                , 'integer'
+            ],
             [['activity_name'], 'string', 'max' => 32],
+
             [['location'], 'string', 'max' => 64],
+
             [['introduction',], 'string', 'max' => 255],
-            [['activity_name'], 'unique'],
+
             ['status', 'in', 'range' => [self::STATUS_UNAUDITED, self::STATUS_APPROVED,self::STATUS_REJECTED]],
+
             ['category', 'in', 'range' => [0,1]],
+
             [['release_by'], 'exist', 'skipOnError' => true, 'targetClass' => Organizer::className(), 'targetAttribute' => ['release_by' => 'id']],
+
             ['current_people', 'compare','compareAttribute'=>'max_people', 'operator' => '<=','message'=>'活动参与人数不能大于活动最大人数'],
-            ['start_at', 'compare','compareAttribute'=>'end_at', 'operator' => '<','message'=>'活动开始时间不能早于结束时间'],
-            ['ticketing_start_at', 'compare','compareAttribute'=>'ticketing_end_at', 'operator' => '<','message'=>'票务开始时间不能早于结束时间'],
+
+            ['start_at', 'compare','compareAttribute'=>'end_at', 'operator' => '<','message'=>'活动开始时间不能晚于结束时间'],
+
+            ['ticketing_start_at', 'compare','compareAttribute'=>'ticketing_end_at', 'operator' => '<','message'=>'票务开始时间不能晚于结束时间'],
+
+            ['ticketing_end_at', 'compare','compareAttribute'=>'start_at', 'operator' => '<','message'=>'票务结束时间不能晚于活动开始时间'],
+        ];
+    }
+
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::className(),//自动填充时间字段功能
+                'attributes' => [
+                    //当插入时填充created_at和updated_at
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    //当更新时填充updated_at
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
+                ],
+            ],
         ];
     }
 
@@ -108,26 +161,11 @@ class Activity extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getActivityEvents()
-    {
-        return $this->hasMany(ActivityEvent::className(), ['activity_id' => 'id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
     public function getTickets()
     {
         return $this->hasMany(Ticket::className(), ['activity_id' => 'id']);
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTicketEvents()
-    {
-        return $this->hasMany(TicketEvent::className(), ['activity_id' => 'id']);
-    }
 
     public function fields()
     {

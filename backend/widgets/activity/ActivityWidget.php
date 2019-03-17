@@ -13,7 +13,7 @@ use yii\base\Widget;
 use common\models\Activity;
 use yii\helpers\Url;
 use yii\data\Pagination;
-use backend\models\ActivityFrom;
+use common\models\ActivityForm;
 
 class ActivityWidget extends Widget
 {
@@ -25,12 +25,12 @@ class ActivityWidget extends Widget
 
     public function run()
     {
-        //或许可以改成switch?php有switch吗?
+        //或许可以改成switch?
         if($this->option=='index')
         {
             $curPage=Yii::$app->request->get('page',1);
             $cond=['=','status',Activity::STATUS_APPROVED];
-            $res=ActivityFrom::getList($cond,$curPage,$this->limit,['ticketing_end_at'=>SORT_DESC]);
+            $res=ActivityForm::getList($cond,$curPage,$this->limit,['ticketing_end_at'=>SORT_DESC]);
             $result['title']=$this->title?:"最新活动";
             $result['more']=Url::to(['activity/index']);
             $result['body']=$res['data']?:[];
@@ -45,7 +45,7 @@ class ActivityWidget extends Widget
         {
             $curPage=Yii::$app->request->get('page',1);
             $cond=['=','release_by',Yii::$app->user->id];
-            $res=ActivityFrom::getList($cond,$curPage,$this->limit,['release_at'=>SORT_DESC]);
+            $res=ActivityForm::getList($cond,$curPage,$this->limit,['release_at'=>SORT_DESC]);
             $result['title']=$this->title?:"我的活动记录";
             $result['more']=Url::to(['activity/index']);
             $result['body']=$res['data']?:[];

@@ -5,14 +5,15 @@ use Yii;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\Organizer;
+use common\models\OrganizerForm;
 use backend\models\LoginForm;
-use backend\models\PasswordForm;
 use yii\web\NotFoundHttpException;
+use yii\web\Controller;
 
 /**
  * Site controller
  */
-class SiteController extends BaseController
+class SiteController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -85,31 +86,18 @@ class SiteController extends BaseController
         }
         $this->viewAction();
         $model = Yii::$app->user->identity;
-        $passwordForm =new PasswordForm($model);
-        if ($passwordForm->load(Yii::$app->request->post()) &&$passwordForm->repassword())
+        $form =new OrganizerForm();
+        $form->org_id=$model->id;
+        $form->org_name=$model->org_name;
+        if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model))
         {
+            Yii::$app->getSession()->setFlash('success', '密码修改成功!');
             return $this->redirect('index');
         }
         return $this->render('password', [
-            'model' => $passwordForm,
+            'model' => $form,
         ]);
     }
-    /*
-     public function actionRepassword()
-    {
-        if (Yii::$app->user->isGuest)
-            return $this->render('site/login');
-        $model = Yii::$app->user->identity;
-        $passwordform =new AdminPasswordForm($model);
-        if ($passwordform->load(Yii::$app->request->post()) &&$passwordform->repassword($model))
-        {
-            return $this->redirect('index');
-        }
-        return $this->render('repassword', [
-            'model' => $passwordform,
-        ]);
-    }
-     */
 
     /**
      * Login action.

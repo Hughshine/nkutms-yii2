@@ -51,7 +51,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'created_at:datetime',
                 'updated_at:datetime',
                 'logged_at:datetime',
-                'signup_at:datetime',
                 //'access_token',
             ],
         ]) ?>

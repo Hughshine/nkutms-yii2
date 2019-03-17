@@ -2,23 +2,22 @@
 
 namespace admin\controllers;
 
+use common\models\Activity;
 use Yii;
-use admin\models\TkActivity;
-
-use common\models\Organizer;
-
-use admin\models\TkActivitySearch;
-use admin\models\ActivityUpdateForm;
+use admin\models\ActivitySearch;
+use admin\models\NOW;
+use common\models\ActivityForm;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessRule;
 
 /**
- * TkActivityController implements the CRUD actions for TkActivity model.
+ * ActivityController implements the CRUD actions for Activity model.
  */
-class TkActivityController extends Controller
+class ActivityController extends Controller
 {
+    public $lastError;//用于事务提交失败后存放信息
     /**
      * @inheritdoc
      */
@@ -40,7 +39,7 @@ class TkActivityController extends Controller
                     [//登录用户能访问这个控制器里的方法
                         'allow'=>true,
                         //可访问的页面名字
-                        'actions'=>['index','view','create','update'],
+                        'actions'=>['index','view','create','update','review'],
                         'roles'=>['@'],//登录用户
                     ],
                 ],
@@ -55,13 +54,15 @@ class TkActivityController extends Controller
         ];
     }
 
+
+
     /**
-     * Lists all TkActivity models.
+     * Lists all Activity models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $searchModel = new TkActivitySearch();
+        $searchModel = new ActivitySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
   #分页 
         $dataProvider->pagination = ['pagesize' => '10']; 
@@ -73,7 +74,7 @@ class TkActivityController extends Controller
     }
 
     /**
-     * Displays a single TkActivity model.
+     * Displays a single Activity model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -86,30 +87,29 @@ class TkActivityController extends Controller
     }
 
     /**
-     * Creates a new TkActivity model.
+     * Creates a new Activity model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new TkActivity();
+        $form = new ActivityForm();
         //直接在页面中向模型写入数据，但是时间和一些默认值需要在表单返回后写入
-        if ($model->load(Yii::$app->request->post()))
+        if ($form->load(Yii::$app->request->post()))
         {
-            $model->start_at=strtotime($model->time_start_stamp);
-            $model->end_at=strtotime($model->time_end_stamp);
-            $model->ticketing_start_at=strtotime($model->ticket_start_stamp);
-            $model->ticketing_end_at=strtotime($model->ticket_end_stamp);
-            $model->updated_at=$model->release_at=time()+7*3600;
-            $model->current_people=0;
-            $model->current_serial=1;
-            if($model->save())
-            {
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
+            $form->start_at=strtotime($form->time_start_stamp);
+            $form->end_at=strtotime($form->time_end_stamp);
+            $form->ticketing_start_at=strtotime($form->ticket_start_stamp);
+            $form->ticketing_end_at=strtotime($form->ticket_end_stamp);
+            $form->updated_at=$form->release_at=time()+7*3600;
+            $form->current_people=0;
+            $form->status=Activity::STATUS_UNAUDITED;
+            $form->current_serial=1;
+            $act=$form->create();
+            if($act!=null) return $this->redirect(['view', 'id' => $act->id]);
         }
         return $this->render('create', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
@@ -119,50 +119,63 @@ class TkActivityController extends Controller
      */
     public function actionUpdate($id)
     {
-        /*$model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post())) 
-        {
-            $model->time_start_stamp=$model->start_at;
-            $model->time_end_stamp=$model->end_at;
-            $model->updated_at=time()+7*3600;
-            if($model->save(false))//此处需要将false去掉
-                return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('update', ['model' => $model,]);*/
-
         $model = $this->findModel($id);
-        $updateform =new ActivityUpdateForm($model);
-        if ($updateform->load(Yii::$app->request->post()) &&
-            $updateform->update($model)) 
-        {
+        $form =new ActivityForm();
+
+        //复制model的信息
+        $form->act_id=$model->id;
+        $form->activity_name=$model->activity_name;
+        $form->category=$model->category;
+        $form->introduction=$model->introduction;
+        $form->location=$model->location;
+        $form->status=$model->status;
+        $form->time_start_stamp=date('Y-m-d H:i' , $model->start_at);
+        $form->time_end_stamp=date('Y-m-d H:i' , $model->end_at);
+        $form->ticket_start_stamp=date('Y-m-d H:i' , $model->ticketing_start_at);
+        $form->ticket_end_stamp=date('Y-m-d H:i' , $model->ticketing_end_at);
+        $form->release_by=$model->release_by;
+        $form->max_people=$model->max_people;
+        $form->current_serial=$model->current_serial;
+
+        if ($form->load(Yii::$app->request->post()) &&
+            $form->infoUpdate($model))
             return $this->redirect(['view', 'id' => $model->id]);
-        }
         return $this->render('update', [
-            'model' => $updateform,
+            'model' => $form,
         ]);
     }
 
+    /*
+        一键无效化或通过功能
+    */
+    public function actionReview($id,$status)
+    {
+        $model = $this->findModel($id);
+        $form=new ActivityForm();
+        $form->review($model,$status);
+        return $this->redirect(['view', 'id' => $model->id]);
+    }
+
+
     /*删除动作，目前没有接口
      * */
-    public function actionDelete($id)
+    /*public function actionDelete($id)
     {
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
-    }
+    }*/
 
     /**
-     * Finds the TkActivity model based on its primary key value.
+     * Finds the Activity model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return TkActivity the loaded model
+     * @return Activity the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = TkActivity::findOne($id)) !== null) {
+        if (($model = Activity::findOne($id)) !== null) {
             return $model;
         }
         throw new NotFoundHttpException('The requested page does not exist.');

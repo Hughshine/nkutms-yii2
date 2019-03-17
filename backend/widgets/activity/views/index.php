@@ -30,7 +30,7 @@ use yii\widgets\LinkPager;
                         <?php endif;?>
                         <span class="fa fa-location-arrow"></span><?=$list['location']?>
                         <br/>
-                        <span class="fa fa-clock-o"></span><?=date('Y-m-d H:m:s',$list['release_at'])?>&nbsp;
+                        <span class="fa fa-clock-o"></span><?=date('Y-m-d H:i:s',$list['release_at'])?>&nbsp;
                         <!--浏览量<span class="glyphicon glyphicon-eye-open"></span>< ? =isset($list['extend']['browser'])?$list['extend']['browser']:0?>&nbsp;-->
                         <!--评论数<span class="glyphicon glyphicon-comment"></span><a href="< ? =Url::to(['post/detail','id'=>$list['id']])?>">< ? =isset($list['extend']['comment'])?$list['extend']['comment']:0?></a>-->
                     </span>
@@ -45,8 +45,8 @@ use yii\widgets\LinkPager;
             </div>
             <div class="col-lg-4">
                 <a href="<?=Url::to(['activity/view','id'=>$list['id']])?>"><button class="btn btn-success no-radius btn-sm pull-right ">了解详情</button></a>
-                <span class="fa fa-ticket"></span><?=date('m-d H:m:s',$list['ticketing_start_at'])?>
-                <br/>---<?=date('m-d H:m:s',$list['ticketing_end_at'])?>
+                <span class="fa fa-ticket"></span><?=date('m-d H:i:s',$list['ticketing_start_at'])?>
+                <br/>---<?=date('m-d H:i:s',$list['ticketing_end_at'])?>
 
                 <br/>
                 <h3 align="right"><span class="fa fa-info-circle"></span>

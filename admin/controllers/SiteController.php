@@ -6,13 +6,14 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use admin\models\LoginForm;
-use admin\models\AdminPasswordForm;
+use admin\models\AdminForm;
 
 /**
  * Site controller
  */
 class SiteController extends Controller
 {
+
     /**
      * {@inheritdoc}
      */
@@ -40,9 +41,7 @@ class SiteController extends Controller
             ],
             'verbs' => [
                 'class' => VerbFilter::className(),
-                'actions' => [
-                    'logout' => ['post'],
-                ],
+                'actions' => ['logout' => ['post'],],
             ],
         ];
     }
@@ -72,23 +71,22 @@ class SiteController extends Controller
     }
 
     /**
-     *
-     *修改密码
-     *
+     * 修改密码
      */
     public function actionRepassword()
     {
         if (Yii::$app->user->isGuest)
             return $this->render('site/login');
         $model = Yii::$app->user->identity;
-        $passwordform =new AdminPasswordForm($model);
-        if ($passwordform->load(Yii::$app->request->post()) &&$passwordform->repassword())
+        $form =new AdminForm();
+        $form ->admin_name=$model->admin_name;
+        $form ->admin_id=$model->id;
+        if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model))
         {
+            Yii::$app->getSession()->setFlash('success', '密码修改成功');
             return $this->redirect('index');
         }
-        return $this->render('repassword', [
-            'model' => $passwordform,
-        ]);
+        return $this->render('password', ['model' => $form,]);
     }
 
     /**
@@ -105,15 +103,14 @@ class SiteController extends Controller
             return $this->goHome();
         }
 
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+        $form = new LoginForm();
+        if ($form->load(Yii::$app->request->post()) && $form->login())
             return $this->goBack();
-        } else {
-            $model->password = '';
-            return $this->render('login', [
-                'model' => $model,
-            ]);
-        }
+        else
+            {
+                $form->password = '';
+                return $this->render('login', ['model' => $form,]);
+            }
     }
 
     /**

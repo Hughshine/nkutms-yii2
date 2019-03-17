@@ -47,7 +47,7 @@ class OrganizerSignupForm extends Model
         return [
         'org_name'=>'组织者名字',
         'status'=>'状态',
-        'credential'=>'证书号',
+        'credential'=>'账号',
         'category'=>'分类',
         'password'=>'密码',
         ];

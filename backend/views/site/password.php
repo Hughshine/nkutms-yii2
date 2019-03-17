@@ -3,7 +3,7 @@
 /* @var $this yii\web\View */
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-$this->title = '修改密码:'.$model->org->org_name;
+$this->title = '修改密码:'.$model->org_name;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 

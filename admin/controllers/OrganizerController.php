@@ -2,8 +2,10 @@
 
 namespace admin\controllers;
 
+
 use Yii;
 use common\models\Organizer;
+use common\models\OrganizerForm;
 use admin\models\OrganizerSearch;
 use admin\models\OrganizerSignupForm;
 use admin\models\OrganizerUpdateForm;
@@ -62,10 +64,11 @@ class OrganizerController extends Controller
 
         //index页面的每页条目数pagesize
         $dataProvider->pagination = ['pagesize' => '10'];
-        return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-        ]);
+        return $this->render('index',
+            [
+                'searchModel' => $searchModel,
+                'dataProvider' => $dataProvider,
+            ]);
     }
 
     /**
@@ -76,9 +79,7 @@ class OrganizerController extends Controller
      */
     public function actionView($id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        return $this->render('view', ['model' => $this->findModel($id),]);
     }
 
     /**
@@ -88,13 +89,11 @@ class OrganizerController extends Controller
      */
     public function actionCreate()
     {
-        $model = new OrganizerSignupForm();
-        if ($model->load(Yii::$app->request->post())&&(($organizer = $model->signup())!==null) )
-        {
+        $form = new OrganizerForm();
+        if ($form->load(Yii::$app->request->post())&&(($organizer = $form->create())!==null) )
             return $this->redirect(['view', 'id' => $organizer->id]);
-        }
         return $this->render('create', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
@@ -108,29 +107,30 @@ class OrganizerController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $updateform =new OrganizerUpdateForm($model);
-        if ($updateform->load(Yii::$app->request->post()) &&
-            $updateform->update($model)) 
+        $form =new OrganizerForm();
+        $form->org_id=$model->id;
+        $form->org_name=$model->org_name;
+        if ($form->load(Yii::$app->request->post()) &&
+            $form->infoUpdate($model))
         {
+            Yii::$app->getSession()->setFlash('success', '资料修改成功');
             return $this->redirect(['view', 'id' => $model->id]);
         }
-
-        return $this->render('update', [
-            'model' => $updateform,
-        ]);
+        return $this->render('update', ['model' => $form,]);
     }
 
     public function actionRepassword($id)
     {
         $model = $this->findModel($id);
-        $passwordform =new OrganizerPasswordForm($model);
-        if ($passwordform->load(Yii::$app->request->post()) &&$passwordform->repassword())
+        $form =new OrganizerForm();
+        $form->org_name=$model->org_name;
+        $form->org_id=$model->id;
+        if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model,false))
         {
+            Yii::$app->getSession()->setFlash('success', '密码修改成功');
             return $this->redirect(['view', 'id' => $model->id]);
         }
-        return $this->render('password', [
-            'model' => $passwordform,
-        ]);
+        return $this->render('password', ['model' => $form,]);
     }
 
 
@@ -141,12 +141,12 @@ class OrganizerController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+    /*public function actionDelete($id)
     {
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
-    }
+    }*/
 
     /**
      * Finds the Organizer model based on its primary key value.
@@ -157,10 +157,7 @@ class OrganizerController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = Organizer::findOne($id)) !== null) {
-            return $model;
-        }
-
+        if (($model = Organizer::findOne($id)) !== null) return $model;
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 }
