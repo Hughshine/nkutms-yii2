@@ -7,7 +7,7 @@ use yii\rest\ActiveController;
 
 use yii\data\ActiveDataProvider;
 use common\models\Ticket;
-use common\models\TicketEvent;
+// use common\models\TicketEvent;
 use common\models\Activity;
 
 
@@ -121,7 +121,7 @@ class TicketController extends ActiveController
 			$activity->current_people--;
 			$activity->save(false);
 
-			TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,1,-1);
+			// TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,1,-1);
 
 			return ['code' => 0, 'message' => 'success', 'data' => $ticket];
 		}

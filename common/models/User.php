@@ -285,8 +285,6 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
 
     public function saveAllowance($request,$action,$allowance,$timestamp)
     {
-        // echo $allowance;
-        // echo $timestamp;
         $this->allowance = $allowance;
         $this->allowance_updated_at = $timestamp;//time();
         $this->save();

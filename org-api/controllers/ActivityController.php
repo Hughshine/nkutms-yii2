@@ -7,9 +7,7 @@ use yii\data\ActiveDataProvider;
 use common\models\Activity;
 // use common\models\User;
 use common\models\Ticket;
-// use common\models\TicketEvent;
 use common\models\Organizer;
-use common\models\ActivityEvent;
 
 // use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
@@ -203,7 +201,6 @@ class ActivityController extends ActiveController
 
 
 		return ['code'=>0,'message'=>'success','data'=> Ticket::find()
-				// ->where(['organizer_id' => $org_id])
 				->where(['activity_id' => $activity_id])
 				->andWhere(['status' => 0])
 				->orderBy('serial_number')
@@ -254,7 +251,7 @@ class ActivityController extends ActiveController
 
 		$activity = Activity::generateAndWriteNewActivity($org_id,$activity_name,$category,$location,$ticketing_start_at,$ticketing_end_at,$start_at,$end_at,$max_people,$intro);
 
-		ActivityEvent::generateAndWriteNewActivityEvent($org_id, $activity->id, 0, -1);
+		// ActivityEvent::generateAndWriteNewActivityEvent($org_id, $activity->id, 0, -1);
 
 		return ['code'=>0, 'message' => 'success', 'data' => $activity];
 	}
@@ -291,13 +288,13 @@ class ActivityController extends ActiveController
 		if($organizer == null)
 			return ['code'=>1, 'message' => 'organizer inexists'];
 
-		$activity = Activity::find()
-					->where(['activity_name' => $activity_name])
-					->limit(1)
-					->one();
+		// $activity = Activity::find()
+		// 			->where(['activity_name' => $activity_name])
+		// 			->limit(1)
+		// 			->one();
 
-		if($activity != null)
-			return ['code'=>1, 'message' => 'duplicate activity name'];
+		// if($activity != null)
+		// 	return ['code'=>1, 'message' => 'duplicate activity name'];
 
 		$activity = Activity::find()
 					->where(['id'=>$activity_id])
@@ -307,6 +304,14 @@ class ActivityController extends ActiveController
 		if($activity == null)
 			return ['code'=>1, 'message' => 'activity inexists'];
 
+		if($activity->status == 1)
+		{
+			return ['code'=>1, 'message' => '已经成功发布，无法修改'];
+		}
+		if($activity->status == 3)
+		{
+			return ['code'=>1, 'message' => '已经被取消，无法修改'];
+		}
 
 
 		if($organizer == null)
@@ -317,7 +322,7 @@ class ActivityController extends ActiveController
 			return ['code'=>1, 'message' => 'illegal request'];
 
 
-
+		if()
 		$category= $request->post('category');
 		$location = $request->post('location');
 		$ticketing_start_at = $request->post('ticketing_start_at');
@@ -373,12 +378,10 @@ class ActivityController extends ActiveController
 		if($activity->release_by != $org_id)
 			return ['code'=>1,'message' => 'illegal request'];
 
-		if($activity->status == 1)
+		if($activity->status == 3)
 			return ['code'=>1,'message' => 'already cancelled'];
 		$activity->status = 1;
 		$activity->save(false);
-
-		ActivityEvent::generateAndWriteNewActivityEvent($org_id, $activity_id, 1, -1);
 
 		return ['code'=>0,'message' => 'cancel success','data'=>$activity];
 	}

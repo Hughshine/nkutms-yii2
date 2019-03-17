@@ -202,16 +202,16 @@ class Activity extends ActiveRecord
                 switch ($model->status) 
                 {
                     case 0:
-                        return '正常';
+                        return '待审核';
                         break;
                     case 1:
-                        return '取消';
+                        return '通过';
                         break;
                     case 2:
-                        return '结束';
+                        return '被驳回';
                         break;
                     default:
-                        return '未知';
+                        return '取消';
                         break;
                 }
             },
@@ -235,6 +235,7 @@ class Activity extends ActiveRecord
         $activity->activity_name = $activity_name;
         $activity->category = $category;
         $activity->location = $location;
+        $activity->status = 0;
         $activity->ticketing_start_at = $ticketing_start_at;
         $activity->ticketing_end_at = $ticketing_end_at;
         $activity->start_at = $start_at;
@@ -254,7 +255,6 @@ class Activity extends ActiveRecord
         $activity->activity_name = $activity_name==null?$activity->activity_name:$activity_name;
 
         $activity->category = $category==null?$activity->category:$category;
-        // $activity->name = $activity_name==null?$activity->name:$activity_name;
         $activity->location = $location==null?$activity->location:$location;
         $activity->ticketing_start_at = $ticketing_start_at==null?$activity->ticketing_start_at:$ticketing_start_at;
         $activity->ticketing_end_at = $ticketing_end_at==null?$activity->ticketing_end_at:$ticketing_end_at;
@@ -264,11 +264,4 @@ class Activity extends ActiveRecord
         $activity->introduction = $intro==null?$activity->introduction:$intro;
         $activity->save(false);
     }
-
-    // public function extraFields()
-    // {
-
-    // }
-
-
 }

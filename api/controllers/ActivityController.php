@@ -7,7 +7,7 @@ use yii\data\ActiveDataProvider;
 use common\models\Activity;
 use common\models\User;
 use common\models\Ticket;
-use common\models\TicketEvent;
+// use common\models\TicketEvent;
 
 use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
@@ -166,7 +166,7 @@ class ActivityController extends ActiveController
 
 		$ticket = Ticket::generateAndWriteNewTicket($user_id,$activity_id,$current_serial,0);
 
-		TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,0,-1);
+		// TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,0,-1);
 
 		return ['code'=> 0, 'message' => 'success', 'data' => $ticket];
 	}

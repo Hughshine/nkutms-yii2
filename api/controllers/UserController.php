@@ -46,6 +46,79 @@ class UserController extends ActiveController
 		return $actions;
 	}
 
+	/*
+		未绑定的微信号，绑定credential;
+		POST wechat_id,credential,password,wechat_id,category; url验证access-token
+	 */
+	public function actionBindCredential()
+	{
+		$request = Yii::$app->request;
+
+		$wechat_id = $request->post('wechat_id');   
+		$credential = $request->post('credential');   
+		$password = $request->post('password');
+		$category = $request->post('category');   
+
+		if($wechat_id==null||$credential==null||$password==null||$category==null)
+		{
+			return ['code'=>1,'message'=>'empty paramter'];
+		}
+
+		$user = User::find()
+					->where(['wechat_id' => $wechat_id])
+					->limit(1)
+					->one();
+
+		if($user != null)
+			return ['code'=>1,'message'=>'user already bind credential!'];
+
+		//TODO:改成hasOne？
+		$tmp_user = User::find()
+					->where(['credential' => $credential])
+					->limit(1)
+					->one();
+
+		if($tmp_user!=null)
+		{
+			if($tmp_user->wechat_id!=null)
+				return ['code'=>1,'message'=>'credentail already bind user!'];
+			//credential未绑定账号，验证密码
+			if(Yii::$app->getSecurity()->validatePassword($password , $tmp_user->password))
+			{
+				$tmp_user->wechat_id = $wechat_id;
+				$tmp_user->save(false);//需要修改，体现对传入参数的控制
+				return [ 
+					'code'=>0,
+					'message'=> 'bind success', 
+					'data' => [
+						'user_info' => $tmp_user,
+						'access_token' => $access_token]
+					];
+			}
+				return ['code'=>1,'message'=>'password doesn\'t match'];
+		}
+
+		//TODO
+		$user = new User();
+		$user->user_name = 'default-name';
+		$user->wechat_id = $wechat_id;
+		$user->credential = $credential;
+		$user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+		$user->category = $category;
+		$user->expire_at = time()+3600*7;
+		$access_token = $user->generateAccessToken();
+		$user->save(false);
+
+		return [ 
+			'code'=>0,
+			'message'=> 'bind success', 
+			'data' => [
+				'user_info' => $user,
+				'access_token' => $access_token]
+			];
+		//credential未存在，绑定密码
+	}
+
 	public function actionWechatLogin()
 	{
 		//TODO
@@ -61,40 +134,17 @@ class UserController extends ActiveController
 					->limit(1)
 					->one();
 
-		// user 的返回格式特殊处理
+		// 未绑定的微信号直接禁止
 		if($user == null){
-			$user = new User();
-			$user->wechat_id = $sql_wechat;
-			$user->category = $sql_category;
-			$user->expire_at = time()+3600*24;
-			/*
-				新微信号的注册处理。没有验证来源是微信小程序。
-			 */
-			if (!$user->save(false)) 
-			{
-    			return ['code'=>1,'message' => 'wrong', 'user_info' => null];
-			}
-
-			/*
-				生成access_token
-			 */
-			$user->access_token = Yii::$app->security->generateRandomString();
-			$access_token = $user->generateAccessToken();
-			$user->save(false);//TODO
-
-			$user = User::find()
-					->where(['wechat_id' => $sql_wechat])
-					->limit(1)
-					->one();
-			return ['code'=>0,
-			'message' => 'create',
-			 'data'=>['user_info' => $user,'access_token' => $access_token]];
+			return [
+					'code'=>2,
+					'message'=> 'please bind credential and password',
+					];
 		}
 
 		$access_token = $user->generateAccessToken();
 		$user->expire_at = time()+3600*24;
 		$user->save(false);//TODO
-
 
 		return [ 'code'=>0,
 		'message'=> 'success', 
@@ -108,34 +158,20 @@ class UserController extends ActiveController
 	{
 		$request = Yii::$app->request;
 
-		$sql_id = $request->post('user_id');
-		$sql_name = $request->post('name');
-		$sql_category = $request->post('category');
-		$sql_credential = $request->post('credential');
+		$user_id = $request->post('user_id');
+		$user_name = $request->post('name');
 
 		$user = User::find()
-				->where(['id' => $sql_id])
+				->where(['id' => $user_id])
 				->limit(1)
 				->one();
+
 		if($user == null)
 			return ['code'=>1, 'message'=>'user inexists'];
 
-		$user2 = User::find()
-				->where(['credential'=>$sql_credential])
-				->limit(1)
-				->one();
 
-		if($user2 != null){
-			if(!$user->user_name == $user2->user_name){
-					return ['code'=>1, 'message'=>'dulpilicate credential'];
-			}
-		}
-
-		$user = User::editAndSaveUser($user,$sql_name,$sql_category,$sql_credential);
-
+		$user = User::editAndSaveUser($user,$user_name,null,null);
 
 		return ['code'=>0, 'message'=>'success', 'data'=>$user];
 	}
-
-
 }
