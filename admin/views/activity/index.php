@@ -46,12 +46,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label'=>'状态',
                 'attribute'=>'status',
                 'value'=>
-                function($model)
-                {
-                    if($model->status==0)
-                        return '未审核';
-                    return ($model->status==1)?'已通过':'被驳回';
-                },
+                    function($model)
+                    {
+                        switch($model->status)
+                        {
+                            case \common\models\Activity::STATUS_UNAUDITED :return '未审核';
+                            case \common\models\Activity::STATUS_APPROVED :return '已通过';
+                            case \common\models\Activity::STATUS_REJECTED :return '被驳回';
+                            case \common\models\Activity::STATUS_CANCEL :return '已取消';
+                            default: return '未知';
+                        }
+                    },
                 'filter'=>['0'=>'未审核','1'=>'已通过','2'=>'被驳回'],
             ],
             //'max_people',

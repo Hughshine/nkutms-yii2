@@ -16,7 +16,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?php if($model->status!=common\models\Activity::STATUS_CANCEL):?>
+            <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?php endif;?>
         <?php switch($model->status):
             case \common\models\Activity::STATUS_UNAUDITED :?>
                 <?= Html::a('通过该活动',
@@ -89,12 +91,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label'=>'状态',
                 'attribute'=>'status',
                 'value'=>
-                function($model)
-                {
-                    if($model->status==0)
-                        return '未审核';
-                    return ($model->status==1)?'已通过':'被驳回';
-                },
+                    function($model)
+                    {
+                        switch($model->status)
+                        {
+                            case \common\models\Activity::STATUS_UNAUDITED :return '未审核';
+                            case \common\models\Activity::STATUS_APPROVED :return '已通过';
+                            case \common\models\Activity::STATUS_REJECTED :return '被驳回';
+                            case \common\models\Activity::STATUS_CANCEL :return '已取消';
+                            default: return '未知';
+                        }
+                    },
             ],
             'introduction',
             'location',

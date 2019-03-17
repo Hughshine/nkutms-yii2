@@ -56,7 +56,8 @@ class ActivityWidget extends Widget
             }
             $status=array('<font color="gray">未审核</font>',
                                     '<font color="#339933">已通过</font>',
-                                    '<font color="#FF0000">被驳回</font>');
+                                    '<font color="#FF0000">被驳回</font>',
+                                    '<font color="black">已取消</font>');
             return $this->render('index',['data'=>$result,'option'=>'mine','statusString'=>$status]);
         }
         return null;

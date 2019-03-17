@@ -17,6 +17,7 @@ use yii\filters\AccessControl;
 use yii\web\NotFoundHttpException;
 use common\models\Activity;
 use yii\web\Controller;
+use yii\widgets\ActiveForm;
 
 class ActivityController extends Controller
 {
@@ -32,7 +33,7 @@ class ActivityController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index','error','create','mine','view','update'],
+                        'actions' => ['index','error','create','mine','view','update','cancel'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -139,9 +140,11 @@ class ActivityController extends Controller
             return $this->redirect('site/login');
         }
         $this->viewAction();
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        $model=$this->findModel($id);
+        $form=new ActivityForm();
+        if($form->review($model,Activity::STATUS_CANCEL))
+            Yii::$app->session->setFlash('success','修改成功');
+        return $this->render('view', ['model' => $model,]);
     }
 
     protected function findModel($id)

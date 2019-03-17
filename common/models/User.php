@@ -19,7 +19,6 @@ use yii\filters\RateLimitInterface;
  * @property string $password
  * @property string $access_token
  * @property string $created_at
- * @property int $logged_at 使用int类型便于比较操作
  * @property int $expire_at
  * @property int $updated_at
  * @property int $allowance 用于限制访问频率
@@ -68,7 +67,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
     {
         return [
             [['wechat_id', 'credential'], 'required'],
-            [['id','created_at','category', 'logged_at', 'expire_at', 'updated_at', 'allowance', 'allowance_updated_at'], 'integer'],
+            [['id','created_at','category', 'expire_at', 'updated_at', 'allowance', 'allowance_updated_at'], 'integer'],
             [['credential','wechat_id'],'unique'],
             [['user_name'], 'string', 'max' => 32],
             [['wechat_id', 'credential', 'password', 'access_token'], 'string', 'max' => 255],
@@ -91,7 +90,6 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
             'password' => '密码',
             'access_token' => 'Access Token',
             'created_at' => '注册时间',
-            'logged_at' => '上一次登录时间',
             'expire_at' => 'Expire At',
             'updated_at' => 'Update At',
             'status' => '状态',

@@ -290,7 +290,11 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
             if($status==Activity::STATUS_APPROVED)
                 $model->release_at=time()+7*3600;
             if(!$model->save())
+            {
+                var_dump($model->errors);
                 throw new \Exception('修改失败!');
+            }
+
             $transaction->commit();
             return true;
         }

@@ -18,7 +18,6 @@ use yii\web\IdentityInterface;
  * @property string $password
  * @property string $access_token
  * @property string $created_at
- * @property int $logged_at 使用int类型便于比较操作
  * @property int $updated_at
  * @property int $expire_at
  * @property int $allowance 用于限制访问频率
@@ -87,7 +86,6 @@ class Organizer extends ActiveRecord implements IdentityInterface
                     'category',
                     'created_at',
                     'expire_at',
-                    'logged_at',
                     'status',
                     'updated_at',
                 ],
@@ -128,7 +126,6 @@ class Organizer extends ActiveRecord implements IdentityInterface
             'password' => '密码',
             'access_token' => 'Access Token',
             'created_at' => '注册时间',
-            'logged_at' => '上一次登录时间',
             'updated_at' => '上一次更新时间',
             'expire_at' => 'Expire At',
             'allowance' => '用于限制访问频率',
@@ -144,7 +141,6 @@ class Organizer extends ActiveRecord implements IdentityInterface
             "credential",
             // "access_token": null,
             // "created_at",
-            "logged_at",
             // "updated_at": 0,
             // "expire_at": 0,
             // "allowance": null,

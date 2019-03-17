@@ -41,6 +41,7 @@ class Activity extends ActiveRecord
     const STATUS_UNAUDITED  = 0;//未审核状态
     const STATUS_APPROVED = 1;//已批准状态
     const STATUS_REJECTED= 2;//被驳回状态
+    const STATUS_CANCEL= 3;//被取消状态
     public $org_name;//用于admin端查找发布者名字
 
 
@@ -94,7 +95,13 @@ class Activity extends ActiveRecord
 
             [['introduction',], 'string', 'max' => 255],
 
-            ['status', 'in', 'range' => [self::STATUS_UNAUDITED, self::STATUS_APPROVED,self::STATUS_REJECTED]],
+            ['status', 'in', 'range' =>
+                [
+                    self::STATUS_UNAUDITED,
+                    self::STATUS_APPROVED,
+                    self::STATUS_REJECTED,
+                    self::STATUS_CANCEL,
+                ]],
 
             ['category', 'in', 'range' => [0,1]],
 
@@ -135,7 +142,7 @@ class Activity extends ActiveRecord
             'activity_name' => '活动名称',
             'release_by' => '发布者ID',
             'category' => '活动类别',
-            'status' => '证件号',
+            'status' => '状态',
             'location' => '活动地点',
             'release_at' => '发布时间',
             'start_at' => '活动开始时间',

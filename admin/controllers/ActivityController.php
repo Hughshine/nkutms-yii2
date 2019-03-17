@@ -7,6 +7,7 @@ use Yii;
 use admin\models\ActivitySearch;
 use admin\models\NOW;
 use common\models\ActivityForm;
+use yii\debug\panels\EventPanel;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -119,30 +120,47 @@ class ActivityController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
-        $form =new ActivityForm();
+        try
+        {
+            $model = $this->findModel($id);
+            if($model->status!=Activity::STATUS_CANCEL)
+            {
+                $form =new ActivityForm();
 
-        //复制model的信息
-        $form->act_id=$model->id;
-        $form->activity_name=$model->activity_name;
-        $form->category=$model->category;
-        $form->introduction=$model->introduction;
-        $form->location=$model->location;
-        $form->status=$model->status;
-        $form->time_start_stamp=date('Y-m-d H:i' , $model->start_at);
-        $form->time_end_stamp=date('Y-m-d H:i' , $model->end_at);
-        $form->ticket_start_stamp=date('Y-m-d H:i' , $model->ticketing_start_at);
-        $form->ticket_end_stamp=date('Y-m-d H:i' , $model->ticketing_end_at);
-        $form->release_by=$model->release_by;
-        $form->max_people=$model->max_people;
-        $form->current_serial=$model->current_serial;
+                //复制model的信息
+                $form->act_id=$model->id;
+                $form->activity_name=$model->activity_name;
+                $form->category=$model->category;
+                $form->introduction=$model->introduction;
+                $form->location=$model->location;
+                $form->status=$model->status;
+                $form->time_start_stamp=date('Y-m-d H:i' , $model->start_at);
+                $form->time_end_stamp=date('Y-m-d H:i' , $model->end_at);
+                $form->ticket_start_stamp=date('Y-m-d H:i' , $model->ticketing_start_at);
+                $form->ticket_end_stamp=date('Y-m-d H:i' , $model->ticketing_end_at);
+                $form->release_by=$model->release_by;
+                $form->max_people=$model->max_people;
+                $form->current_serial=$model->current_serial;
 
-        if ($form->load(Yii::$app->request->post()) &&
-            $form->infoUpdate($model))
-            return $this->redirect(['view', 'id' => $model->id]);
-        return $this->render('update', [
-            'model' => $form,
-        ]);
+                if ($form->load(Yii::$app->request->post()) &&
+                    $form->infoUpdate($model))
+                {
+                    Yii::$app->getSession()->setFlash('success', '修改成功');
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
+                return $this->render('update', ['model' => $form,]);
+            }
+            else
+            {
+                Yii::$app->getSession()->setFlash('warning', '不能修改被取消的活动');
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+        catch(NotFoundHttpException $exception)
+        {
+            Yii::$app->getSession()->setFlash('error', '找不到指定内容');
+            return $this->redirect(['index']);
+        }
     }
 
     /*
@@ -152,7 +170,8 @@ class ActivityController extends Controller
     {
         $model = $this->findModel($id);
         $form=new ActivityForm();
-        $form->review($model,$status);
+        if($form->review($model,$status))
+            Yii::$app->getSession()->setFlash('success', '修改成功');
         return $this->redirect(['view', 'id' => $model->id]);
     }
 

@@ -20,8 +20,22 @@ $this->params['breadcrumbs'][] = $model->activity_name;
             <h1><?= Html::encode($model->activity_name) ?>
             <?php if($model->release_by==Yii::$app->user->id
                 &&$model->status!=\common\models\Activity::STATUS_APPROVED
+                &&$model->status!=\common\models\Activity::STATUS_CANCEL
                 &&$model->start_at>time()+7*3600):?>
-                <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+                    <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+                    <?= Html::a('取消该活动',
+                        [
+                            'cancel',
+                            'id' => $model->id,
+                        ],
+                        [
+                            'class' => 'btn btn-danger pull-right',
+                            'data' =>
+                                [
+                                    'confirm' => '取消后这条活动记录作废,无法修改!确定取消?',
+                                    'method' => 'post',
+                                ],
+                        ]) ?>
             <?php endif;?>
             </h1>
         </div>
@@ -47,9 +61,14 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                         'value'=>
                             function($model)
                             {
-                                if($model->status==0)
-                                    return '未审核';
-                                return ($model->status==1)?'已通过':'被驳回';
+                                switch($model->status)
+                                {
+                                    case \common\models\Activity::STATUS_UNAUDITED :return '未审核';
+                                    case \common\models\Activity::STATUS_APPROVED :return '已通过';
+                                    case \common\models\Activity::STATUS_REJECTED :return '被驳回';
+                                    case \common\models\Activity::STATUS_CANCEL :return '已取消';
+                                    default: return '未知';
+                                }
                             },
                     ],
                 'introduction',
