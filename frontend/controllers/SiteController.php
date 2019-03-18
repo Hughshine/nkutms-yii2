@@ -1,6 +1,7 @@
 <?php
 namespace frontend\controllers;
 
+use common\models\UserForm;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\web\BadRequestHttpException;
@@ -15,6 +16,7 @@ use frontend\models\ContactForm;
 
 /**
  * Site controller
+ * 在此 site controller相当于user controller和web controller
  */
 class SiteController extends Controller
 {
@@ -150,18 +152,20 @@ class SiteController extends Controller
      */
     public function actionSignup()
     {
-        $model = new SignupForm();
-        if ($model->load(Yii::$app->request->post())) {
-            if ($user = $model->signup()) {
-                if (Yii::$app->getUser()->login($user)) {
+        $model = new UserForm();
+        if ($model->load(Yii::$app->request->post()))
+        {
+            if ($user = $model->create())
+            {
+                if (Yii::$app->getUser()->login($user))
+                {
+                    Yii::$app->getSession()->setFlash('success', '注册成功');
                     return $this->goHome();
                 }
             }
         }
 
-        return $this->render('signup', [
-            'model' => $model,
-        ]);
+        //return $this->render('signup', ['model' => $model,]);
     }
 
     /**

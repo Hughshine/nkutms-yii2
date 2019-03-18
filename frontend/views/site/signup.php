@@ -22,13 +22,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'user_name')->textInput(['autofocus' => true]) ?>
 
-                <?= $form->field($model, 'wechat_id') ?>
+                <?= $form->field($model, 'credential')->textInput()?>
 
-                <?= $form->field($model, 'credential') ?>
+                <?= $form->field($model, 'email')->textInput()?>
 
                 <?= $form->field($model, 'password')->passwordInput() ?>
 
-                <?= $form->field($model, 'repassword')->passwordInput() ?>
+                <?= $form->field($model, 'rePassword')->passwordInput() ?>
 
                 <?= $form->field($model, 'verifyCode')->widget(Captcha::className(), [
                     'template' => '<div class="row"><div class="col-lg-3">{image}</div><div class="col-lg-6">{input}</div></div>',

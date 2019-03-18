@@ -7,10 +7,9 @@ use common\models\User;
 
 class LoginForm extends Model
 {
-    public $user_name;
+    public $credential;
     public $password;
     public $rememberMe = true;
-    public $verifyCode;
 
     private $_user;
 
@@ -22,23 +21,20 @@ class LoginForm extends Model
     {
         return [
             // user_name and password are both required
-            [['user_name', 'password'], 'required'],
+            [['credential', 'password'], 'required'],
             // rememberMe must be a boolean value
             ['rememberMe', 'boolean'],
             // password is validated by validatePassword()
              ['password', 'validatePassword'],
-
-            ['verifyCode', 'captcha'],
         ];
     }
     public function attributeLabels()
     {
         return 
         [
-            'user_name'=>'用户名',
+            'credential'=>'账号',
             'password'=>'密码',
             'rememberMe'=>'记住登录状态',
-            'verifyCode' => '验证码',
         ];
     }
     /**
@@ -80,7 +76,7 @@ class LoginForm extends Model
     protected function getUser()
     {
         if ($this->_user === null) {
-            $this->_user = User::findOne(["user_name"=>$this->user_name]);
+            $this->_user = User::findOne(["credential"=>$this->credential]);
         }
 
         return $this->_user;

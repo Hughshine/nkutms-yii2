@@ -5,12 +5,16 @@ use Yii;
 use yii\base\Model;
 use common\models\User;
 
+
 /**
  * Password reset request form
  */
 class PasswordResetRequestForm extends Model
 {
     public $email;
+    public $credential;
+
+    public $verifyCode;
 
 
     /**
@@ -27,6 +31,14 @@ class PasswordResetRequestForm extends Model
                 'filter' => ['status' => User::STATUS_ACTIVE],
                 'message' => 'There is no user with this email address.'
             ],
+            ['verifyCode', 'captcha'],
+        ];
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'verifyCode' => '验证码',
         ];
     }
 

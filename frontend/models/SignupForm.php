@@ -14,7 +14,7 @@ class SignupForm extends Model
     public $repassword;
     public $credential;
     public $verifyCode;
-    //public $email;
+    public $email;
     public $wechat_id;
     public $password;
 
