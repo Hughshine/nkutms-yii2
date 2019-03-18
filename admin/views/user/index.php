@@ -47,9 +47,11 @@ $this->title = '用户管理';
                 'value'=>
                 function($model)
                 {
+                    if($model->category>=count(USER_CATEGORY))
+                        return '未知';
                     return USER_CATEGORY[$model->category];
                 },
-                'filter'=>['0'=>'学生','1'=>'教职员工','2'=>'其他'],
+                'filter'=>USER_CATEGORY,
             ],
             //'credential',
             //'ticket_total',

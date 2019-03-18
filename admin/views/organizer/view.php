@@ -47,6 +47,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=>
                 function($model)
                 {
+                    if($model->category>=count(ORG_CATEGORY))
+                        return '未知';
                     return ORG_CATEGORY[$model->category];
                 },
                 'filter'=>['0'=>'校级组织','1'=>'学生社团'],

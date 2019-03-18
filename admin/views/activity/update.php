@@ -7,7 +7,7 @@ use kartik\datetime\DateTimePicker;
 /* @var $this yii\web\View */
 /* @var $model admin\models\NOW */
 
-$this->title = '修改活动状态：'.$model->activity_name;
+$this->title = '修改活动信息：'.$model->activity_name;
 $this->params['breadcrumbs'][] = ['label' => '活动管理', 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->activity_name, 'url' => ['view', 'id' => $model->act_id]];
 $this->params['breadcrumbs'][] = '修改状态';

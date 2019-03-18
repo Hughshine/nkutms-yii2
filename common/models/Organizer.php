@@ -38,8 +38,6 @@ class Organizer extends ActiveRecord implements IdentityInterface
 {
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
-    const CATEGORY_SCHOOL_ORG = 0;
-    const CATEGORY_STUDENT_ORG = 1;
     /**
      * {@inheritdoc}
      */
@@ -101,10 +99,14 @@ class Organizer extends ActiveRecord implements IdentityInterface
                     ],
             ],
             [
-                'category', 'in', 'range' =>
-                    [
-                        self::CATEGORY_SCHOOL_ORG,self::CATEGORY_STUDENT_ORG
-                    ],
+                'category', 'compare',
+                'compareValue'=>0,
+                'operator' => '>=','message'=>'分类无效',
+            ],
+            [
+                'category', 'compare',
+                'compareValue'=>count(ORG_CATEGORY),
+                'operator' => '<','message'=>'分类无效',
             ],
 
             [['org_name'], 'string', 'max' => 32],

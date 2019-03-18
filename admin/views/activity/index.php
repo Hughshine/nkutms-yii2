@@ -37,9 +37,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=>
                 function($model)
                 {
+                    if($model->category>=count(ACT_CATEGORY))
+                        return '未知';
                     return ACT_CATEGORY[$model->category];
                 },
-                'filter'=>['0'=>'暂无分类','1'=>'文体活动'],
+                'filter'=>ACT_CATEGORY,
             ],
             'status'=>
             [

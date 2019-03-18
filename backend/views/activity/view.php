@@ -51,7 +51,9 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                         'value'=>
                             function($model)
                             {
-                                return ($model->status==1)?'文体活动':'暂无分类';
+                                if($model->category>=count(ACT_CATEGORY))
+                                    return '未知';
+                                return ACT_CATEGORY[$model->category];
                             },
                     ],
                 'status'=>

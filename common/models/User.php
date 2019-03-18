@@ -28,7 +28,7 @@ use yii\filters\RateLimitInterface;
  * @property TicketEvent[] $tkTicketEvents
  */
 
-//定义活动的分类常量
+//定义用户的分类常量
 define('USER_CATEGORY',
     [
         '0'=>'USER_0','1'=>'USER_1','2'=>'USER_2','3'=>'USER_3'
@@ -66,13 +66,43 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
     public function rules()
     {
         return [
-            [['wechat_id', 'credential'], 'required'],
-            [['id','created_at','category', 'expire_at', 'updated_at', 'allowance', 'allowance_updated_at'], 'integer'],
-            [['credential','wechat_id'],'unique'],
+            [
+                ['credential'],
+                'required'
+            ],
+            [
+                ['id','created_at','category', 'expire_at', 'updated_at', 'allowance', 'allowance_updated_at'],
+                'integer'
+            ],
+            [
+                ['credential','wechat_id'],
+                'unique'
+            ],
+            ['email', 'trim'],
+            ['email', 'required'],
+            ['email', 'email'],
+            ['email', 'string', 'max' => 255],
+            ['email', 'unique', 'targetClass' => '\common\models\User', 'message' => '这个邮箱已经被注册'],
+
             [['user_name'], 'string', 'max' => 32],
+
             [['wechat_id', 'credential', 'password', 'access_token'], 'string', 'max' => 255],
+
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
+
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
+
+            [
+                'category', 'compare',
+                'compareValue'=>0,
+                'operator' => '>=','message'=>'分类无效',
+            ],
+            [
+                'category', 'compare',
+                'compareValue'=>count(USER_CATEGORY),
+                'operator' => '<','message'=>'分类无效',
+            ],
+
         ];
     }
 
@@ -85,7 +115,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
             'id' => 'ID',
             'user_name' => '名字',
             'wechat_id' => '微信 ID',
-            'category' => '标记用户类别0-学生1-教职员工2-其他',
+            'category' => '类别',
             'credential' => '账号',
             'password' => '密码',
             'access_token' => 'Access Token',
@@ -104,20 +134,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
             'user_name',
             'category' => function($model)
             {
-                switch ($model->category) {
-                    case 0:
-                        return '学生';
-                        break;
-                    case 1:
-                        return '教职员';
-                        break;
-                    case 2:
-                        return '其他';
-                        break;
-                    default:
-                        return '未知身份';
-                        break;
-                }
+                return USER_CATEGORY[$model->category];
             },
             'credential',
         ];

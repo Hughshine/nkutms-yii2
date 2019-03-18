@@ -33,8 +33,9 @@ use yii\db\ActiveRecord;
 //定义活动的分类常量
 define('ACT_CATEGORY',
     [
-        '0'=>'ACT_0','1'=>'ACT_1','2'=>'ACT_2','3'=>'ACT_3'
+        0=>'ACT_0',1=>'ACT_1',2=>'ACT_2',3=>'ACT_3'
     ]);
+
 
 class Activity extends ActiveRecord
 {
@@ -42,6 +43,8 @@ class Activity extends ActiveRecord
     const STATUS_APPROVED = 1;//已批准状态
     const STATUS_REJECTED= 2;//被驳回状态
     const STATUS_CANCEL= 3;//被取消状态
+
+
     public $org_name;//用于admin端查找发布者名字
 
 
@@ -103,7 +106,16 @@ class Activity extends ActiveRecord
                     self::STATUS_CANCEL,
                 ]],
 
-            ['category', 'in', 'range' => [0,1]],
+            [
+                'category', 'compare',
+                'compareValue'=>0,
+                'operator' => '>=','message'=>'活动分类无效',
+            ],
+            [
+                'category', 'compare',
+                'compareValue'=>count(ACT_CATEGORY),
+                'operator' => '<','message'=>'活动分类无效',
+            ],
 
             [['release_by'], 'exist', 'skipOnError' => true, 'targetClass' => Organizer::className(), 'targetAttribute' => ['release_by' => 'id']],
 
@@ -196,21 +208,7 @@ class Activity extends ActiveRecord
             },
             "category" => function($model)
             {
-                switch($model->category)
-                {
-                    case 0:
-                        return '讲座';
-                        break;
-                    case 1:
-                        return '文艺';
-                        break;
-                    case 2:
-                        return '其他';
-                        break;
-                    default:
-                        return '未知';
-                        break;
-                }
+                return ACT_CATEGORY[$model->category];
             },
             "status" => function($model)
             {

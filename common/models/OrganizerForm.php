@@ -65,7 +65,18 @@ class OrganizerForm extends ActiveRecord
                 [['credential',], 'unique','on'=>['Create',]],
 
                 ['status', 'in', 'range' => [Organizer::STATUS_ACTIVE, Organizer::STATUS_DELETED],'on'=>['Create','Update']],
-                ['category', 'in', 'range' => [0,1],'on'=>['Create','Update']],
+                [
+                    'category', 'compare',
+                    'compareValue'=>0,
+                    'operator' => '>=','message'=>'分类无效',
+                    'on'=>['Create','Update'],
+                ],
+                [
+                    'category', 'compare',
+                    'compareValue'=>count(ORG_CATEGORY),
+                    'operator' => '<','message'=>'分类无效',
+                    'on'=>['Create','Update'],
+                ],
 
                 [['org_name'], 'string', 'max' => 32,'on'=>['Create','Update']],
 

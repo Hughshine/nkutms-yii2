@@ -44,6 +44,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
                         'introduction' ,
                         'release_by',
                         'location',
+                        'category',
                         'time_start_stamp',
                         'ticket_start_stamp',
                         'time_end_stamp',
@@ -57,7 +58,6 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
                 [
                     //要求为整数
                     [
-                        'category',
                         'status',
                         'max_people',
                         'current_serial',
@@ -74,7 +74,18 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
 
                 ['status', 'in', 'range' => [Activity::STATUS_UNAUDITED, Activity::STATUS_APPROVED,Activity::STATUS_REJECTED],'on'=>['Create','Update','Review']],
 
-                ['category', 'in', 'range' => [0,1],'on'=>['Create','Update','Review'],],
+                [
+                    'category', 'compare',
+                    'compareValue'=>0,
+                    'operator' => '>=','message'=>'活动分类无效',
+                    'on'=>['Create','Update',]
+                ],
+                [
+                    'category', 'compare',
+                    'compareValue'=>count(ACT_CATEGORY),
+                    'operator' => '<','message'=>'活动分类无效',
+                    'on'=>['Create','Update',]
+                ],
 
                 ['category','default','value'=>'0','on'=>'Create',],
                 ['current_people','default','value'=>'0','on'=>'Create',],
@@ -202,7 +213,6 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
         try
         {
             if(!$this->validate())throw new \Exception('数据不符合要求!');
-
             $model = new Activity();
             $model->start_at=strtotime($this->time_start_stamp);
             $model->end_at=strtotime($this->time_end_stamp);
@@ -218,7 +228,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
             $model->current_serial=1;
             $model->activity_name=$this->activity_name;
             $model->category=$this->category;
-
+            
             if(!$model->save())throw new \Exception('活动发布失败!');
 
              //此处可以写一个afterCreate方法来处理创建后事务
@@ -245,7 +255,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
         {
             if (!$this->validate())throw new \Exception('数据不符合要求!');
             $model->activity_name = $this->activity_name;
-            $model->category=$this->category;
+            
             $model->status=$this->status;
             if($this->status==Activity::STATUS_APPROVED)
                 $model->release_at=time()+7*3600;
@@ -261,6 +271,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
             $model->ticketing_end_at=strtotime($this->ticket_end_stamp);
             $model->current_people=0;
             $model->current_serial=1;
+            $model->category=$this->category;
             if(!$model->save()) throw new \Exception('活动修改失败!');
 
             //此处可以写一个afterCreate方法来处理创建后事务

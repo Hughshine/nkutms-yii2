@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'activity_name')->textInput() ?>
 
-                <?= $form->field($model, 'category')->dropDownList(ACT_CATEGORY)?>
+                <?= $form->field($model, 'categoryString')->dropDownList(ACT_CATEGORY)?>
 
                 <?= $form->field($model, 'introduction')->textInput(['maxlength' => true]) ?>
 
