@@ -152,20 +152,19 @@ class SiteController extends Controller
      */
     public function actionSignup()
     {
-        $model = new UserForm();
-        if ($model->load(Yii::$app->request->post()))
+        $form = new UserForm();
+        if ($form->load(Yii::$app->request->post()))
         {
-            if ($user = $model->create())
+            if ($model = $form->create('SignUp'))
             {
-                if (Yii::$app->getUser()->login($user))
+                if (Yii::$app->getUser()->login($model))
                 {
                     Yii::$app->getSession()->setFlash('success', '注册成功');
                     return $this->goHome();
                 }
             }
         }
-
-        //return $this->render('signup', ['model' => $model,]);
+        return $this->render('signup', ['model' => $form,]);
     }
 
     /**

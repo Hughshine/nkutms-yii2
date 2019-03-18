@@ -22,6 +22,7 @@ $this->title = '用户管理';
 
             'id',
             'user_name',
+            'email',
             //'auth_key',
             //'password',
             //'password_reset_token',
@@ -47,7 +48,7 @@ $this->title = '用户管理';
                 'value'=>
                 function($model)
                 {
-                    if($model->category>=count(USER_CATEGORY))
+                    if($model->category>=count(USER_CATEGORY)||$model->category<0)
                         return '未知';
                     return USER_CATEGORY[$model->category];
                 },

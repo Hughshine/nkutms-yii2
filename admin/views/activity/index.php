@@ -37,7 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=>
                 function($model)
                 {
-                    if($model->category>=count(ACT_CATEGORY))
+                    if($model->category>=count(ACT_CATEGORY)||$model->category<0)
                         return '未知';
                     return ACT_CATEGORY[$model->category];
                 },

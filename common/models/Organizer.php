@@ -25,14 +25,8 @@ use yii\web\IdentityInterface;
  * @property string $wechat_id2
  * @property string $wechat_id3
  *
- * @property ActivityEvent[] $tkActivityEvents
+ *
  */
-
-//定义组织者的分类常量
-define('ORG_CATEGORY',
-    [
-        '0'=>'ORG_0','1'=>'ORG_1','2'=>'ORG_2','3'=>'ORG_3'
-    ]);
 
 class Organizer extends ActiveRecord implements IdentityInterface
 {
@@ -148,22 +142,11 @@ class Organizer extends ActiveRecord implements IdentityInterface
             // "allowance": null,
             // "allowance_updated_at": 0,
             "category" => function($model)
-            {
-                switch ($model->category) {
-                    case 0:
-                        return '校级组织';
-                        break;
-                    case 1:
-                        return '学生社团';
-                        break;
-                    case 2:
-                        return '其他';
-                        break;
-                    default:
+                {
+                    if($model->category>=count(ORG_CATEGORY)||$model->category<0)
                         return '未知';
-                        break;
-                }
-            },
+                    return ORG_CATEGORY[$model->category];
+                },
         ];
     }
 

@@ -28,11 +28,7 @@ use yii\filters\RateLimitInterface;
  * @property TicketEvent[] $tkTicketEvents
  */
 
-//定义用户的分类常量
-define('USER_CATEGORY',
-    [
-        '0'=>'USER_0','1'=>'USER_1','2'=>'USER_2','3'=>'USER_3'
-    ]);
+
 class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimitInterface
 {
 
@@ -134,6 +130,8 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
             'user_name',
             'category' => function($model)
             {
+                if($model->category>=count(USER_CATEGORY)||$model->category<0)
+                    return '未知';
                 return USER_CATEGORY[$model->category];
             },
             'credential',

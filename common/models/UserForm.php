@@ -7,6 +7,7 @@ use Yii;
 /**
  * 用户表单
  */
+
 class UserForm extends Model
 {
     public $user_name;
@@ -33,7 +34,7 @@ class UserForm extends Model
             ['credential', 'trim'],
             ['credential', 'required'],
             ['credential', 'unique', 'targetClass' => '\common\models\User', 'message' => '这个账号已经被注册'],
-            ['credential', 'string', 'min' => 2, 'max' => 255],
+            ['credential', 'string', 'min' => 5, 'max' => 255],
 
             ['email', 'trim'],
             ['email', 'required'],
@@ -59,7 +60,7 @@ class UserForm extends Model
                 'on'=>['Create','Update'],
             ],
 
-            ['verifyCode', 'captcha'],
+            ['verifyCode', 'captcha','on'=>['SignUp',]],
         ];
     }
 
@@ -70,15 +71,36 @@ class UserForm extends Model
                 'Create'=>//表示某个场景所用到的信息,没标记出来的不会有影响
                     [
                         'category',
+                        'created_at',
                         'credential',
                         'email',
                         'password',
                         'rePassword',
+                        'status',
+                        'updated_at',
+                        'user_name',
+                    ],
+                'SignUp'=>//SignUp与Create的区别是SignUp需要验证验证码
+                    [
+                        'category',
+                        'created_at',
+                        'credential',
+                        'email',
+                        'password',
+                        'rePassword',
+                        'status',
+                        'updated_at',
                         'user_name',
                         'verifyCode',
-                        'status',
                     ],
-                'Ban'=> ['status',],
+                'Update'=>
+                    [
+                        'category',
+                        'email',
+                        'user_name',
+                        'updated_at',
+                    ],
+                'ChangeStatus'=> ['status','updated_at'],
                 'default'=>
                     [
                         'category',
@@ -89,6 +111,8 @@ class UserForm extends Model
                         'user_name',
                         'verifyCode',
                         'status',
+                        'created_at',
+                        'updated_at',
                     ],
             ];
     }
@@ -108,16 +132,19 @@ class UserForm extends Model
     }
 
     /**
-     * Create a user .
+     * create a user .
      *
      * @return User|null the saved model or null if saving fails
      */
-    public function create()
+    //需要传入$scenario作为场景变量,接受的参数必须为'Create'或'SignUp'
+    public function create($scenario)
     {
-        $this->scenario='Create';
+        $this->scenario=$scenario;
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
+            if($scenario!='Create'&&$scenario!='SignUp')
+                throw new \Exception('场景参数错误');
             if(!$this->validate())throw new \Exception('注册信息需要调整');
 
             $model = new User();
@@ -133,9 +160,45 @@ class UserForm extends Model
             $model->allowance_updated_at=0;
             $model->generateAuthKey();
 
-            if(!$model->save())
-            {var_dump($model->errors);throw new \Exception('注册失败!');}
+            if(!$model->save())throw new \Exception('注册失败!');
             //此处可以写一个afterCreate方法来处理创建后事务
+
+            $transaction->commit();
+            return $model;
+        }
+        catch(\Exception $e)
+        {
+            $transaction->rollBack();
+            $this->lastError=$e->getMessage();
+            Yii::$app->getSession()->setFlash('warning', $this->lastError);
+            return null;
+        }
+    }
+
+
+    //update场景字段为:
+    public function infoUpdate($model)
+    {
+        $this->scenario='Update';
+        $transaction=Yii::$app->db->beginTransaction();
+        try
+        {
+            if(!$this->validate())throw new \Exception('修改信息需要调整');
+
+            $model = new User();
+            $model->user_name = $this->user_name;
+            $model->category=USER_CATEGORY[0];
+            $model->credential=$this->credential;
+            $model->email=$this->email;
+            $model->setPassword($this->password);
+            $model->status=User::STATUS_ACTIVE;
+            $model->expire_at=0;
+            $model->access_token='';
+            $model->allowance=2;
+            $model->allowance_updated_at=0;
+            $model->generateAuthKey();
+
+            if(!$model->save())throw new \Exception('修改失败!');
 
             $transaction->commit();
             return $model;
@@ -147,6 +210,31 @@ class UserForm extends Model
 
             Yii::$app->getSession()->setFlash('warning', $this->lastError);
             return null;
+        }
+    }
+
+    //改变用户状态功能,即封号和解封
+    //返回是否修改成功
+    public function changeStatus($model,$status)
+    {
+        $this->scenario='ChangeStatus';
+        $transaction=Yii::$app->db->beginTransaction();
+        try
+        {
+            if(!$this->validate())throw new \Exception('状态不在有效范围内');
+            $model->status=$status;
+
+            if(!$model->save())throw new \Exception('修改失败!');
+
+            $transaction->commit();
+            return true;
+        }
+        catch(\Exception $e)
+        {
+            $transaction->rollBack();
+            $this->lastError=$e->getMessage();
+            Yii::$app->getSession()->setFlash('warning', $this->lastError);
+            return false;
         }
     }
 }

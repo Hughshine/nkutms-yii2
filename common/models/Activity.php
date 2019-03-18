@@ -30,11 +30,6 @@ use yii\db\ActiveRecord;
  * @property Ticket[] $tkTickets
  * @property TicketEvent[] $tkTicketEvents
  */
-//定义活动的分类常量
-define('ACT_CATEGORY',
-    [
-        0=>'ACT_0',1=>'ACT_1',2=>'ACT_2',3=>'ACT_3'
-    ]);
 
 
 class Activity extends ActiveRecord
@@ -208,6 +203,8 @@ class Activity extends ActiveRecord
             },
             "category" => function($model)
             {
+                if($model->category>=count(ACT_CATEGORY)||$model->category<0)
+                    return '未知';
                 return ACT_CATEGORY[$model->category];
             },
             "status" => function($model)

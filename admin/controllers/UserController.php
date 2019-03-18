@@ -4,6 +4,7 @@ namespace admin\controllers;
 
 use Yii;
 use common\models\User;
+use common\models\UserForm;
 use admin\models\UserSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -34,7 +35,7 @@ class UserController extends Controller
                     ],
                     [//登录用户能访问这个控制器里的方法
                         'allow'=>true,
-                        'actions'=>['index','update','view'],
+                        'actions'=>['index','update','view','changestatus'],
                         'roles'=>['@'],//登录用户
                     ],
                 ],
@@ -99,6 +100,16 @@ class UserController extends Controller
         ]);
     }
 
+    //一键封号功能
+    public function actionChangestatus($id,$status)
+    {
+        $model = $this->findModel($id);
+        $form=new UserForm();
+        if($form->changeStatus($model,$status))
+            Yii::$app->getSession()->setFlash('success', '修改成功');
+        return $this->redirect(['view', 'id' => $model->id]);
+    }
+
     /**
      * Deletes an existing User model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
@@ -106,12 +117,11 @@ class UserController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+    /*public function actionDelete($id)
     {
         $this->findModel($id)->delete();
-
         return $this->redirect(['index']);
-    }
+    }*/
 
     /**
      * Finds the User model based on its primary key value.
