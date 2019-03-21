@@ -157,9 +157,11 @@ class OrganizerForm extends ActiveRecord
         ];
     }
 
+    //rules中调用的验证旧密码的函数
     public function validatePassword($attribute, $params)
     {
-        if (!$this->hasErrors()) {
+        if (!$this->hasErrors())
+        {
             $org=Organizer::findIdentity($this->org_id);
             if (!$org || !$org->validatePassword($this->oldPassword)) {
                 $this->addError($attribute, '旧密码不正确');
@@ -181,8 +183,12 @@ class OrganizerForm extends ActiveRecord
             ];
     }
 
+
+    //根据这个表单的信息创建一个账号,返回新创建的模型或者null(创建失败)
     /*
-     * 根据这个表单的信息创建一个账号,返回新创建的模型或者null(创建失败)
+     * 必须的字段为:
+     * org_name,category,credential,password,rePassword,
+     * status
      * */
     public function create()
     {
@@ -190,20 +196,19 @@ class OrganizerForm extends ActiveRecord
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('数据不符合要求!');
+            if(!$this->validate())throw new \Exception('创建信息需要调整');
             $model = new Organizer();
             $model->org_name = $this->org_name;
+            $model->category=$this->category;
+            $model->credential = $this->credential;
+            $model->setPassword($this->password);
+            $model->status=$this->status;
+            $model->generateAuthKey();//原理不明，保留就对了，据说是用于自动登录的
             $model->access_token=' ';
             $model->wechat_id=' ';
             $model->expire_at = 0;
             $model->allowance = 2;
             $model->allowance_updated_at = 0;
-            $model->category=$this->category;
-            $model->credential = $this->credential;
-            $model->setPassword($this->password);
-            $model->status=$this->status;
-            $model->updated_at=$model->created_at=time()+7*3600;
-            $model->generateAuthKey();//原理不明，保留就对了，据说是用于自动登录的
 
             if(!$model->save())throw new \Exception('组织者创建失败!');
 
@@ -221,8 +226,11 @@ class OrganizerForm extends ActiveRecord
         }
     }
 
+
+    //根据表单的信息更新$model的信息,返回是否修改成功
     /*
-     * 根据表单的信息更新$model的名字,分类,状态
+     * 必须的字段为:
+     * status,category,org_name
      * */
     public function infoUpdate($model)
     {
@@ -230,7 +238,7 @@ class OrganizerForm extends ActiveRecord
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('数据不符合要求');
+            if(!$this->validate())throw new \Exception('修改信息需要调整');
 
             $model->status=$this->status;
             $model->category=$this->category;
@@ -247,19 +255,18 @@ class OrganizerForm extends ActiveRecord
             return false;
         }
     }
+    //向数据库更新该模型对应的修改的密码,返回是否修改成功
     /*
-     * 向数据库更新该模型对应的修改的密码
-     * 注意:需要先往$this->ord_id,$this->org_name写入相应的数据
-     * 因为页面显示需要id和名字数据,而传递的模型是表单模型而不是实例模型,所以需要补充数据
+     * 必须的字段:password,rePassword,
+     * 第二个参数为true时oldPassword也是必须的
      * */
     public function RePassword($model,$validateOldPassword=true)
     {
-        $this->org_id=$model->id;
         $this->scenario=($validateOldPassword)?'RePassword':'RePasswordByAdmin';
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('数据不符合要求');
+            if(!$this->validate())throw new \Exception('修改信息需要调整');
             $model->setPassword($this->password);
             if(!$model->save())throw new \Exception('密码修改失败!');
 

@@ -97,8 +97,9 @@ class TicketForm extends ActiveRecord
             ];
     }
 
+     //根据这个表单的信息创建一个票务记录,返回新创建的模型或者null(创建失败)
     /*
-     * 根据这个表单的信息创建一个票务记录,返回新创建的模型或者null(创建失败)
+     * 必须的字段为:user_id,activity_id,status,serial_number
      * */
     public function create()
     {
@@ -106,14 +107,14 @@ class TicketForm extends ActiveRecord
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('数据不符合要求!');
+            if(!$this->validate())throw new \Exception('创建信息需要调整');
             $model = new Ticket();
             $model->user_id=$this->user_id;
             $model->activity_id=$this->activity_id;
             $model->status=$this->status;
             $model->serial_number=$this->serial_number;
 
-            if(!$model->save())throw new \Exception('组织者创建失败!');
+            if(!$model->save())throw new \Exception('票务创建失败!');
             //此处可以写一个afterCreate方法来处理创建后事务
 
             $this->tk_id=$model->id;//用于创建后导向相关页面
@@ -130,8 +131,11 @@ class TicketForm extends ActiveRecord
         }
     }
 
+
+    //根据表单的信息更新$model
     /*
-     * 根据表单的信息更新$model
+     * 必须的字段为:
+     * user_id, activity_id,status,serial_number
      * */
     public function infoUpdate($model)
     {
@@ -139,7 +143,7 @@ class TicketForm extends ActiveRecord
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('数据不符合要求');
+            if(!$this->validate())throw new \Exception('修改信息需要调整');
             $model->user_id=$this->user_id;
             $model->activity_id=$this->activity_id;
             $model->status=$this->status;

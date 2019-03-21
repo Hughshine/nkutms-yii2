@@ -123,6 +123,8 @@ class OrganizerController extends Controller
     {
         $model = $this->findModel($id);
         $form =new OrganizerForm();
+        /*注意:需要先往$this->ord_id,$this->org_name写入相应的数据
+        因为页面显示需要id和名字数据,而传递的模型是表单模型而不是实例模型,所以需要补充数据*/
         $form->org_name=$model->org_name;
         $form->org_id=$model->id;
         if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model,false))

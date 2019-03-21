@@ -23,22 +23,36 @@ class PasswordResetRequestForm extends Model
     public function rules()
     {
         return [
-            ['email', 'trim'],
-            ['email', 'required'],
+            [['email','credential'], 'trim'],
+            [['email','credential'], 'required'],
             ['email', 'email'],
             ['email', 'exist',
                 'targetClass' => '\common\models\User',
                 'filter' => ['status' => User::STATUS_ACTIVE],
-                'message' => 'There is no user with this email address.'
+                'message' => '邮箱尚未被注册应或该用户已被禁用'
             ],
             ['verifyCode', 'captcha'],
+            ['credential', 'validateCredential',],
         ];
+    }
+
+    //验证邮箱与密码是否对应
+    public function validateCredential($attribute, $params)
+    {
+        if (!$this->hasErrors())
+        {
+            $user=User::findByCredential($this->credential);
+            if (!$user || strcmp($this->email,$user->email)!=0)
+                $this->addError($attribute, '账号与邮箱不对应或账号已被禁用');
+        }
     }
 
     public function attributeLabels()
     {
         return [
             'verifyCode' => '验证码',
+            'credential' => '账号',
+            'email' => '邮箱',
         ];
     }
 

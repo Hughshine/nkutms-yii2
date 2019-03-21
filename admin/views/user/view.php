@@ -15,6 +15,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
+        <?= Html::a('修改密码', ['repassword', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('修改资料', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
         <?php switch($model->status):
             case \common\models\User::STATUS_ACTIVE :?>
                 <?= Html::a('封号',
@@ -69,6 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'user_name',
             'email',
+            'credential',
             //'auth_key',
             //'password',
             //'password_reset_token',

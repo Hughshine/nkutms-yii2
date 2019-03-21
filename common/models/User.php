@@ -14,8 +14,8 @@ use yii\filters\RateLimitInterface;
  * @property int $id
  * @property string $user_name
  * @property string $wechat_id
- * @property int $category 标记用户类别0-学生1-教职员工2-其他
- * @property string $credential 该用户类别下，他的证件号。web端使用此为账号进行登录
+ * @property int $category 用户类别
+ * @property string $credential 账号
  * @property string $password
  * @property string $access_token
  * @property string $created_at
@@ -44,7 +44,6 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
                 'class' => TimestampBehavior::className(),
                 'createdAtAttribute' => 'created_at',
                 'updatedAtAttribute' => 'updated_at',
-                // 'value' => new Expression('NOW()'),
             ],
         ];   
     } 
@@ -99,6 +98,8 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
                 'operator' => '<','message'=>'分类无效',
             ],
 
+            [['img_url'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg'],
+
         ];
     }
 
@@ -111,6 +112,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
             'id' => 'ID',
             'user_name' => '名字',
             'wechat_id' => '微信 ID',
+            'email' => '邮箱',
             'category' => '类别',
             'credential' => '账号',
             'password' => '密码',
@@ -194,9 +196,9 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
      * @param string $user_name
      * @return static|null
      */
-    public static function findByUsername($user_name)
+    public static function findByCredential($credential)
     {
-        return static::findOne(['user_name' => $user_name, 'status' => self::STATUS_ACTIVE]);
+        return static::findOne(['credential' => $credential, 'status' => self::STATUS_ACTIVE]);
     }
 
     /**
@@ -210,7 +212,6 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
         if (!static::isPasswordResetTokenValid($token)) {
             return null;
         }
-
         return static::findOne([
             'password_reset_token' => $token,
             'status' => self::STATUS_ACTIVE,

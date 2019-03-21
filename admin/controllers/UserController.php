@@ -35,7 +35,7 @@ class UserController extends Controller
                     ],
                     [//登录用户能访问这个控制器里的方法
                         'allow'=>true,
-                        'actions'=>['index','update','view','changestatus'],
+                        'actions'=>['index','update','view','changestatus','repassword'],
                         'roles'=>['@'],//登录用户
                     ],
                 ],
@@ -90,8 +90,24 @@ class UserController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        if ($model->load(Yii::$app->request->post()) && $model->save())
+        {
+            Yii::$app->getSession()->setFlash('success', '修改成功');
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+        return $this->render('update', [
+            'model' => $model,
+        ]);
+    }
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+    //创建一个新的用户
+    public function actionCreate($id)
+    {
+        $model = $this->findModel($id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->save())
+        {
+            Yii::$app->getSession()->setFlash('success', '创建成功');
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -105,9 +121,37 @@ class UserController extends Controller
     {
         $model = $this->findModel($id);
         $form=new UserForm();
-        if($form->changeStatus($model,$status))
+        $form->status=$status;
+        if($form->changeStatus($model))
             Yii::$app->getSession()->setFlash('success', '修改成功');
         return $this->redirect(['view', 'id' => $model->id]);
+    }
+    //修改分类功能
+    public function actionChangeCategory($id,$category)
+    {
+        $model = $this->findModel($id);
+        $form=new UserForm();
+        $form->category=$category;
+        if($form->changeStatus($model))
+            Yii::$app->getSession()->setFlash('success', '修改成功');
+        return $this->redirect(['view', 'id' => $model->id]);
+    }
+
+    //修改用户密码功能
+    public function actionRepassword($id)
+    {
+        $model = $this->findModel($id);
+        $form =new UserForm();
+        /*注意:需要先往$this->user_id,$this->user_name写入相应的数据
+        因为页面显示需要id和名字数据,而传递的模型是表单模型而不是实例模型,所以需要补充数据*/
+        $form->user_name=$model->user_name;
+        $form->user_id=$model->id;
+        if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model,false))
+        {
+            Yii::$app->getSession()->setFlash('success', '密码修改成功');
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+        return $this->render('password', ['model' => $form,]);
     }
 
     /**

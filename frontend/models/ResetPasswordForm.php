@@ -11,6 +11,8 @@ use common\models\User;
 class ResetPasswordForm extends Model
 {
     public $password;
+    public $rePassword;
+
 
     /**
      * @var \common\models\User
@@ -45,6 +47,7 @@ class ResetPasswordForm extends Model
         return [
             ['password', 'required'],
             ['password', 'string', 'min' => 6],
+            ['rPassword','compare','compareAttribute'=>'password','message'=>'密码和重复密码不相同'],
         ];
     }
 

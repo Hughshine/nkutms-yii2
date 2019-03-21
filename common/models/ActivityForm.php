@@ -206,6 +206,13 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
     }
 
     //以当前表单的信息创建一个活动,返回这个活动的模型
+    /*
+     * 必须字段为:
+     * time_start_stamp,time_end_stamp
+     * ticket_start_stamp,ticket_end_stamp
+     * release_by,location,introduction,
+     * max_people,activity_name,category
+     * */
     public function create()
     {
         $this->scenario='Create';
@@ -218,7 +225,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
             $model->end_at=strtotime($this->time_end_stamp);
             $model->ticketing_start_at=strtotime($this->ticket_start_stamp);
             $model->ticketing_end_at=strtotime($this->ticket_end_stamp);
-            $model->updated_at=$model->release_at=time()+7*3600;
+            $model->release_at=time()+7*3600;
             $model->current_people=0;
             $model->release_by=$this->release_by;
             $model->status=Activity::STATUS_UNAUDITED;
@@ -245,15 +252,23 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
         }
     }
 
-    //以当前表单的信息更新$activity活动信息
+    //以当前表单的信息更新$activity活动信息,返回是否成功
     //之所以不用update做名字,因为父类有update方法,不想重写
+    /*
+     * 必须字段为:
+     * time_start_stamp,time_end_stamp
+     * ticket_start_stamp,ticket_end_stamp
+     * release_by,location,introduction,
+     * max_people,activity_name,category,
+     * status
+     * */
     public function infoUpdate($model)
     {
         $this->scenario='Update';
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if (!$this->validate())throw new \Exception('数据不符合要求!');
+            if (!$this->validate())throw new \Exception('更新信息需要调整');
             $model->activity_name = $this->activity_name;
             
             $model->status=$this->status;
@@ -261,7 +276,6 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
                 $model->release_at=time()+7*3600;
             $model->location=$this->location;
             $model->release_by=$this->release_by;
-            $model->current_serial=$this->current_serial;
             $model->max_people=$this->max_people;
             $model->introduction=$this->introduction;
             $model->start_at=strtotime($this->time_start_stamp);
@@ -269,42 +283,36 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
             $model->updated_at=time()+7*3600;
             $model->ticketing_start_at=strtotime($this->ticket_start_stamp);
             $model->ticketing_end_at=strtotime($this->ticket_end_stamp);
-            $model->current_people=0;
-            $model->current_serial=1;
             $model->category=$this->category;
             if(!$model->save()) throw new \Exception('活动修改失败!');
 
             //此处可以写一个afterCreate方法来处理创建后事务
 
             $transaction->commit();
-            return $model;
+            return true;
         }
         catch(\Exception $e)
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
             Yii::$app->getSession()->setFlash('error', $this->lastError);
-            return null;
+            return false;
         }
     }
 
-    /*
-     * 一键审核功能实现将$model的status置为$status,返回是否成功
-     * */
-    public function review($model,$status)
+
+    //一键审核功能实现将$model的status置为$this->status,返回是否成功
+    //必须字段为status
+    public function review($model)
     {
         $this->scenario='Review';
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            $model->status=$status;
-            if($status==Activity::STATUS_APPROVED)
+            $model->status=$this->status;
+            if($this->status==Activity::STATUS_APPROVED)
                 $model->release_at=time()+7*3600;
-            if(!$model->save())
-            {
-                var_dump($model->errors);
-                throw new \Exception('修改失败!');
-            }
+            if(!$model->save()) throw new \Exception('非法状态修改失败!');
 
             $transaction->commit();
             return true;

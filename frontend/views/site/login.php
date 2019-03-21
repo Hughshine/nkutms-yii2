@@ -14,7 +14,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="site-login">
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>请填写用户名和密码进行登录:</p>
+    <p>请填写账号和密码进行登录:</p>
 
     <div class="row">
         <div class="col-lg-5">

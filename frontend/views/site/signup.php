@@ -30,12 +30,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'rePassword')->passwordInput() ?>
 
+                <?= $form->field($model, 'img_url')->widget('common\widgets\file_upload\FileUpload',[
+                    'config'=>[
+                        //图片上传的一些配置，不写调用默认配置
+                        //'domain_url' => '@web/images/user/avatar',
+                    ]
+                ]) ?>
+
                 <?= $form->field($model, 'verifyCode')->widget(Captcha::className(), [
                     'template' => '<div class="row"><div class="col-lg-3">{image}</div><div class="col-lg-6">{input}</div></div>',
                 ]) ?>
 
                 <div class="form-group">
-                    <?= Html::submitButton('注册', ['class' => 'btn btn-primary', 'name' => 'signup-button']) ?>
+                    <?= Html::submitButton( '注册', ['class' =>'btn btn-success', 'name' => 'signup-button']) ?>
                 </div>
 
             <?php ActiveForm::end(); ?>

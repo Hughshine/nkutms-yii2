@@ -46,7 +46,8 @@ class LoginForm extends Model
      */
     public function validatePassword($attribute, $params)
     {
-        if (!$this->hasErrors()) {
+        if (!$this->hasErrors())
+        {
             $user = $this->getUser();
             if (!$user || !$user->validatePassword($this->password)) {
                 $this->addError($attribute, '密码或用户名不正确');
@@ -62,23 +63,20 @@ class LoginForm extends Model
      */
     public function login()
     {
-        if ($this->validate()) {
+        if ($this->validate())
             return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
-        }
         return false;
     }
 
     /**
-     * Finds user by [[user_name]]
+     * Finds user by [[credential]]
      *
      * @return User|null
      */
     protected function getUser()
     {
-        if ($this->_user === null) {
+        if ($this->_user === null)
             $this->_user = User::findOne(["credential"=>$this->credential]);
-        }
-
         return $this->_user;
     }
 }

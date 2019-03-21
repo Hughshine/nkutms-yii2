@@ -20,14 +20,14 @@ AppAsset::register($this);
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php $this->registerCsrfMetaTags() ?>
-    <title><?= Html::encode($this->title) ?></title>
+    <!--title><?= Html::encode($this->title) ?></title-->
     <?php $this->head() ?>
 </head>
 <body>
 <?php $this->beginBody() ?>
 
-<div class="wrap">
-    <?php
+<!--div class="wrap">
+    < ?php
     NavBar::begin([
         'brandLabel' => Yii::$app->name,
         'brandUrl' => Yii::$app->homeUrl,
@@ -35,47 +35,54 @@ AppAsset::register($this);
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
-    $menuItems = [
-        ['label' => 'Home', 'url' => ['/site/index']],
-        ['label' => 'About', 'url' => ['/site/about']],
-        ['label' => 'Contact', 'url' => ['/site/contact']],
+    $leftMenus = [
+        ['label' => '主页', 'url' => ['/site/index']],
+        ['label' => '活动', 'url' => ['/activity/index']],
+        ['label' => '公告', 'url' => ['/information/index']],
+        //['label' => 'About', 'url' => ['/site/about']],
+        //['label' => 'Contact', 'url' => ['/site/contact']],
     ];
-    if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
-        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
-    } else {
-        $menuItems[] = '<li>'
-            . Html::beginForm(['/site/logout'], 'post')
-            . Html::submitButton(
-                'Logout (' . Yii::$app->user->identity->user_name . ')',
-                ['class' => 'btn btn-link logout']
-            )
-            . Html::endForm()
-            . '</li>';
-    }
+    $rightMenus=[];
+    if (Yii::$app->user->isGuest)
+        {
+            $rightMenus[] = ['label' => '注册', 'url' => ['/site/signup']];
+            $rightMenus[] = ['label' => '登录', 'url' => ['/site/login']];
+        }
+    else
+        {
+             $rightMenus[]=
+                 [
+                     'label'=>Yii::$app->user->identity->user_name,
+                     //'url'=>['site/logout'],
+                     'items'=>
+                     [
+                         ['label'=>'<i class="fa fa-user"></i>个人中心', 'url'=>['/site/view'], 'linkOptions'=>['data-method'=>'post']],
+                         ['label'=>'<i class="fa fa-sign-out"></i>退出', 'url'=>['/site/logout'], 'linkOptions'=>['data-method'=>'post']],
+                     ],
+                 ];
+        }
+    echo Nav::widget([
+        'options' => ['class' => 'navbar-nav navbar-left'],
+        'items' => $leftMenus,
+    ]);
+
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav navbar-right'],
-        'items' => $menuItems,
+        'encodeLabels'=>false,
+        'items' => $rightMenus,
     ]);
     NavBar::end();
-    ?>
+    ?-->
 
     <div class="container">
-        <?= Breadcrumbs::widget([
+        <?= Breadcrumbs::widget(
+            [
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-        ]) ?>
+            ]) ?>
         <?= Alert::widget() ?>
         <?= $content ?>
     </div>
-</div>
-
-<footer class="footer">
-    <div class="container">
-        <p class="pull-left">&copy; <?= Html::encode(Yii::$app->name) ?> <?= date('Y') ?></p>
-
-        <p class="pull-right"><?= Yii::powered() ?></p>
-    </div>
-</footer>
+<!--/div-->
 
 <?php $this->endBody() ?>
 </body>

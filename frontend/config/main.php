@@ -8,6 +8,7 @@ $params = array_merge(
 
 return [
     'id' => 'app-frontend',
+    'name'=>'南开票务系统',
     'basePath' => dirname(__DIR__),
     'language' => 'zh-CN',
     'bootstrap' => ['log'],
