@@ -472,7 +472,6 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
                 $this->pic_url='/upload_files/activity/'.$date.'/'.$fileName;
                 return true;
             }
-
         }
         return false;
     }

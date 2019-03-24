@@ -72,7 +72,6 @@ class SiteController extends Controller
         if (Yii::$app->user->isGuest) {
             return $this->redirect('site/login');
         }
-        $this->viewAction();
         return $this->render('index');
     }
 
@@ -84,7 +83,6 @@ class SiteController extends Controller
         if (Yii::$app->user->isGuest) {
             return $this->redirect('site/login');
         }
-        $this->viewAction();
         $model = Yii::$app->user->identity;
         $form =new OrganizerForm();
         $form->org_id=$model->id;
@@ -92,11 +90,9 @@ class SiteController extends Controller
         if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model))
         {
             Yii::$app->getSession()->setFlash('success', '密码修改成功!');
-            return $this->redirect('index');
+            return $this->redirect('index.php');
         }
-        return $this->render('password', [
-            'model' => $form,
-        ]);
+        return $this->render('password', ['model' => $form,]);
     }
 
     /**
@@ -123,15 +119,6 @@ class SiteController extends Controller
     }
 
 
-    private function viewAction()
-    {
-        $this->layout='main.php';
-        $view=Yii::$app->view;
-        $org=Yii::$app->user->identity;
-        $view->params['org_name']=$org->org_name;
-        $view->params['created_at']=$org->created_at;
-    }
-
     /**
      * Logout action.
      *
@@ -148,7 +135,6 @@ class SiteController extends Controller
         if (Yii::$app->user->isGuest) {
             return $this->redirect('site/login');
         }
-        $this->viewAction();
         return $this->render('view', [
             'model' => Yii::$app->user->identity,
         ]);

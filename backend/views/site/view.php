@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     return '未知';
                         return ORG_CATEGORY[$model->category];
                     },
-                    'filter'=>['0'=>'校级组织','1'=>'学生社团'],
+                    'filter'=>ORG_CATEGORY,
                 ],
                 'status'=>
                 [

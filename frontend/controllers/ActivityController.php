@@ -79,12 +79,12 @@ class ActivityController extends Controller
             Yii::$app->getSession()->setFlash('warning','该活动不存在');
             return $this->redirect(['view', 'id' => $act->id]);
         }
-        if(time()+7*3600<$act->start_at)
+        if(time()+7*3600<$act->ticketing_start_at)
         {
             Yii::$app->getSession()->setFlash('warning','票务尚未开始,别急');
             return $this->redirect(['view', 'id' => $act->id]);
         }
-        if(time()+7*3600>$act->end_at)
+        if(time()+7*3600>$act->ticketing_end_at)
         {
             Yii::$app->getSession()->setFlash('warning','票务已过期');
             return $this->redirect(['view', 'id' => $act->id]);

@@ -5,7 +5,7 @@ use yii\widgets\DetailView;
 use common\models\Organizer;
 
 /* @var $this yii\web\View */
-/* @var $model admin\models\NOW */
+/* @var $model common\models\Activity */
 
 $this->title = '修改活动信息';
 $this->params['breadcrumbs'][] = ['label' => '活动列表', 'url' => ['index']];
@@ -22,8 +22,18 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                 &&$model->status!=\common\models\Activity::STATUS_APPROVED
                 &&$model->status!=\common\models\Activity::STATUS_CANCEL
                 &&$model->start_at>time()+7*3600):?>
-                    <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-                    <?= Html::a('修改预览图', ['change-picture', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+                    <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']); ?>
+                    <?= Html::a('修改预览图',
+                        ['change-picture', 'id' => $model->id],
+                        [
+                                'class' => 'btn btn-primary',
+                            'data' =>
+                                [
+                                    'method' => 'post',
+                                ],
+                        ]
+                    );
+                    ?>
                     <?= Html::a('取消该活动',
                         [
                             'cancel',
@@ -36,7 +46,7 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                                     'confirm' => '取消后这条活动记录作废,无法修改!确定取消?',
                                     'method' => 'post',
                                 ],
-                        ]) ?>
+                        ]); ?>
             <?php endif;?>
             </h1>
         </div>

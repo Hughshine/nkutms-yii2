@@ -190,7 +190,7 @@ class ActivityController extends Controller
             Yii::$app->session->setFlash('success','修改成功');
             return $this->redirect(['view', 'model' => $model,]);
         }
-        return $this->redirect(['update', 'modelForm' => $form,'scenario'=>'ChangePicture']);
+        return $this->render('update', ['modelForm' => $form,'scenario'=>'ChangePicture']);
     }
 
     /*
