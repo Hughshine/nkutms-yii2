@@ -85,15 +85,13 @@ class TicketController extends Controller
     public function actionCreate()
     {
         $form=new TicketForm();
+        $form->status=Ticket::STATUS_VALID;
         if ($form->load(Yii::$app->request->post()) && $form->create())
         {
             Yii::$app->getSession()->setFlash('success', '创建成功');
             return $this->redirect(['view', 'id' => $form->tk_id]);
         }
-
-        return $this->render('create', [
-            'model' => $form,
-        ]);
+        return $this->render('create', ['model' => $form,]);
     }
 
     /**
@@ -134,7 +132,7 @@ class TicketController extends Controller
         $form->activity_id=$model->activity_id;
         $form->serial_number=$model->serial_number;
         $form->status=$status;
-        if($form->infoUpdate($model))
+        if($form->infoUpdate($model,'ChangeStatus'))
             Yii::$app->getSession()->setFlash('success', '修改成功');
         else
             Yii::$app->getSession()->setFlash('success', '修改失败');

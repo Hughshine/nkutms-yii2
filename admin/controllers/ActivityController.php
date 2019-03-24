@@ -171,7 +171,7 @@ class ActivityController extends Controller
         $model = $this->findModel($id);
         $form=new ActivityForm();
         $form->status=$status;
-        if($form->review($model))
+        if($form->infoUpdate($model,'ChangeStatus'))
             Yii::$app->getSession()->setFlash('success', '修改成功');
         return $this->redirect(['view', 'id' => $model->id]);
     }

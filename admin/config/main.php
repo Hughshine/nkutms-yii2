@@ -35,7 +35,7 @@ return [
         //路由设置：美化url
         'urlManager' => 
         [
-            'enablePrettyUrl' => true,
+            'enablePrettyUrl' => false,
             'showScriptName' => false,
         ],
         'session' => [

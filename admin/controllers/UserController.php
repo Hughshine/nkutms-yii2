@@ -122,17 +122,18 @@ class UserController extends Controller
         $model = $this->findModel($id);
         $form=new UserForm();
         $form->status=$status;
-        if($form->changeStatus($model))
+        if($form->infoUpdate($model,'ChangeStatus'))
             Yii::$app->getSession()->setFlash('success', '修改成功');
         return $this->redirect(['view', 'id' => $model->id]);
     }
+
     //修改分类功能
     public function actionChangeCategory($id,$category)
     {
         $model = $this->findModel($id);
         $form=new UserForm();
         $form->category=$category;
-        if($form->changeStatus($model))
+        if($form->infoUpdate($model,'ChangeCategory'))
             Yii::$app->getSession()->setFlash('success', '修改成功');
         return $this->redirect(['view', 'id' => $model->id]);
     }

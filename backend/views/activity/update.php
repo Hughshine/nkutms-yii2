@@ -9,6 +9,8 @@ use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use kartik\datetime\DateTimePicker;
 $this->title = '活动信息修改';
+$this->params['breadcrumbs'][] = ['label' => '我的发布记录', 'url' => ['mine']];
+$this->params['breadcrumbs'][] = ['label' => $modelForm->activity_name, 'url' => ['view','id'=>$modelForm->act_id]];
 $this->params['breadcrumbs'][] = '活动信息修改';
 ?>
 <div class="row">
@@ -16,17 +18,24 @@ $this->params['breadcrumbs'][] = '活动信息修改';
         <div class ="panel-body">
             <?php $form = ActiveForm::begin(); ?>
 
-            <?= $form->field($model, 'activity_name')->textInput() ?>
+            <?php switch($scenario):
+            case 'Update':?>
 
-            <?= $form->field($model, 'category')->dropDownList(ACT_CATEGORY)?>
+            <?= $form->field($modelForm, 'activity_name')->textInput() ?>
 
-            <?= $form->field($model, 'introduction')->textInput(['maxlength' => true]) ?>
+            <?= $form->field($modelForm, 'category')->dropDownList(ACT_CATEGORY)?>
 
-            <?= $form->field($model, 'location')->textInput() ?>
+                <?= $form->field($modelForm, 'introduction')->widget('common\widgets\ueditor\Ueditor',[
+                    'options'=>[
+                        'initialFrameWidth' => 1050,//宽度
+                        'initialFrameHeight' => 550,//高度
+                    ]
+                ]) ?>
+            <?= $form->field($modelForm, 'location')->textInput() ?>
 
-            <?= $form->field($model, 'max_people')->textInput() ?>
+            <?= $form->field($modelForm, 'max_people')->textInput() ?>
 
-            <?= $form->field($model, 'time_start_stamp')->widget(DateTimePicker::classname(),
+            <?= $form->field($modelForm, 'time_start_stamp')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
                     'pluginOptions' =>
@@ -38,7 +47,7 @@ $this->params['breadcrumbs'][] = '活动信息修改';
                 ]);
             ?>
 
-            <?= $form->field($model, 'time_end_stamp')->widget(DateTimePicker::classname(),
+            <?= $form->field($modelForm, 'time_end_stamp')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
                     'pluginOptions' =>
@@ -50,7 +59,7 @@ $this->params['breadcrumbs'][] = '活动信息修改';
                 ]);
             ?>
 
-            <?= $form->field($model, 'ticket_start_stamp')->widget(DateTimePicker::classname(),
+            <?= $form->field($modelForm, 'ticket_start_stamp')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
                     'pluginOptions' =>
@@ -62,7 +71,7 @@ $this->params['breadcrumbs'][] = '活动信息修改';
                 ]);
             ?>
 
-            <?= $form->field($model, 'ticket_end_stamp')->widget(DateTimePicker::classname(),
+            <?= $form->field($modelForm, 'ticket_end_stamp')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
                     'pluginOptions' =>
@@ -73,6 +82,27 @@ $this->params['breadcrumbs'][] = '活动信息修改';
                         ]
                 ]);
             ?>
+            <?php break;
+            case 'ChangePicture':?>
+                <p>
+                    <?php if($modelForm->pic_url):?>
+                        <img src= "<?=$modelForm->pic_url?>" width="256px" height="256px" alt="pic">
+                    <?php else:?>
+                        <img src="/statics/images/activity_default_pic.png" width="256px" height=256px" alt="pic">
+                    <?php endif;?>
+                </p>
+                <p>
+                    <?= $form->field($modelForm, 'pic_url')->widget('common\widgets\file_upload\FileUpload',[
+                        'config'=>[
+                            //图片上传的一些配置，不写调用默认配置
+                            //'domain_url' => '@web/images/user/avatar',
+                        ]
+                    ]) ?>
+                    <?= Html::a('不用自定义图片', ['remove-picture','id'=>$modelForm->act_id], ['class' => 'btn btn-warning']) ?>
+                </p>
+            <?php break;
+            default:break;
+            endswitch;?>
 
             <div class="form-group">
                 <?= Html::submitButton('修改', ['class' => 'btn btn-success']) ?>

@@ -91,8 +91,6 @@ class Activity extends ActiveRecord
 
             [['location'], 'string', 'max' => 64],
 
-            [['introduction',], 'string', 'max' => 255],
-
             ['status', 'in', 'range' =>
                 [
                     self::STATUS_UNAUDITED,
@@ -163,6 +161,7 @@ class Activity extends ActiveRecord
             'max_people' => '最大人数',
             'current_serial' => '票务的序列号',
             'pic_url' => '图片',
+            'summary' => '摘要',
         ];
     }
 

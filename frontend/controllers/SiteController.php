@@ -1,8 +1,6 @@
 <?php
 namespace frontend\controllers;
 
-use common\models\User;
-use common\models\UserForm;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\web\BadRequestHttpException;
@@ -13,6 +11,8 @@ use frontend\models\LoginForm;
 use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\ContactForm;
+use common\models\User;
+use common\models\UserForm;
 
 /**
  * Site controller
@@ -32,19 +32,27 @@ class SiteController extends Controller
                     [
                         'actions' =>
                             [
-                                'signup','login','index','error','request-password-reset',
+                                'signup','index','error','request-password-reset',
                                 'reset-password'
                             ],
                         'allow' => true,
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['captcha','reset-password','upload'],
+                        'actions' =>
+                            [
+                                'my-activities',
+                            ],
+                        'allow' => false,
+                        'roles' => ['?'],
+                    ],
+                    [
+                        'actions' => ['captcha','reset-password','upload','login'],
                         'allow' => true,
                         'roles' => ['?','@'],
                     ],
                     [
-                        'actions' => ['logout','view','repassword','error','index','update'],
+                        'actions' => ['logout','view','repassword','error','index','update','my-activities'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -76,7 +84,7 @@ class SiteController extends Controller
                 'class' => 'common\widgets\file_upload\UploadAction',     //这里扩展地址别写错
                 'config' =>
                     [
-                          'imagePathFormat' => "/images/{yyyy}{mm}{dd}{time}{rand:6}",
+                          'imagePathFormat' =>"/upload_files/temp/images/{yyyy}{mm}{dd}{time}{rand:6}",
                     ]
             ],
         ];
@@ -96,6 +104,13 @@ class SiteController extends Controller
         if(Yii::$app->user->isGuest)
             return $this->redirect('index');
         return $this->render('view');
+    }
+
+    public function actionMyActivities()
+    {
+        if(Yii::$app->user->isGuest)
+            return $this->redirect('index');
+        return $this->render('myActivities');
     }
 
     /**
@@ -148,7 +163,7 @@ class SiteController extends Controller
         if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model,true))
         {
             Yii::$app->getSession()->setFlash('success', '密码修改成功');
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['view']);
         }
         return $this->render('password', ['model' => $form,]);
     }
@@ -210,24 +225,14 @@ class SiteController extends Controller
         if ($form->load(Yii::$app->request->post()))
         {
             $form->category=0;
-            if($form->img_url&&$form->credential)//如果选择了图片且有了账号
+            if($model=$form->create('SignUp'))
             {
-                if(!$this->setImg($form))
-                {
-                    Yii::$app->getSession()->setFlash('warning', '图片上传失败,请稍后重试');
-                    return $this->render('signup', ['model' => $form,]);
-                }
-            }
-            else $form->img_url=null;
-            if ($model = $form->create('SignUp'))
-            {
-                if (Yii::$app->getUser()->login($model))
+                if(Yii::$app->getUser()->login($model))
                 {
                     Yii::$app->getSession()->setFlash('success', '注册成功');
                     return $this->goHome();
                 }
             }
-
         }
         return $this->render('signup', ['model' => $form,]);
     }
@@ -237,58 +242,32 @@ class SiteController extends Controller
     public function actionUpdate($scenario)
     {
         $form =new UserForm();
-        switch($scenario)
+        $model=Yii::$app->user->identity;
+        switch($scenario)//检测场景参数是否错误
         {
             case 'ChangeUserName':
             case 'ChangeEmail':
-            case 'ChangeAvatar':
-            case 'RemoveAvatar':
-                $form->scenario=$scenario;break;
-            default:
-                Yii::$app->getSession()->setFlash('warning', '场景参数错误');
-                return $this->redirect(['view']);
-        }
-        $model = Yii::$app->user->identity;
-        $form->user_name=$model->user_name;
-        $form->email=$model->email;
-        $form->category=$model->category;
-        $form->img_url=$model->img_url;
-        if($scenario=='RemoveAvatar')
-        {
-            //删除原有的图像文件
-            $oldFile=strtr(Yii::$app->basePath, '\\', '/').'/web'.$model->img_url;
-            if($model->img_url&&file_exists($oldFile))unlink($oldFile);
-            if($form->infoUpdate($model,$scenario))
-            {
-                Yii::$app->getSession()->setFlash('success', '修改成功');
-                return $this->redirect(['view']);
-            }
-        }
-        if ($form->load(Yii::$app->request->post()))
-        {
-            if($scenario=='ChangeAvatar')
-            {
-                //如果没改头像就不去调用update方法
-                if($form->img_url==$model->img_url)
+            case 'ChangeAvatar':$form->scenario=$scenario;break;
+            case 'RemoveAvatar'://当删除头像场景时,要求是点击即完成,不需要也不会有表单提交动作
+                if($form->infoUpdate($model,$scenario))
                 {
                     Yii::$app->getSession()->setFlash('success', '修改成功');
                     return $this->redirect(['view']);
                 }
-                $form->credential=$model->credential;
-                if(!$this->setImg($form))
-                {
-                    Yii::$app->getSession()->setFlash('warning', '图片上传失败,请稍后重试');
-                    return $this->redirect(['view']);
-                }
-                //删除原有的图像文件
-                $oldFile=strtr(Yii::$app->basePath, '\\', '/').'/web'.$model->img_url;
-                if($model->img_url&&file_exists($oldFile))unlink($oldFile);
-            }
-            if($form->infoUpdate($model,$scenario))
-            {
-                Yii::$app->getSession()->setFlash('success', '修改成功');
+                else
+                    return $this->render('update', ['model' => $form,'scenario'=>$scenario]);
+                break;
+            default:
+                Yii::$app->getSession()->setFlash('warning', '场景参数错误');
                 return $this->redirect(['view']);
-            }
+        }
+        $form->user_name=$model->user_name;
+        $form->email=$model->email;
+        $form->category=$model->category;
+        if ($form->load(Yii::$app->request->post())&&$form->infoUpdate($model,$scenario))
+        {
+            Yii::$app->getSession()->setFlash('success', '修改成功');
+            return $this->redirect(['view']);
         }
         return $this->render('update', ['model' => $form,'scenario'=>$scenario]);
     }
@@ -341,33 +320,5 @@ class SiteController extends Controller
         return $this->render('resetPassword', [
             'model' => $model,
         ]);
-    }
-
-    //将表单的img_url正确处理,返回是否处理成功
-    /*
-     * 主要是将上传的文件复制到用户的文件夹下,
-     * 因为这个图片上传组件只要一点击图片就会将图片上传到服务器,
-     * 在表单中重复选择图片会导致多张图片上传至服务器,这样会有很多的无效图片
-     * 我想的解决方案是,将真正用得到的图片放到另一个目录下
-     * 服务器定期清理组件所指定的web/images里的文件夹,这样就可以省去很多空间,
-     * 注意:由于这里用了credential字段来建立文件夹,所以需要提前向$form里写入
-     * credential
-     * */
-    private function setImg($form)
-    {
-        if($form->img_url)
-        {
-            //这里的文件处理搞得我脑阔有点疼
-            $newDir=strtr(Yii::$app->basePath, '\\', '/').'/web/user/'.$form->credential;
-            $oldDir=strtr(Yii::$app->basePath, '\\', '/').'/web'.$form->img_url;
-            $fileName=substr($form->img_url,8);
-            if(!file_exists($newDir)) mkdir($newDir,0777,true);
-            if(file_exists($newDir)&&copy($oldDir,$newDir.'/'.$fileName))
-            {
-                $form->img_url='/user/'.$form->credential.'/'.$fileName;
-                return true;
-            }
-        }
-        return false;
     }
 }

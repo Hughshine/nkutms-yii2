@@ -31,61 +31,61 @@ class UserForm extends ActiveRecord
     {
         return [
             ['user_name', 'trim','on'=>['Create','SignUp','ChangeUserName'],],
-            ['user_name', 'required','on'=>['Create','SignUp','ChangeUserName'],],
+            ['user_name', 'required','on'=>['Create','SignUp','ChangeUserName','default',],],
             [
                 'user_name', 'string', 'min' => 2, 'max' => 255,
-                'on'=>['Create','SignUp','ChangeUserName'],
+                'on'=>['Create','SignUp','ChangeUserName','default',],
             ],
 
             ['credential', 'trim','on'=>['Create','SignUp'],],
-            ['credential', 'required','on'=>['Create','SignUp'],],
+            ['credential', 'required','on'=>['Create','SignUp','default',],],
             [
                 'credential', 'unique',
                 'targetClass' => '\common\models\User',
                 'message' => '这个账号已经被注册',
-                'on'=>['Create','SignUp',],
+                'on'=>['Create','SignUp','default',],
             ],
-            ['credential', 'string', 'min' => 5, 'max' => 255,'on'=>['Create','SignUp'],],
+            ['credential', 'string', 'min' => 5, 'max' => 255,'on'=>['Create','SignUp','default',],],
 
             ['email', 'trim','on'=>['Create','SignUp','ChangeEmail'],],
             ['email', 'required','on'=>['Create','SignUp','ChangeEmail'],],
             ['email', 'email','on'=>['Create','SignUp','ChangeEmail'],],
-            ['email', 'string', 'max' => 255,'on'=>['Create','SignUp','ChangeEmail'],],
+            ['email', 'string', 'max' => 255,'on'=>['Create','SignUp','ChangeEmail','default',],],
             [
                 'email', 'unique',
                 'targetClass' => '\common\models\User', 'message' => '这个邮箱已经被注册',
-                'on'=>['Create','SignUp'],
+                'on'=>['Create','SignUp','default',],
             ],
-            ['email', 'validateEmail','on'=>['ChangeEmail',]],
+            ['email', 'validateEmail','on'=>['ChangeEmail','default',]],
 
-            ['rePassword','required','on'=>['RePassword','RePasswordByAdmin']],
+            ['rePassword','required','on'=>['RePassword','RePasswordByAdmin','default',]],
             [
                 'rePassword','compare','compareAttribute'=>'password',
                 'message'=>'密码和重复密码不相同',
-                'on'=>['RePassword','RePasswordByAdmin'],
+                'on'=>['RePassword','RePasswordByAdmin','default',],
             ],
 
-            ['oldPassword','required','on'=>['RePassword',]],
-            ['oldPassword', 'validatePassword','on'=>['RePassword',]],
+            ['oldPassword','required','on'=>['RePassword','default',]],
+            ['oldPassword', 'validatePassword','on'=>['RePassword','default',]],
 
-            ['password', 'required','on'=>['RePassword','RePasswordByAdmin']],
-            ['password', 'string', 'min' => 6,'on'=>['RePassword','RePasswordByAdmin']],
+            ['password', 'required','on'=>['RePassword','RePasswordByAdmin','default',]],
+            ['password', 'string', 'min' => 6,'on'=>['RePassword','RePasswordByAdmin','default',]],
 
 
             [
                 'category', 'compare',
                 'compareValue'=>0,
                 'operator' => '>=','message'=>'分类无效',
-                'on'=>['Create','ChangeCategory'],
+                'on'=>['Create','ChangeCategory','default',],
             ],
             [
                 'category', 'compare',
                 'compareValue'=>count(USER_CATEGORY),
                 'operator' => '<','message'=>'分类无效',
-                'on'=>['Create','ChangeCategory'],
+                'on'=>['Create','ChangeCategory','default',],
             ],
 
-            ['verifyCode', 'captcha','on'=>['SignUp',]],
+            ['verifyCode', 'captcha','on'=>['SignUp','default',]],
         ];
     }
 
@@ -218,6 +218,14 @@ class UserForm extends ActiveRecord
                 throw new \Exception('场景参数错误');
             if(!$this->validate())throw new \Exception('注册信息需要调整');
 
+            if($this->img_url)
+            {
+                if(!$this->setImg())
+                    throw new \Exception('图片上传失败,请稍后重试');
+            }
+            else
+                $this->img_url=null;
+
             $model = new User();
             $model->user_name = $this->user_name;
             $model->category=$this->category;
@@ -231,8 +239,8 @@ class UserForm extends ActiveRecord
             $model->allowance=2;
             $model->allowance_updated_at=0;
             $model->img_url=$this->img_url;
+            
             $model->generateAuthKey();
-
 
             if(!$model->save())throw new \Exception('注册失败!');
 
@@ -258,36 +266,64 @@ class UserForm extends ActiveRecord
      *  ChangeCategory:category
      *  ChangeUserName:user_name
      *  ChangeEmail:email
+     *  ChangeAvatar:img_url
+     *  RemoveAvatar: img_url允许为空
      * */
     public function infoUpdate($model,$scenario)
     {
-        switch($scenario)
-        {
-            case 'ChangeStatus':
-            case 'ChangeCategory':
-            case 'ChangeUserName':
-            case 'ChangeAvatar':
-            case 'RemoveAvatar':
-            case 'ChangeEmail':
-                $this->scenario=$scenario;break;
-            default:
-                Yii::$app->getSession()->setFlash('warning', '场景参数错误');
-                return false;
-        }
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
+            switch($scenario)//过滤无效场景
+            {
+                case 'ChangeStatus':
+                case 'ChangeCategory':
+                case 'ChangeUserName':
+                case 'ChangeEmail':
+                case 'ChangeAvatar':
+                case 'RemoveAvatar':
+                    $this->scenario=$scenario;break;
+                default:
+                    throw new \Exception('场景参数错误');
+                    break;
+            }
             if(!$this->validate())throw new \Exception('修改信息需要调整');
 
-            $model->user_name = $this->user_name;
-            $model->email=$this->email;
-            if($scenario=='RemoveAvatar')
-                $model->img_url=null;
-            else
-                $model->img_url=$this->img_url;
-
+            switch($scenario)
+            {
+                case 'ChangeStatus':
+                    $model->status = $this->status;break;
+                case 'ChangeCategory':
+                    $model->category = $this->category;break;
+                case 'ChangeUserName':
+                    $model->user_name = $this->user_name;break;
+                case 'ChangeEmail':
+                    $model->email = $this->email;break;
+                case 'ChangeAvatar':
+                {
+                    //如果没改头像就不做动作
+                    if($this->img_url!=$model->img_url)
+                    {
+                        $this->credential=$model->credential;
+                        if(!$this->setImg()) throw new \Exception('图片上传失败,请稍后重试');
+                        //删除原有的图像文件
+                        $oldFile=BASE_PATH.$model->img_url;
+                        if($model->img_url&&file_exists($oldFile))unlink($oldFile);
+                        $model->img_url=$this->img_url;
+                    }
+                    break;
+                }
+                case 'RemoveAvatar':
+                {
+                    //删除原有的图像文件
+                    $oldFile=BASE_PATH.$model->img_url;
+                    if($model->img_url&&file_exists($oldFile))unlink($oldFile);
+                    $model->img_url=null;
+                    break;
+                }
+                default:break;
+            }
             if(!$model->save())throw new \Exception('修改失败!');
-
             $transaction->commit();
             return true;
         }
@@ -295,7 +331,6 @@ class UserForm extends ActiveRecord
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
-
             Yii::$app->getSession()->setFlash('warning', $this->lastError);
             return false;
         }
@@ -329,31 +364,33 @@ class UserForm extends ActiveRecord
         }
     }
 
-    //改变用户状态功能,即封号和解封返回是否修改成功
+    //将表单的img_url正确处理,返回是否处理成功
     /*
-     * 必须的字段为:
-     * status
+     * 主要是将上传的文件复制到用户的文件夹下,
+     * 因为这个图片上传组件只要一点击图片就会将图片上传到服务器,
+     * 在表单中重复选择图片会导致多张图片上传至服务器,这样会有很多的无效图片
+     * 我想的解决方案是,将真正用得到的图片放到另一个目录下
+     * 服务器定期清理组件所指定的upload_files/temp里的文件夹,这样就可以省去很多空间,
+     * 注意:由于这里用了credential字段来建立文件夹,所以需要提前向$form里写入
+     * credential
      * */
-    public function changeStatus($model)
+    private function setImg()
     {
-        $this->scenario='ChangeStatus';
-        $transaction=Yii::$app->db->beginTransaction();
-        try
+        if($this->img_url&&$this->credential)
         {
-            if(!$this->validate())throw new \Exception('状态无效');
-            $model->status=$this->status;
-
-            if(!$model->save())throw new \Exception('修改失败!');
-
-            $transaction->commit();
-            return true;
+            //这里的文件处理搞得我脑阔有点疼
+            $newDir=BASE_PATH.'/upload_files/user/'.$this->credential;
+            $oldDir=BASE_PATH.$this->img_url;
+            $fileName=substr($this->img_url,25);
+            if(!file_exists($newDir)) mkdir($newDir,0777,true);
+            if(file_exists($newDir)&&copy($oldDir,$newDir.'/'.$fileName))
+            {
+                if($this->img_url&&file_exists($oldDir))unlink($oldDir);
+                $this->img_url='/upload_files/user/'.$this->credential.'/'.$fileName;
+                return true;
+            }
         }
-        catch(\Exception $e)
-        {
-            $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('warning', $this->lastError);
-            return false;
-        }
+        return false;
     }
+
 }

@@ -14,6 +14,13 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="tk-activity-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
+    <p>
+        <?php if($model->pic_url):?>
+            <img src= "<?=$model->pic_url?>" width="256px" height="256px" alt="pic">
+        <?php else:?>
+            <img src="/statics/images/activity_default_pic.png" width="256px" height=256px" alt="pic">
+        <?php endif;?>
+    </p>
 
     <p>
         <?php if($model->status!=common\models\Activity::STATUS_CANCEL):?>
@@ -105,7 +112,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     },
             ],
-            'introduction',
+            'summary',
             'location',
             'max_people',
             'current_people',
@@ -177,3 +184,5 @@ $this->params['breadcrumbs'][] = $this->title;
     ]) ?>
 
 </div>
+<h3>活动介绍</h3>
+<?=$model->introduction?>

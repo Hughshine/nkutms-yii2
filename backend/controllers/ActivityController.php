@@ -33,7 +33,13 @@ class ActivityController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['index','error','create','mine','view','update','cancel'],
+                        'actions' =>
+                            [
+                                'index','error','create',
+                                'mine','view','update',
+                                'cancel','upload','change-picture',
+                                'remove-picture','ueditor',
+                            ],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -47,6 +53,31 @@ class ActivityController extends Controller
             ],
         ];
     }
+
+    public function actions()
+    {
+        return 
+        [
+            'error' => [
+                'class' => 'yii\web\ErrorAction',
+            ],
+            'upload'=>[//图片上传组件
+                'class' => 'common\widgets\file_upload\UploadAction',     //这里扩展地址别写错
+                'config' =>
+                    [
+                          'imagePathFormat' =>"/upload_files/temp/images/{yyyy}{mm}{dd}{time}{rand:6}",
+                    ]
+            ],
+            'ueditor'=>[
+                'class' => 'common\widgets\ueditor\UeditorAction',
+                'config'=>[
+                    //上传图片配置
+                    'imageUrlPrefix' => "", /* 图片访问路径前缀 */
+                    'imagePathFormat' => "/upload_files/ueditor/image/activity/{yyyy}{mm}{dd}/{time}{rand:6}", /* 上传保存路径,可以自定义保存路径和文件名格式 */
+                ]
+            ],
+        ];
+    }
     /*
      * 活动列表
      * */
@@ -54,7 +85,6 @@ class ActivityController extends Controller
     {
         if (Yii::$app->user->isGuest)
             return $this->redirect('site/login');
-        $this->viewAction();
         return $this->render('index');
     }
 
@@ -65,12 +95,12 @@ class ActivityController extends Controller
     {
         if (Yii::$app->user->isGuest)
             return $this->redirect('site/login');
-        $this->viewAction();
 
         $model=Activity::findIdentity_admin($id);
         if($model->release_by!=Yii::$app->user->id) return $this->goBack();
         $form = new ActivityForm();
         $form->activity_name=$model->activity_name;
+        $form->act_id=$model->id;
         $form->status=$model->status;
         $form->release_by=$model->release_by;
         $form->category=$model->category;
@@ -81,13 +111,13 @@ class ActivityController extends Controller
         $form->ticket_start_stamp=date('Y-m-d H:i' , $model->ticketing_start_at);
         $form->ticket_end_stamp=date('Y-m-d H:i' , $model->ticketing_end_at);
         $form->max_people=$model->max_people;
-        if ($form->load(Yii::$app->request->post())&&$form->infoUpdate($model) )
+        $form->pic_url=$model->pic_url;
+        if ($form->load(Yii::$app->request->post())&&$form->infoUpdate($model,'Update') )
         {
             Yii::$app->session->setFlash('success','修改成功');
             return $this->redirect(['view', 'id' => $model->id]);
-            //return $this->redirect(['activity/mine']);
         }
-        return $this->render('update', ['model' => $form]);
+        return $this->render('update', ['modelForm' => $form,'scenario'=>'Update']);
     }
 
     /*
@@ -97,7 +127,6 @@ class ActivityController extends Controller
     {
         if (Yii::$app->user->isGuest)
             return $this->redirect('site/login');
-        $this->viewAction();
         $form = new ActivityForm();
         $form->release_by=Yii::$app->user->id;
         $form->status=Activity::STATUS_UNAUDITED;
@@ -116,7 +145,6 @@ class ActivityController extends Controller
     {
         if (Yii::$app->user->isGuest)
             return $this->redirect('site/login');
-        $this->viewAction();
         return $this->render('mine');
     }
 
@@ -127,7 +155,6 @@ class ActivityController extends Controller
     {
         if (Yii::$app->user->isGuest)
             return $this->redirect('site/login');
-        $this->viewAction();
         return $this->render('view', ['model' => $this->findModel($id),]);
     }
 
@@ -136,15 +163,52 @@ class ActivityController extends Controller
      * */
     public function actionCancel($id)
     {
-        if (Yii::$app->user->isGuest) {
+        if (Yii::$app->user->isGuest)
             return $this->redirect('site/login');
-        }
-        $this->viewAction();
         $model=$this->findModel($id);
         $form=new ActivityForm();
-        if($form->review($model,Activity::STATUS_CANCEL))
+        $form->status=Activity::STATUS_CANCEL;
+        if($form->infoUpdate($model,'ChangeStatus'))
             Yii::$app->session->setFlash('success','修改成功');
-        return $this->render('view', ['model' => $model,]);
+        return $this->redirect(['view', 'model' => $model,]);
+    }
+
+    /*
+     * 修改活动预览图
+     * */
+    public function actionChangePicture($id)
+    {
+        if (Yii::$app->user->isGuest)
+            return $this->redirect('site/login');
+        $model=$this->findModel($id);
+        $form=new ActivityForm();
+        $form->act_id=$model->id;
+        $form->activity_name=$model->activity_name;
+        $form->pic_url=$model->pic_url;
+        if($form->load(Yii::$app->request->post())&&$form->infoUpdate($model,'ChangePicture'))
+        {
+            Yii::$app->session->setFlash('success','修改成功');
+            return $this->redirect(['view', 'model' => $model,]);
+        }
+        return $this->redirect(['update', 'modelForm' => $form,'scenario'=>'ChangePicture']);
+    }
+
+    /*
+     * 去除活动预览图
+     * */
+    public function actionRemovePicture($id)
+    {
+        if (Yii::$app->user->isGuest)
+            return $this->redirect('site/login');
+        $model=$this->findModel($id);
+        $form=new ActivityForm();
+        $form->pic_url=null;
+        if($form->infoUpdate($model,'ChangePicture'))
+        {
+            Yii::$app->session->setFlash('success','修改成功');
+            return $this->redirect(['view', 'model' => $model,]);
+        }
+        return $this->redirect(['update', 'model' => $form,'scenario'=>'ChangePicture']);
     }
 
     protected function findModel($id)
@@ -155,14 +219,4 @@ class ActivityController extends Controller
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 
-    //这个是用于向页面组件传数据的:不知为何,在页面转换的时候,页面组件不会接收到上一个页面的数据
-    //在这个样式下,最好每个页面调用前都执行这个动作,否则会报错
-    private function viewAction()
-    {
-        $this->layout='main.php';
-        $view=Yii::$app->view;
-        $org=Yii::$app->user->identity;
-        $view->params['org_name']=$org->org_name;
-        $view->params['created_at']=$org->created_at;
-    }
 }

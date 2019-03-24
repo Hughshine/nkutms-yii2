@@ -45,18 +45,10 @@ use yii\helpers\Html;
                 <?php if(Yii::$app->user->isGuest):?>
                     <ul class="top-link">
                         <li>
-                            <?= Html::a('   登录', ['site/login',],
-                                [
-                                    'class' => 'fa fa-sign-in',
-                                    'data' => ['method' => 'post',],
-                                ]) ?>
+                            <?= Html::a('   登录', ['site/login',],['class' => 'fa fa-sign-in',]) ?>
                         </li>
                         <li>
-                            <?= Html::a('   注册', ['site/signup',],
-                                [
-                                    'class' => 'fa fa-user-plus',
-                                    'data' => ['method' => 'post',],
-                                ]) ?>
+                            <?= Html::a('注册', ['site/signup',],['class' => 'fa fa-user-plus']) ?>
                         </li>
                     </ul>
                 <?php else:?>
@@ -64,35 +56,26 @@ use yii\helpers\Html;
                         <li class="dropdown">
                             <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                                 <?php if(Yii::$app->user->identity->img_url) :?>
-                                    <img src= "<?= Yii::$app->user->identity->img_url?>"
-                                         width="32px"
-                                         height="32px"
-                                         alt="avatar">
+                                    <img src= "<?=Yii::$app->user->identity->img_url?>" width="32px" height="32px" alt="avatar">
                                 <?php else:?>
-                                欢迎: <?= Yii::$app->user->identity->user_name?>
+                                    欢迎: <?= Yii::$app->user->identity->user_name?>
                                 <?php endif;?>
                                 <span class="caret"></span></a>
                             <ul class="dropdown-menu">
-                                <li><?= Html::a('个人资料', ['view'],
-                                        [
-                                            'class' => 'fa fa-user',
-                                            'data' => ['method' => 'post',],
-                                        ]) ?>
+                                <li>
+                                	<?= Html::a('个人资料', ['site/view'],['class' => 'fa fa-user',]) ?>
                                 </li>
                                 <li>
-                                    <?= Html::a('修改密码', ['repassword'],
-                                        [
-                                            'class' => 'fa fa-user-secret',
-                                            'data' => ['method' => 'post',],
-                                        ]) ?>
+                                    <?= Html::a('修改密码', ['site/repassword'],['class' => 'fa fa-user-secret',]) ?>
                                 </li>
                                 <li class="divider"></li>
                                 <li>
                                     <?= Html::a('退出', ['site/logout',],
                                         [
                                             'class' => 'fa fa-sign-out',
-                                            'data' => ['method' => 'post',],
-                                        ]) ?>
+                                            'data-method'=>['post'],
+                                        ]) 
+                                        ?>
                                 </li>
                             </ul>
                         </li>
@@ -114,19 +97,15 @@ use yii\helpers\Html;
             </div>
         </div>
         <div class="col-md-5">
-            <form class="form-search">
+            <!--form class="form-search">
                 <input type="text" class="input-medium search-query">
                 <button type="submit" class="btn"><span class="glyphicon glyphicon-search"></span></button>
-            </form>
+            </form-->
         </div>
         <div class="col-md-3">
             <?php if(!Yii::$app->user->isGuest):?>
             <div id="cart" class="pull-left">
-                <?= Html::a('参与的活动:0', ['index'],
-                    [
-                        'class' => 'btn btn-1 fa fa-hand-paper-o',
-                        'data' => ['method' => 'post',],
-                    ]) ?>
+                <?= Html::a('参与的活动', ['site/my-activities'],['class' => 'btn btn-1 fa fa-hand-paper-o',]) ?>
             </div>
             <?php endif;?>
         </div>
@@ -143,18 +122,18 @@ use yii\helpers\Html;
                 <li>
                     <?= Html::a('主页', ['site/index',]) ?>
                 </li>
-                <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">活动</a>
+                <li><?= Html::a('活动', ['activity/index',]) ?></li>
+                <!--li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">活动</a>
                     <div class="dropdown-menu">
                         <div class="dropdown-inner">
                             <ul class="list-unstyled">
-                                <li><a href="category.html">分类1</a></li>
-                                <li><a href="category.html">分类2</a></li>
+                                <?= Html::a('分类1', ['activity/index']) ?>
+                                <?= Html::a('分类2', ['activity/index']) ?>
                             </ul>
                         </div>
                     </div>
-                </li>
-                <li><?= Html::a('公告', ['site/information',]) ?></li>
-                <li><?= Html::a('组织', ['site/organization',]) ?></li>
+                </li-->
+                <li><?= Html::a('通知', ['notice/index',]) ?></li>
             </ul>
         </div>
     </div>
@@ -178,7 +157,7 @@ use yii\helpers\Html;
                     <!-- Wrapper for slides -->
                     <div class="carousel-inner">
                         <div class="item active">
-                            <img src="<?=Url::to('@web/template/images/main-banner1-1903x600.jpg');?>" width="1800px" height="280px" alt="First slide">
+                            <img src="<?=Url::to('@web/template/images/nk1.jpg');?>" width="1800px" height="280px" alt="First slide">
                             <!-- Static Header -->
                             <div class="header-text hidden-xs">
                                 <div class="col-md-12 text-center">
@@ -186,7 +165,7 @@ use yii\helpers\Html;
                             </div><!-- /header-text -->
                         </div>
                         <div class="item">
-                            <img src="<?=Url::to('@web/template/images/main-banner2-1903x600.jpg');?>" width="1800px" height="280px"alt="Second slide">
+                            <img src="<?=Url::to('@web/template/images/nk2.jpg');?>" width="1800px" height="280px"alt="Second slide">
                             <!-- Static Header -->
                             <div class="header-text hidden-xs">
                                 <div class="col-md-12 text-center">
@@ -194,7 +173,7 @@ use yii\helpers\Html;
                             </div><!-- /header-text -->
                         </div>
                         <div class="item">
-                            <img src="<?=Url::to('@web/template/images/main-banner3-1903x600.jpg');?>" width="1800px" height="280px"alt="Third slide">
+                            <img src="<?=Url::to('@web/template/images/nk3.jpg');?>" width="1800px" height="280px"alt="Third slide">
                             <!-- Static Header -->
                             <div class="header-text hidden-xs">
                                 <div class="col-md-12 text-center">

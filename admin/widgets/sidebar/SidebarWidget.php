@@ -20,9 +20,10 @@ class SidebarWidget extends Menu
     {
         $this->items = [
             //['label' =>'<i class="fa fa-dashboard"></i><span>仪表盘</span>','url'=>['site/index']],
-            ['label' =>'<a href=""><i class="fa fa-th-list"></i><span>活动票务管理</span></a>','options'=>['class'=>'nav-parent'],'items'=>[
+            ['label' =>'<a href=""><i class="fa fa-th-list"></i><span>事务管理</span></a>','options'=>['class'=>'nav-parent'],'items'=>[
                     ['label'=>'活动管理','url'=>['activity/index'],],
                     ['label'=>'票务管理','url'=>['ticket/index'],],
+                    ['label'=>'通知管理','url'=>['notice/index'],],
                 ]
             ],
             ['label' =>'<a href=""><i class="fa fa-user"></i><span>用户管理</span></a>','options'=>['class'=>'nav-parent'],'items'=>[

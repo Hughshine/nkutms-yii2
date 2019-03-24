@@ -13,9 +13,11 @@ return [
     'language' => 'zh-CN',
     'bootstrap' => ['log'],
     'controllerNamespace' => 'frontend\controllers',
+    'homeUrl'=>'/',//修改所有应用在同一个域名下
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-frontend',
+            'baseUrl'=>'',//修改所有应用在同一个域名下
         ],
         //路由设置：美化url
         'urlManager' =>

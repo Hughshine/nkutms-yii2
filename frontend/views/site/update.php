@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = '修改资料';
                     <?php break;case'ChangeAvatar':?>
                         <p>
                             <?php if(Yii::$app->user->identity->img_url):?>
-                                <img src="<?= Yii::$app->user->identity->img_url?>" width="128px" height="128px" alt="avatar">
+                                <img src="<?=Yii::$app->user->identity->img_url?>" width="128px" height="128px" alt="avatar">
                             <?php endif;?>
                         </p>
                         <p>
@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = '修改资料';
                                     //'domain_url' => '@web/images/user/avatar',
                                 ]
                             ]) ?>
-                            <?= Html::a('不用头像', ['update','scenario'=>'RemoveAvatar'], ['class' => 'btn btn-warning']) ?>
+                            <?= Html::a('不用头像', ['site/update','scenario'=>'RemoveAvatar'], ['class' => 'btn btn-warning']) ?>
                         </p>
 
 

@@ -23,6 +23,7 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                 &&$model->status!=\common\models\Activity::STATUS_CANCEL
                 &&$model->start_at>time()+7*3600):?>
                     <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+                    <?= Html::a('修改预览图', ['change-picture', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
                     <?= Html::a('取消该活动',
                         [
                             'cancel',
@@ -39,6 +40,11 @@ $this->params['breadcrumbs'][] = $model->activity_name;
             <?php endif;?>
             </h1>
         </div>
+        <?php if($model->pic_url):?>
+        <img src= "<?=$model->pic_url?>" width="256px" height="256px" alt="pic">
+        <?php else:?>
+            <img src="/statics/images/activity_default_pic.png" width="256px" height=256px" alt="pic">
+        <?php endif;?>
         <?= DetailView::widget([
             'model' => $model,
             'attributes' => [
@@ -73,7 +79,7 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                                 }
                             },
                     ],
-                'introduction',
+                'summary',
                 'location',
                 'max_people',
                 'current_people',
@@ -81,17 +87,17 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                 'start_at'=>
                     [
                         'label'=>'活动开始时间',
-                        'attribute'=>'updated_at',
+                        'attribute'=>'start_at',
                         'value' => function ($model) {
-                                return date('Y-m-d:H:i:s',($model->updated_at));
+                                return date('Y-m-d:H:i:s',($model->start_at));
                             },
                     ],
                 'end_at'=>
                     [
                         'label'=>'活动结束时间',
-                        'attribute'=>'updated_at',
+                        'attribute'=>'end_at',
                         'value' => function ($model) {
-                            return date('Y-m-d:H:i:s',($model->updated_at));
+                            return date('Y-m-d:H:i:s',($model->end_at));
                         },
                     ],
                 'release_by'=>
@@ -113,25 +119,25 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                 'ticketing_start_at:'=>
                     [
                         'label'=>'票务开始时间',
-                        'attribute'=>'updated_at',
+                        'attribute'=>'ticketing_start_at',
                         'value' => function ($model) {
-                            return date('Y-m-d:H:i:s',($model->updated_at));
+                            return date('Y-m-d:H:i:s',($model->ticketing_start_at));
                         },
                     ],
                 'ticketing_end_at:'=>
                     [
                         'label'=>'票务结束时间',
-                        'attribute'=>'updated_at',
+                        'attribute'=>'ticketing_end_at',
                         'value' => function ($model) {
-                            return date('Y-m-d:H:i:s',($model->updated_at));
+                            return date('Y-m-d:H:i:s',($model->ticketing_end_at));
                         },
                     ],
                 'release_at'=>
                     [
                         'label'=>'发布时间',
-                        'attribute'=>'updated_at',
+                        'attribute'=>'release_at',
                         'value' => function ($model) {
-                            return date('Y-m-d:H:i:s',($model->updated_at));
+                            return date('Y-m-d:H:i:s',($model->release_at));
                         },
                     ],
 
@@ -143,4 +149,6 @@ $this->params['breadcrumbs'][] = $model->activity_name;
 
     </div>
 </div>
+<h3>活动介绍</h3>
+<?=$model->introduction?>
 

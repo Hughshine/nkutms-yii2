@@ -42,15 +42,46 @@ class Ticket extends ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'activity_id', 'serial_number', 'status','created_at'], 'integer'],
+            [
+                [
+                    'user_id',
+                    'activity_id',
+                    'serial_number',
+                    'status',
+                    'created_at',
+                    'updated_at',
+                ],
+                'integer'
+            ],
+            [
+                [
+                    'user_id',
+                    'activity_id',
+                    'serial_number',
+                    'status',
+                ],
+                'required'
+            ],
 
-            ['status', 'in', 'range' => [self::STATUS_VALID, self::STATUS_WITHDRAW,
-                                                    self::STATUS_INVALID,self::STATUS_UNKNOWN]],
+
+
+            [
+                'status', 'in', 'range' =>
+                [
+                    self::STATUS_VALID,
+                    self::STATUS_WITHDRAW,
+                    self::STATUS_INVALID,
+                    self::STATUS_UNKNOWN
+                ]
+            ],
 
             [['activity_id'], 'exist', 'skipOnError' => true, 'targetClass' => Activity::className(), 'targetAttribute' => ['activity_id' => 'id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+
         ];
     }
+
+
 
     public function behaviors()
     {
@@ -66,8 +97,6 @@ class Ticket extends ActiveRecord
             ],
         ];
     }
-
-
 
     //曾经的尝试,发现parent::save总是返回false,遂放弃
     //后来的查找结果:准备尝试
@@ -162,7 +191,7 @@ class Ticket extends ActiveRecord
                 "ticket_id" => "id",
                 "user_id",
                 "activity_id",
-                "activity_name" => function($model)
+                "activity_name" => function()
                 {
                     return $this->activity->activity_name;
                 },

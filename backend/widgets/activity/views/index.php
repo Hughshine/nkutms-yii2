@@ -18,7 +18,14 @@ use yii\widgets\LinkPager;
     <div class="new-list">
     <?php foreach ($data['body'] as $list):?>
         <div class="panel-body border-bottom box-title">
-            <div class="col-lg-8">
+            <div class="col-lg-2">
+                <?php if($list['pic_url']):?>
+                    <img src="<?=$list['pic_url'] ?>" width="100%" height=100%" alt="pictrue">
+                <?php else:?>
+                    <img src="/statics/images/activity_default_pic.png" width="100%" height=100%" alt="pictrue">
+                <?php endif;?>
+            </div>
+            <div class="col-lg-6">
                 <div class="col-lg-10 btn-group">
                     <h1><a href="<?=Url::to(['activity/view','id'=>$list['id']])?>"><?=$list['activity_name']?></a></h1>
                     <span class="activity-tags">
@@ -34,7 +41,7 @@ use yii\widgets\LinkPager;
                         <!--浏览量<span class="glyphicon glyphicon-eye-open"></span>< ? =isset($list['extend']['browser'])?$list['extend']['browser']:0?>&nbsp;-->
                         <!--评论数<span class="glyphicon glyphicon-comment"></span><a href="< ? =Url::to(['post/detail','id'=>$list['id']])?>">< ? =isset($list['extend']['comment'])?$list['extend']['comment']:0?></a>-->
                     </span>
-                    <p class="activity-content"><?=$list['introduction']?></p>
+                    <p class="activity-content"><?=$list['summary']?></p>
 
                 </div>
                 <div class="col-lg-2 label-img-size">
@@ -51,13 +58,13 @@ use yii\widgets\LinkPager;
                 <br/>
                 <h3 align="right"><span class="fa fa-info-circle"></span>
                 <?php if($list ['ticketing_end_at']<time()+7*3600):?>
-                        <font color="#696969">票务结束</font>
+                        <font color="#696969">已过期</font>
                 <?php else:?>
                     <?php if($list['current_people']<$list['max_people']):?>
                         <?php if($option=='mine'):?>
                             <?=$statusString[$list['status']]?>
                         <?php else:?>
-                            <font color="#4682b4">票务正常</font>
+                            <font color="#4682b4">正常</font>
                         <?php endif;?>
                     <?php else:?>
                         <font color="#8b0000">人数已满</font>

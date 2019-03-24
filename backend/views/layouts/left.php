@@ -6,7 +6,7 @@
         <div class="user-panel">
             <div class="pull-left info">
                 <p>欢迎回来:</p>
-                <p><?=$this->params['org_name'] ?></p>
+                <p><?=Yii::$app->user->identity->org_name ?></p>
 
                 <!--<p><i class="fa fa-circle text-success"></i> 在线</p>-->
             </div>
@@ -45,7 +45,7 @@
                                 'icon' => 'user-circle-o',
                                 'url' => '#',
                                 'items' => [
-                                    ['label' => '已发布活动', 'icon' => 'file-excel-o', 'url' => ['activity/mine'],],
+                                    ['label' => '发布活动记录', 'icon' => 'file-excel-o', 'url' => ['activity/mine'],],
                                     ['label' => '发布一个活动', 'icon' => 'file-word-o', 'url' => ['activity/create'],]
                                     /*[
                                         'label' => 'Level Two',

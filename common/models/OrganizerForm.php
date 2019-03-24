@@ -42,7 +42,7 @@ class OrganizerForm extends ActiveRecord
                         'status',
                     ],
                     'required',
-                    'on'=>['Create',],
+                    'on'=>['Create','default',],
                 ],
                 [//update场景用到的必须字段
                     [
@@ -51,7 +51,7 @@ class OrganizerForm extends ActiveRecord
                         'status',
                     ],
                     'required',
-                    'on'=>['Update',],
+                    'on'=>['Update','default',],
                 ],
                 [
                     [
@@ -59,43 +59,44 @@ class OrganizerForm extends ActiveRecord
                         'status',
                     ],
                     'integer',
-                    'on'=>['Update','Create'],
+                    'on'=>['Update','Create','default',],
                 ],
 
                 [['credential',], 'unique','on'=>['Create',]],
 
-                ['status', 'in', 'range' => [Organizer::STATUS_ACTIVE, Organizer::STATUS_DELETED],'on'=>['Create','Update']],
+                ['status', 'in', 'range' => [Organizer::STATUS_ACTIVE, Organizer::STATUS_DELETED],'on'=>['Create','Update','default',]],
                 [
                     'category', 'compare',
                     'compareValue'=>0,
                     'operator' => '>=','message'=>'分类无效',
-                    'on'=>['Create','Update'],
+                    'on'=>['Create','Update','default',],
                 ],
                 [
                     'category', 'compare',
                     'compareValue'=>count(ORG_CATEGORY),
                     'operator' => '<','message'=>'分类无效',
-                    'on'=>['Create','Update'],
+                    'on'=>['Create','Update','default',],
                 ],
 
-                [['org_name'], 'string', 'max' => 32,'on'=>['Create','Update']],
+                [['org_name'], 'string', 'max' => 32,'on'=>['Create','Update','default',]],
 
-                [['credential',], 'string', 'max' => 255,'on'=>['Create',]],
+                [['credential',], 'string', 'max' => 255,'on'=>['Create','default',]],
                 [
                     ['credential'],
                     'unique', 'skipOnError' => true,
                     'targetClass' => Organizer::className(),
                     'targetAttribute' => ['credential' => 'credential'],
                     'message' => '这个账号已经被注册',
+                    'on'=>['Create','default',]
                 ],
-                [['password'], 'string', 'max' => 255,'on'=>['Create','RePassword']],
+                [['password'], 'string', 'max' => 255,'on'=>['Create','RePassword','default',]],
 
-                [['password','rePassword'], 'string', 'min' => 6,'on'=>['RePassword','RePasswordByAdmin','Create']],
-                [['password','rePassword',], 'required','on'=>['RePassword','RePasswordByAdmin','Create']],
-                [['oldPassword',], 'required','on'=>['RePassword',]],
+                [['password','rePassword'], 'string', 'min' => 6,'on'=>['RePassword','RePasswordByAdmin','Create','default',]],
+                [['password','rePassword',], 'required','on'=>['RePassword','RePasswordByAdmin','Create','default',]],
+                [['oldPassword',], 'required','on'=>['RePassword','default',]],
                 //重复密码必须与密码相等
-                ['rePassword','compare','compareAttribute'=>'password','message'=>'密码和重复密码不相同','on'=>['RePassword','RePasswordByAdmin','Create']],
-                ['oldPassword', 'validatePassword','on'=>['RePassword',]],
+                ['rePassword','compare','compareAttribute'=>'password','message'=>'密码和重复密码不相同','on'=>['RePassword','RePasswordByAdmin','Create','default',]],
+                ['oldPassword', 'validatePassword','on'=>['RePassword','default',]],
             ];
     }
 

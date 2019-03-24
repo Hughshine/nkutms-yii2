@@ -26,7 +26,28 @@ class TicketForm extends ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'activity_id', 'serial_number', 'status','created_at'], 'integer'],
+            [
+                [
+                    'user_id',
+                    'activity_id',
+                    'serial_number',
+                    'status',
+                    'created_at',
+                    'updated_at',
+                ],
+                'integer',
+                'on'=>['Create','Update','default',],
+            ],
+            [
+                [
+                    'user_id',
+                    'activity_id',
+                    'serial_number',
+                    'status',
+                ],
+                'integer',
+                'on'=>['Create','Update','default',],
+            ],
 
             [
                 'status', 'in', 'range' =>
@@ -35,16 +56,25 @@ class TicketForm extends ActiveRecord
                     Ticket::STATUS_WITHDRAW,
                     Ticket::STATUS_INVALID,
                     Ticket::STATUS_UNKNOWN
-                ]
+                ],
+                'on'=>['Create','Update','ChangeStatus','default',],
             ],
-            [['activity_id'], 'exist', 'skipOnError' => true, 'targetClass' => Activity::className(), 'targetAttribute' => ['activity_id' => 'id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+            [
+                ['activity_id'],
+                'exist',
+                'skipOnError' => true, 'targetClass' => Activity::className(),
+                'targetAttribute' => ['activity_id' => 'id'],
+                'on'=>['Create','Update','default',],
+            ],
+            [
+                ['user_id'],
+                'exist', 'skipOnError' => true, 'targetClass' => User::className(),
+                'targetAttribute' => ['user_id' => 'id'],
+                'on'=>['Create','Update','default',],
+            ],
+            ['activity_id','validateTicket','on'=>['Create','Update','default',],],
+            ['serial_number','validateSerial','on'=>['Create','Update','default',],],
         ];
-    }
-
-    public static function tableName()
-    {
-        return 'tk_ticket';
     }
 
     //设置场景值
@@ -52,37 +82,78 @@ class TicketForm extends ActiveRecord
     {
         return
             [
-            'Create' =>//表示某个场景所用到的信息,没标记出来的不会有影响
-                [
-                    'tk_id',
-                    'user_id',
-                    'activity_id',
-                    'created_at',
-                    'status',
-                    'serial_number',
-                    'updated_at',
-                ],
-            'Update'=>
-                [
-                    'tk_id',
-                    'user_id',
-                    'activity_id',
-                    'status',
-                    'serial_number',
-                    'updated_at',
-                ],
-             'default'=>
-                 [
-                     'tk_id',
-                     'user_id',
-                     'activity_id',
-                     'created_at',
-                     'status',
-                     'serial_number',
-                     'updated_at',
-                 ],
-        ];
+                'Create' =>//表示某个场景所用到的信息,没标记出来的不会有影响
+                    [
+                        'user_id',
+                        'activity_id',
+                        'created_at',
+                        'status',
+                        'serial_number',
+                        'updated_at',
+                        'created_at',
+                    ],
+                'Update'=>
+                    [
+                        'status',
+                        'user_id',
+                        'activity_id',
+                        'serial_number',
+                        'updated_at',
+                    ],
+                'ChangeStatus'=>
+                    [
+                        'status',
+                        'updated_at',
+                    ],
+                'default'=>
+                    [
+                        'tk_id',
+                        'user_id',
+                        'activity_id',
+                        'created_at',
+                        'status',
+                        'serial_number',
+                        'updated_at',
+                        'created_at',
+                    ],
+            ];
     }
+
+    public function validateTicket($attribute, $params)
+    {
+        if (!$this->hasErrors())
+        {
+            if($this->scenario=='Update'&&$this->status!=Ticket::STATUS_VALID)return;
+
+            if(Ticket::findOne(
+                [
+                    'user_id'=>$this->user_id,
+                    'status'=>Ticket::STATUS_VALID,
+                    'activity_id'=>$this->activity_id
+                ]))
+                $this->addError($attribute, '你已经参与了这个活动');
+        }
+    }
+
+    public function validateSerial($attribute, $params)
+    {
+        if (!$this->hasErrors())
+        {
+            if(Ticket::findOne(
+                [
+                    'serial_number'=>$this->serial_number,
+                    'status'=>Ticket::STATUS_VALID,
+                    'activity_id'=>$this->activity_id
+                ]))
+                $this->addError($attribute, '序列号不正确');
+        }
+    }
+
+    public static function tableName()
+    {
+        return 'tk_ticket';
+    }
+
     public function attributeLabels()
     {
         return
@@ -107,15 +178,14 @@ class TicketForm extends ActiveRecord
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('创建信息需要调整');
+            if(!$this->validate()) throw new \Exception('票务信息有冲突');
             $model = new Ticket();
             $model->user_id=$this->user_id;
             $model->activity_id=$this->activity_id;
             $model->status=$this->status;
             $model->serial_number=$this->serial_number;
 
-            if(!$model->save())throw new \Exception('票务创建失败!');
-            //此处可以写一个afterCreate方法来处理创建后事务
+            if(!$model->save()) {var_dump($model->errors);throw new \Exception('票务创建失败!');}
 
             $this->tk_id=$model->id;//用于创建后导向相关页面
 
@@ -137,19 +207,45 @@ class TicketForm extends ActiveRecord
      * 必须的字段为:
      * user_id, activity_id,status,serial_number
      * */
-    public function infoUpdate($model)
+    public function infoUpdate($model,$scenario)
     {
-        $this->scenario='Update';
+        switch($scenario)//过滤无效场景参数
+        {
+            case 'Update':
+            case 'ChangeStatus':
+                $this->scenario=$scenario;
+                break;
+            default:
+                Yii::$app->getSession()->setFlash('warning', '场景参数错误');
+                return false;
+        }
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('修改信息需要调整');
-            $model->user_id=$this->user_id;
-            $model->activity_id=$this->activity_id;
-            $model->status=$this->status;
-            $model->serial_number=$this->serial_number;
+            if(!$this->validate()) {
+                var_dump($this->errors);
+                throw new \Exception('修改信息需要调整');
+            }
 
-            if(!$model->save())throw new \Exception('资料修改失败!');
+            switch($scenario)//过滤无效场景参数
+            {
+                case 'Update':
+                    {
+                        $model->user_id=$this->user_id;
+                        $model->activity_id=$this->activity_id;
+                        $model->status=$this->status;
+                        $model->serial_number=$this->serial_number;
+                        break;
+                    }
+                case 'ChangeStatus':
+                    {
+                        $model->status=$this->status;
+                        break;
+                    }
+                default:break;
+            }
+
+            if(!$model->save())throw new \Exception('票务修改失败!');
             $transaction->commit();
             return true;
         }
@@ -161,4 +257,17 @@ class TicketForm extends ActiveRecord
             return false;
         }
     }
+
+    //取消id为tk_id的票务,返回是否操作成功
+    //如果tk_id不存在,返回也为false
+    public static function invalidateTicket($tk_id)
+    {
+        $model=Ticket::findOne(['id'=>$tk_id]);
+        if(!$model)return false;
+        $form=new TicketForm();
+        $form->status=Ticket::STATUS_INVALID;
+        return $form->infoUpdate($model,'ChangeStatus');
+    }
+
+
 }
