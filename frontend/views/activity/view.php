@@ -5,7 +5,9 @@ use yii\widgets\DetailView;
 use common\models\Organizer;
 
 /* @var $this yii\web\View */
-/* @var $model admin\models\NOW */
+/* @var $model common\models\Activity */
+/* @var $serialNumber */
+/* @var $isTicketed */
 
 $this->title = '修改活动信息';
 $this->params['breadcrumbs'][] = ['label' => '活动列表', 'url' => ['index']];
@@ -19,6 +21,7 @@ $this->params['breadcrumbs'][] = $model->activity_name;
         <div class="row">
             <h1><?= Html::encode($model->activity_name);?></h1>
             <h3><?= $isTicketed?'(已报名参加)':' ' ?></h3>
+            <h4><?= $isTicketed?'你的凭证:'.$serialNumber:' ' ?></h4>
         </div>
 
         <?php if($model->pic_url):?>

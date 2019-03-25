@@ -159,7 +159,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
                     'introduction', 'max_people','updated_at',
                 ],
             'ChangeStatus'=>['status','release_at','updated_at'],
-            'ChangePicture'=>['pic_url','updated_at'],
+            'ChangePicture'=>['pic_url','status','updated_at'],
             'ChangeSerial'=>['current_serial','current_people','updated_at'],
             'default'=>
                 [
@@ -341,6 +341,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
                                 if($model->pic_url&&file_exists($oldFile))unlink($oldFile);
                                 $model->pic_url=null;
                             }
+                            $model->status=Activity::STATUS_UNAUDITED;
                         }
                         break;
                     }

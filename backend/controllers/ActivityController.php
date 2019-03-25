@@ -101,7 +101,7 @@ class ActivityController extends Controller
         $form = new ActivityForm();
         $form->activity_name=$model->activity_name;
         $form->act_id=$model->id;
-        $form->status=$model->status;
+        $form->status=Activity::STATUS_UNAUDITED;
         $form->release_by=$model->release_by;
         $form->category=$model->category;
         $form->introduction=$model->introduction;
@@ -185,6 +185,7 @@ class ActivityController extends Controller
         $form->act_id=$model->id;
         $form->activity_name=$model->activity_name;
         $form->pic_url=$model->pic_url;
+        $form->status=Activity::STATUS_UNAUDITED;
         if($form->load(Yii::$app->request->post())&&$form->infoUpdate($model,'ChangePicture'))
         {
             Yii::$app->session->setFlash('success','修改成功');

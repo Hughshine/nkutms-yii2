@@ -165,7 +165,7 @@ class ActivityController extends Controller
         $ticket=Ticket::findOne(['user_id'=>Yii::$app->user->id,'activity_id'=>$id,'status'=>Ticket::STATUS_VALID]);
         $model= $this->findModel($id);
         if(!$model)return $this->redirect('index');
-        return $this->render('view', ['model' =>$model,'isTicketed'=>$ticket!=null]);
+        return $this->render('view', ['model' =>$model,'isTicketed'=>$ticket!=null,'serialNumber'=>$ticket->serial_number]);
     }
 
 

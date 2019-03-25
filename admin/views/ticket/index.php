@@ -62,7 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]
                     ])
                 ],
-            //'serial_number',
+            'serial_number',
             'status'=>
                 [
                     'label'=>'状态',

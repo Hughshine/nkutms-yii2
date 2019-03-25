@@ -35,7 +35,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         ?'未知':
                      USER_CATEGORY[Yii::$app->user->identity->category],
             ],
-            'credential',
             'created_at'=>
             [
                 'label'=>'注册时间',
