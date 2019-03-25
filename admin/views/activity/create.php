@@ -24,10 +24,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'activity_name')->textInput() ?>
 
-                <?= $form->field($model, 'categoryString')->dropDownList(ACT_CATEGORY)?>
+                <?= $form->field($model, 'category')->dropDownList(ACT_CATEGORY)?>
 
-                <?= $form->field($model, 'introduction')->textInput(['maxlength' => true]) ?>
-
+                <?= $form->field($model, 'introduction')->widget('common\widgets\ueditor\Ueditor',[
+                    'options'=>[
+                        'initialFrameWidth' => 900,//宽度
+                        'initialFrameHeight' => 550,//高度
+                    ]
+                ]) ?>
                 <?= $form->field($model, 'location')->textInput() ?>
 
                 <?= $form->field($model, 'max_people')->textInput() ?>

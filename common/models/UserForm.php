@@ -386,7 +386,7 @@ class UserForm extends ActiveRecord
             if(file_exists($newDir)&&copy($oldDir,$newDir.'/'.$fileName))
             {
                 if($this->img_url&&file_exists($oldDir))unlink($oldDir);
-                $this->img_url='/upload_files/user/'.$this->credential.'/'.$fileName;
+                $this->img_url='/upload_files/user/'.$this->credential.$fileName;
                 return true;
             }
         }

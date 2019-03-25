@@ -450,7 +450,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
 
     //将表单的img_url正确处理,返回是否处理成功
     /*
-     * 主要是将上传的文件复制到用户的文件夹下,
+     * 主要是将上传的文件复制到活动的文件夹下,
      * 因为这个图片上传组件只要一点击图片就会将图片上传到服务器,
      * 在表单中重复选择图片会导致多张图片上传至服务器,这样会有很多的无效图片
      * 我想的解决方案是,将真正用得到的图片放到另一个目录下
@@ -469,7 +469,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
             if(file_exists($newDir)&&copy($oldDir,$newDir.'/'.$fileName))
             {
                 if($this->pic_url&&file_exists($oldDir))unlink($oldDir);
-                $this->pic_url='/upload_files/activity/'.$date.'/'.$fileName;
+                $this->pic_url='/upload_files/activity/'.$date.$fileName;
                 return true;
             }
         }

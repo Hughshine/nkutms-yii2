@@ -40,7 +40,7 @@ class ActivityController extends Controller
                     [//登录用户能访问这个控制器里的方法
                         'allow'=>true,
                         //可访问的页面名字
-                        'actions'=>['index','view','create','update','review'],
+                        'actions'=>['index','view','create','update','review','ueditor'],
                         'roles'=>['@'],//登录用户
                     ],
                 ],
@@ -53,6 +53,21 @@ class ActivityController extends Controller
                 ],
             ],
         ];
+    }
+
+    public function actions()
+    {
+        return
+            [
+                'ueditor'=>[
+                    'class' => 'common\widgets\ueditor\UeditorAction',
+                    'config'=>[
+                        //上传图片配置
+                        'imageUrlPrefix' => "", /* 图片访问路径前缀 */
+                        'imagePathFormat' => "/upload_files/ueditor/image/activity/{yyyy}{mm}{dd}/{time}{rand:6}", /* 上传保存路径,可以自定义保存路径和文件名格式 */
+                    ]
+                ],
+            ];
     }
 
 
