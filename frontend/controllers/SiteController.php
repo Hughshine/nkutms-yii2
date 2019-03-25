@@ -33,7 +33,7 @@ class SiteController extends Controller
                         'actions' =>
                             [
                                 'signup','index','error','request-password-reset',
-                                'reset-password'
+                                'reset-password','contact'
                             ],
                         'allow' => true,
                         'roles' => ['?'],
@@ -47,7 +47,7 @@ class SiteController extends Controller
                         'roles' => ['?'],
                     ],
                     [
-                        'actions' => ['captcha','reset-password','upload','login'],
+                        'actions' => ['captcha','reset-password','upload','login','contact'],
                         'allow' => true,
                         'roles' => ['?','@'],
                     ],
@@ -188,7 +188,8 @@ class SiteController extends Controller
      */
     public function actionContact()
     {
-        $model = new ContactForm();
+        return $this->render('contact');
+        /*$model = new ContactForm();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             if ($model->sendEmail(Yii::$app->params['adminEmail'])) {
                 Yii::$app->session->setFlash('success', 'Thank you for contacting us. We will respond to you as soon as possible.');
@@ -201,7 +202,7 @@ class SiteController extends Controller
             return $this->render('contact', [
                 'model' => $model,
             ]);
-        }
+        }*/
     }
 
     /**

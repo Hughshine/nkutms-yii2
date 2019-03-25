@@ -1,6 +1,7 @@
 <?php
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $form yii\bootstrap\ActiveForm */
@@ -64,9 +65,9 @@ $fieldOptions2 = [
         -->
         <!-- /.social-auth-links -->
 
-        <a href="#">忘记密码?</a><br>
-        <a href="register.html" class="text-center">想要一个组织者账号?</a>
-
+        <a href="/site/contact"> 忘记密码?</a>
+        <br>
+        <a href="/site/contact"> 想要一个组织者账号?</a>
     </div>
     <!-- /.login-box-body -->
 </div><!-- /.login-box -->
