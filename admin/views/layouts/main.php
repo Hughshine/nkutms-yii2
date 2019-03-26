@@ -32,7 +32,7 @@ AppAsset::register($this);
 <header>
     <div class="headerpanel">
         <div class="logopanel">
-            <h4><a href="#">南开大学学生票务管理系统</a></h4>
+            <h4><a href="/admin">南开大学学生票务管理系统</a></h4>
         </div><!-- logopanel -->
 
             <div class="headerbar">
@@ -131,7 +131,7 @@ AppAsset::register($this);
         <?= Breadcrumbs::widget([
             'homeLink'=>[
                 'label' => '<i class="fa fa-home mr5"></i> '.Yii::t('yii', 'Home'),
-                'url' => '/',
+                'url' => '/admin',
                 'encode' => false,
             ],
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],

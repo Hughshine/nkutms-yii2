@@ -143,7 +143,7 @@ class Organizer extends ActiveRecord implements IdentityInterface
             // "allowance_updated_at": 0,
             "category" => function($model)
                 {
-                    if($model->category>=count(ORG_CATEGORY)||$model->category<0)
+                    if(!is_numeric($model->category)||$model->category>=count(ORG_CATEGORY)||$model->category<0)
                         return '未知';
                     return ORG_CATEGORY[$model->category];
                 },

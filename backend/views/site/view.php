@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'value'=>
                     function($model)
                     {
-                        if($model->category>=count(ORG_CATEGORY))
+                        if(!is_numeric($model->category)||$model->category>=count(ORG_CATEGORY)||$model->category<0)
                                     return '未知';
                         return ORG_CATEGORY[$model->category];
                     },

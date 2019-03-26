@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label'=>'类别',
                 'attribute'=>'category',
-                'value'=>(Yii::$app->user->identity->category>=count(USER_CATEGORY)||Yii::$app->user->identity->category<0)
+                'value'=>(!is_numeric(Yii::$app->user->identity->category)||Yii::$app->user->identity->category>=count(USER_CATEGORY)||Yii::$app->user->identity->category<0)
                         ?'未知':
                      USER_CATEGORY[Yii::$app->user->identity->category],
             ],

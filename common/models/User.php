@@ -132,7 +132,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
             'user_name',
             'category' => function($model)
             {
-                if($model->category>=count(USER_CATEGORY)||$model->category<0)
+                if(!is_numeric($model->category)||$model->category>=count(USER_CATEGORY)||$model->category<0)
                     return '未知';
                 return USER_CATEGORY[$model->category];
             },

@@ -39,7 +39,7 @@ $this->title = '组织者管理';
                 'value'=>
                 function($model)
                 {
-                    if($model->category>=count(ORG_CATEGORY)||$model->category<0)
+                    if(!is_numeric($model->category)||$model->category>=count(ORG_CATEGORY)||$model->category<0)
                         return '未知';
                     return ORG_CATEGORY[$model->category];
                 },

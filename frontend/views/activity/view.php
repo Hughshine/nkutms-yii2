@@ -64,7 +64,7 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                         'value'=>
                             function($model)
                             {
-                                if($model->category>=count(ACT_CATEGORY))
+                                if(!is_numeric($model->category)||$model->category>=count(ACT_CATEGORY)||$model->category<0)
                                     return '未知';
                                 return ACT_CATEGORY[$model->category];
                             },

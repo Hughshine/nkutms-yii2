@@ -202,7 +202,7 @@ class Activity extends ActiveRecord
             },
             "category" => function($model)
             {
-                if($model->category>=count(ACT_CATEGORY)||$model->category<0)
+                if(!is_numeric($model->category)||$model->category>=count(ACT_CATEGORY)||$model->category<0)
                     return '未知';
                 return ACT_CATEGORY[$model->category];
             },
