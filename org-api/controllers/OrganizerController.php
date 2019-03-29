@@ -6,6 +6,7 @@ use Yii;
 use yii\filters\auth\QueryParamAuth;
 use yii\rest\ActiveController;
 use common\models\Organizer;
+use common\models\OrganizerForm;
 
 class OrganizerController extends ActiveController
 {
@@ -67,7 +68,10 @@ class OrganizerController extends ActiveController
 			$organizer->access_token = Yii::$app->getSecurity()->generateRandomString();
 			$organizer->logged_at = time();
 			$organizer->expire_at = time()+3600*24;
-			$organizer->save(false);
+			if(!$organizer->save())
+			{
+				return ['code'=>1, 'org failed to get access-token'];
+			}
 
 			return ['code'=>0, "message" => 'success','data'=>["org_info" => $organizer, 'access_token' => $organizer->access_token]];
 		}
@@ -79,6 +83,8 @@ class OrganizerController extends ActiveController
 	 */
 	public function actionSignup()
 	{
+		return null;
+		/*
 		$request = Yii::$app->request;
 		$sql_credential = $request->post('credential');
 		$sql_password = $request->post('password');
@@ -103,6 +109,7 @@ class OrganizerController extends ActiveController
 		return ['code'=>1, 'message' => 'success', 'data' => ['org_info'=>$organizer, "access-token" => $organizer->access_token ]];
 		
 		// return ['message' => 'wrong password'];
+		*/
 	}
 
 	/*
@@ -119,8 +126,8 @@ class OrganizerController extends ActiveController
 	public function actionEditProfile()
 	{
 		$request = Yii::$app->request;
+		$organizer = Yii::$app->user->identity;
 
-		$sql_id = $request->post('org_id');
 		$sql_name = $request->post('org_name');
 		$sql_category = $request->post('category');
 		$sql_credential = $request->post('credential');
@@ -131,18 +138,6 @@ class OrganizerController extends ActiveController
 		if($sql_oldpassword == null)
 			return ['code' => 1, 'message' => 'no password'];
 
-		if($sql_id == null)
-			return ['code' => 1, 'message' => 'no org_id'];
-
-		if($sql_id == '')
-			return ['code' => 1, 'message' => 'invalid org_id'];
-
-
-		$organizer = Organizer::find()
-				->where(['id' => $sql_id])
-				->limit(1)
-				->one();
-
 		if(!Yii::$app->getSecurity()->validatePassword($sql_oldpassword , $organizer->password))
 		{
 			return ['code' => 1, 'message' => 'wrong password'];
@@ -151,8 +146,14 @@ class OrganizerController extends ActiveController
 		if($organizer == null)
 			return ['code'=>1, 'message'=>'organizer inexists'];
 
-
-		Organizer::editAndSaveOrganizer($organizer,$sql_id,$sql_name,$sql_category,$sql_credential,$sql_newpassword);
+        $organizer->org_name = $category==null?$organizer->org_name:$org_name;
+        $organizer->category = $category==null?$organizer->category:$category;
+        $organizer->credential = $credential==null?$organizer->credential:$credential;
+        $organizer->password = Yii::$app->getSecurity()->generatePasswordHash($newpassword);
+        if(!$organizer->save())
+        {
+        	return ['code'=>1, 'message' => 'organizer update failed'];
+        }
 
 		return ['code'=>0, 'message'=>'success','data'=>$organizer];
 	}

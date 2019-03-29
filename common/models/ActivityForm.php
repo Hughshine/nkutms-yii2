@@ -37,6 +37,8 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
     public $is_api = false;
     public $lastError;//用于存放最后一次异常信息
 
+    public $release_at;//TODO:大概可以删掉
+
     public function rules()
     {
         return

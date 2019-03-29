@@ -4,10 +4,16 @@ namespace orgapi\controllers;
 use Yii;
 use yii\rest\ActiveController;
 use yii\data\ActiveDataProvider;
+
 use common\models\Activity;
+use common\models\ActivityForm;
+
 // use common\models\User;
 use common\models\Ticket;
+use common\models\TicketForm;
+
 use common\models\Organizer;
+use common\models\OrganizerForm;
 
 // use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
@@ -92,7 +98,7 @@ class ActivityController extends ActiveController
 	 * params: id
 	 * discription: 查询某具体活动
 	 * @param  [int] $id [活动id]
-	 * @return [array]     [该activity信息]
+	 * @return [array] [该activity信息]
 	 */
 	public function actionView($id){
 		$activity = Activity::find()->where(['id'=>$id])->limit(1)->one();
@@ -145,22 +151,13 @@ class ActivityController extends ActiveController
 	 */
 	public function actionMyActivities()
 	{
-		$request = Yii::$app->request;
-		$sql_id = $request->post('org_id');
-
-		if($sql_id == null)
-			return ['code'=>1,'message' => 'wrong paramters'];
-
-		$organizer = Organizer::find()
-					->where(['id'=>$sql_id])
-					->limit(1)
-					->one();
+		$organizer = Yii::$app->user->identity;
 
 		if($organizer == null)
-			return ['code'=>1,'message' => 'organizer inexists'];
+			return ['code'=>1,'message' => 'inner problem -- organizer is null'];
 
 		return ['code'=>0,'message'=>'success','data'=>Activity::find()
-				->where(['release_by' => $sql_id])
+				->where(['release_by' => $organizer->id])
 				->all()];
 	}
 
@@ -173,29 +170,24 @@ class ActivityController extends ActiveController
 	 */
 	public function actionMyParticipants()
 	{
+		$organizer = Yii::$app->user->identity;
+
 		$request = Yii::$app->request;
 
-		$org_id = $request->post('org_id');
 		$activity_id = $request->post('activity_id');
 
-		if($org_id == null || $activity_id == null)
-			return ['code'=>1,'message' => 'wrong paramters'];
+		if($activity_id == null)
+			return ['code'=>1,'message' => 'empty activity id'];
 
-		$organizer = Organizer::find()
-					->where(['id'=>$org_id])
-					->limit(1)
-					->one();
 
 		if($organizer == null)
-			return ['code'=>1,'message' => 'organizer inexists'];
+			return ['code'=>1,'message' => 'inner problem -- organizer is null'];
 
 		$activity = Activity::find()
 					->where(['id'=>$activity_id])
 					->limit(1)
 					->one();
 
-		if($organizer == null)
-			return ['code'=>1,'message' => 'organizer inexists'];
 		if($activity == null)
 			return ['code'=>1,'message' => 'activity inexists'];
 
@@ -225,7 +217,8 @@ class ActivityController extends ActiveController
 	public function actionAddActivity()
 	{
 		$request = Yii::$app->request;
-		$org_id = $request->post('org_id');
+		$organizer = Yii::$app->user->identity;
+
 		$activity_name = $request->post('activity_name');
 		$category= $request->post('category');
 		$location = $request->post('location');
@@ -236,22 +229,37 @@ class ActivityController extends ActiveController
 		$max_people = $request->post('max_people');
 		$intro = $request->post('intro','no introduction');
 
-		if($org_id == null || $activity_name == null || $category == null|| $location == null || $ticketing_start_at == null || $ticketing_end_at == null || $start_at == null  || $end_at == null || $max_people == null )
+		if($activity_name == null || $category == null|| $location == null || $ticketing_start_at == null || $ticketing_end_at == null || $start_at == null  || $end_at == null || $max_people == null )
 			return ['code'=>1,'message' => 'incomplete paramters'];
 
-		$activity = Activity::find()
-					->where(['activity_name' => $activity_name])
-					->limit(1)
-					->one();
+		// $activity = Activity::find()//TODO: backend 没有加这个限制
+		// 			->where(['activity_name' => $activity_name])
+		// 			->limit(1)
+		// 			->one();
+		// if($activity != null)
+		// 	return ['code'=>1,'message' => 'duplicate activity name'];
 
-		if($activity != null)
-			return ['code'=>1,'message' => 'duplicate activity name'];
+		$act_form = new ActivityForm();
+		$act_form->is_api = true;
 
+		$act_form->category = $category;
+		$act_form->location = $location;
+		$act_form->ticketing_start_at = $ticketing_start_at;
+		$act_form->ticketing_end_at = $ticketing_end_at;
+		$act_form->start_at = $start_at;
+		$act_form->end_at = $end_at;
+		$act_form->max_people = $max_people;
+		$act_form->intro = $intro;
+		$act_form->activity_name = $activity_name;
+		$act_form->status = 0;
+		$act_form->current_people = 0;
+        $act_form->current_serial = 1;
+        $act_form->release_at = time()+7*3600;
 
-
-		$activity = Activity::generateAndWriteNewActivity($org_id,$activity_name,$category,$location,$ticketing_start_at,$ticketing_end_at,$start_at,$end_at,$max_people,$intro);
-
-		// ActivityEvent::generateAndWriteNewActivityEvent($org_id, $activity->id, 0, -1);
+		if(!$act_form->create())
+		{
+			return ['code'=>1,'message' => 'Activity created failed. Check your whether your parameters is valid.'];
+		}
 
 		return ['code'=>0, 'message' => 'success', 'data' => $activity];
 	}
@@ -272,29 +280,16 @@ class ActivityController extends ActiveController
 	public function actionEditActivity()
 	{
 		$request = Yii::$app->request;
+		$organizer = Yii::$app->user->identity;
 
-		$org_id = $request->post('org_id');
 		$activity_id = $request->post('activity_id');
 		$activity_name = $request->post('activity_name');
 
-		if($org_id == null || $activity_id == null)
-			return ['code'=>1, 'message' => 'empty paramters'];
-
-		$organizer = Organizer::find()
-					->where(['id'=>$org_id])
-					->limit(1)
-					->one();
+		if($activity_id == null)
+			return ['code'=>1, 'message' => 'empty activity id'];
 
 		if($organizer == null)
-			return ['code'=>1, 'message' => 'organizer inexists'];
-
-		// $activity = Activity::find()
-		// 			->where(['activity_name' => $activity_name])
-		// 			->limit(1)
-		// 			->one();
-
-		// if($activity != null)
-		// 	return ['code'=>1, 'message' => 'duplicate activity name'];
+			return ['code'=>1, 'message' => 'inner problem -- organizer not found'];
 
 		$activity = Activity::find()
 					->where(['id'=>$activity_id])
@@ -304,25 +299,18 @@ class ActivityController extends ActiveController
 		if($activity == null)
 			return ['code'=>1, 'message' => 'activity inexists'];
 
-		if($activity->status == 1)
+		if($activity->release_by != $org_id)
+			return ['code'=>1, 'message' => 'illegal request'];
+
+		if($activity->status == Activity::STATUS_APPROVED)
 		{
 			return ['code'=>1, 'message' => '已经成功发布，无法修改'];
 		}
-		if($activity->status == 3)
+		if($activity->status == Activity::STATUS_CANCEL)
 		{
 			return ['code'=>1, 'message' => '已经被取消，无法修改'];
 		}
 
-
-		if($organizer == null)
-			return ['code'=>1, 'message' => 'organizer inexists'];
-
-
-		if($activity->release_by != $org_id)
-			return ['code'=>1, 'message' => 'illegal request'];
-
-
-		if()
 		$category= $request->post('category');
 		$location = $request->post('location');
 		$ticketing_start_at = $request->post('ticketing_start_at');
@@ -332,11 +320,43 @@ class ActivityController extends ActiveController
 		$max_people = $request->post('max_people');
 		$intro = $request->post('intro');
 
+		$act_form = new ActivityForm();
+		$act_form->is_api = true;
 
+        $act_form->activity_name = $activity_name==null?$activity->activity_name:$activity_name;
+		$act_form->status = Activity::STATUS_APPROVED;
+        $act_form->category = $category==null?$activity->category:$category;
+        $act_form->location = $location==null?$activity->location:$location;
+        $act_form->max_people = $max_people==null?$activity->max_people:$max_people;
+        $act_form->introduction = $intro==null?$activity->introduction:$intro;
 
-		Activity::editAndSaveActivity($activity,$activity_name,$category,$location,$ticketing_start_at,$ticketing_end_at,$start_at,$end_at,$max_people,$intro);
+        $transaction=Yii::$app->db->beginTransaction();
+        try
+        {
+			if(!$act_form->infoUpdate($activity,'Update'))
+			{
+				throw new \Exception('activity update failed');
+			}
 
-		return ['code'=>0,'message' => 'success' , 'data'=>$activity];
+			$activity->ticketing_start_at = $ticketing_start_at==null?$activity->ticketing_start_at:$ticketing_start_at;
+			$activity->ticketing_end_at = $ticketing_end_at==null?$activity->ticketing_end_at:$ticketing_end_at;
+			$activity->start_at = $start_at==null?$activity->start_at:$start_at;
+			$activity->end_at = $end_at==null?$activity->end_at:$end_at;
+
+			if(!activity->save())
+			{
+				throw new \Exception('activity time update failed');
+			}
+
+			$transaction->commit();//success
+			return ['code'=>0,'message' => 'success' , 'data'=>$activity];
+        }
+        catch(\Exception $e)
+        {
+            $transaction->rollBack();
+            return ['code' => 1, 'message' => $e->getMessage()];
+        }
+        
 	}
 
 
@@ -349,41 +369,48 @@ class ActivityController extends ActiveController
 	public function actionCancelActivity()
 	{
 		$request = Yii::$app->request;
+		$organizer = Yii::$app->user->identity;
 
-		$org_id = $request->post('org_id');
 		$activity_id = $request->post('activity_id');
 
-		if($org_id == null || $activity_id == null)
-			return ['code'=>1,'message' => 'empty paramters'];
+        $transaction=Yii::$app->db->beginTransaction();
+		try
+		{
+			if($activity_id == null)
+				throw new \Exception('empty activity id');
 
-		$organizer = Organizer::find()
-					->where(['id'=>$org_id])
-					->limit(1)
-					->one();
+			if($organizer == null)
+				throw new \Exception('empty activity id');
+				return ['code'=>1,'message' => 'organizer inexists'];
 
-		if($organizer == null)
-			return ['code'=>1,'message' => 'organizer inexists'];
+			$activity = Activity::find()
+						->where(['id'=>$activity_id])
+						->limit(1)
+						->one();
 
-		$activity = Activity::find()
-					->where(['id'=>$activity_id])
-					->limit(1)
-					->one();
+			if($activity == null)
+				throw new \Exception('activity inexists');
 
-		if($organizer == null)
-			return ['code'=>1,'message' => 'organizer inexists'];
+			if($activity->release_by != $org_id)
+				throw new \Exception('illegal request');
 
-		if($activity == null)
-			return ['code'=>1,'message' => 'activity inexists'];
+			if($activity->status == Activity::STATUS_CANCEL)
+				throw new \Exception('already cancelled');
+			
+			$act_form = new ActivityForm();
+			$act_form->status = Activity::STATUS_CANCEL;
+			if(!$act_form->infoUpdate($activity,'ChangeStatus'))
+			{
+				throw new \Exception('cancel failed');
+			}
 
-		if($activity->release_by != $org_id)
-			return ['code'=>1,'message' => 'illegal request'];
-
-		if($activity->status == 3)
-			return ['code'=>1,'message' => 'already cancelled'];
-		
-		$activity->status = 1;
-		$activity->save(false);
-
-		return ['code'=>0,'message' => 'cancel success','data'=>$activity];
+			$transaction->commit();
+			return ['code'=>0,'message' => 'cancel success','data'=>$activity];
+		}
+		catch(\Exception $e)
+		{
+			$transaction->rollBack();
+			return ['code'=>1, 'message'=> $e->getMessage()];
+		}
 	}
 }

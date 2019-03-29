@@ -235,42 +235,4 @@ class Activity extends ActiveRecord
             "max_people",
         ];
     }
-
-    public function generateAndWriteNewActivity($org_id,$activity_name,$category,$location,$ticketing_start_at,$ticketing_end_at,$start_at,$end_at,$max_people,$intro)
-    {
-        $activity = new Activity();
-        //太可怕了
-        $activity->release_by = $org_id;
-        $activity->activity_name = $activity_name;
-        $activity->category = $category;
-        $activity->location = $location;
-        $activity->status = 0;
-        $activity->ticketing_start_at = $ticketing_start_at;
-        $activity->ticketing_end_at = $ticketing_end_at;
-        $activity->start_at = $start_at;
-        $activity->end_at = $end_at;
-        $activity->release_at = time()+7*3600;
-        $activity->max_people = $max_people;
-        $activity->introduction = $intro;
-        $activity->current_people = 0;
-        $activity->current_serial = 1;
-        $activity->save(false);
-
-        return $activity;
-    }
-
-    public function editAndSaveActivity($activity,$activity_name,$category,$location,$ticketing_start_at,$ticketing_end_at,$start_at,$end_at,$max_people,$intro)
-    {
-        $activity->activity_name = $activity_name==null?$activity->activity_name:$activity_name;
-
-        $activity->category = $category==null?$activity->category:$category;
-        $activity->location = $location==null?$activity->location:$location;
-        $activity->ticketing_start_at = $ticketing_start_at==null?$activity->ticketing_start_at:$ticketing_start_at;
-        $activity->ticketing_end_at = $ticketing_end_at==null?$activity->ticketing_end_at:$ticketing_end_at;
-        $activity->start_at = $start_at==null?$activity->start_at:$start_at;
-        $activity->end_at = $end_at==null?$activity->end_at:$end_at;
-        $activity->max_people = $max_people==null?$activity->max_people:$max_people;
-        $activity->introduction = $intro==null?$activity->introduction:$intro;
-        $activity->save(false);
-    }
 }

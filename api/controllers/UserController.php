@@ -58,10 +58,11 @@ class UserController extends ActiveController
 		$wechat_id = $request->post('wechat_id');   
 		$user_name = $request->post('user_name');  
 		$credential = $request->post('credential');   
+		$email = $request->post('email');   
 		$password = $request->post('password');
 		$category = $request->post('category');   
 
-		if($wechat_id==null||$credential==null||$password==null||$category==null)
+		if($wechat_id==null||$credential==null||$password==null||$category==null||$email==null)
 		{
 			return ['code'=>1,'message'=>'empty paramter'];
 		}
@@ -109,13 +110,14 @@ class UserController extends ActiveController
 		$user_form->user_name = $user_name==null?'default-name':$user_name;
 
 		$user_form->wechat_id = $wechat_id;
+		$user_form->email = $email;//TODO
 		$user_form->credential = $credential;
 		$user_form->password = Yii::$app->getSecurity()->generatePasswordHash($password);
 		$user_form->category = $category;
 
 		$transaction=Yii::$app->db->beginTransaction();
 		try{
-			$user = $user_form->create();
+			$user = $user_form->create('Create');
 			if(!$user)
 			{
 				throw new \Exception('create failed');
@@ -123,7 +125,7 @@ class UserController extends ActiveController
 			$user->expire_at = time()+3600*7;
 			$access_token = $user->generateAccessToken();
 
-			if($user->save())
+			if(!$user->save())
 			{
 				throw new \Exception('generate access-token failed');
 			}
@@ -189,7 +191,7 @@ class UserController extends ActiveController
 	 */
 	public function actionEditProfile()
 	{
-		return ['code' => 1, 'message' => 'api is suspended'];
+		return ['code' => 1, 'message' => 'this api is suspended, please turn to web version'];
 		/*
 		$request = Yii::$app->request;
 
