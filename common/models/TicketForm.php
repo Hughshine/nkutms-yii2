@@ -185,10 +185,8 @@ class TicketForm extends ActiveRecord
             $model->activity_id=$this->activity_id;
             $model->status=$this->status;
             $model->serial_number=$this->serial_number;
-            if(!$model->save()) {
-                if(!$this->is_api) var_dump($model->errors);
-                throw new \Exception('票务创建失败!');
-            }
+
+            if(!$model->save()) throw new \Exception('票务创建失败!');
 
             $this->tk_id=$model->id;//用于创建后导向相关页面
 
