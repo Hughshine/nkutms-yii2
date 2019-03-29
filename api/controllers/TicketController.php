@@ -7,9 +7,10 @@ use yii\rest\ActiveController;
 
 use yii\data\ActiveDataProvider;
 use common\models\Ticket;
-// use common\models\TicketEvent;
-use common\models\Activity;
+use common\models\TicketForm;
 
+use common\models\Activity;
+use common\models\ActivityForm;
 
 use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
@@ -45,12 +46,9 @@ class TicketController extends ActiveController
 
 		public function actionMyTickets()
 		{	
+			$user = Yii::$app->user->identity;
+
 			$request = Yii::$app->request;
-
-			$sql_id = $request->post('user_id');   
-
-			if($sql_id == null)
-				return ['code'=>1,'message' => 'empty user_id'];
 			
 			$modelClass = $this->modelClass;
 
@@ -59,7 +57,7 @@ class TicketController extends ActiveController
 					// 'msg' => 0,
 					'query' => $modelClass::find()
 						->where(['and',
-							['user_id' => $sql_id]
+							['user_id' => $user->id]
 							,['status' => 0]
 							])
 						->orderBy('created_at DESC'),//根据发布时间逆序排序
@@ -95,34 +93,49 @@ class TicketController extends ActiveController
 		public function actionWithdraw()
 		{
 			$request = Yii::$app->request;
-			$sql_ticketid = $request->post('ticket_id');   
 
-			$ticket = Ticket::find()
-					->where(['id' => $sql_ticketid])
-					->limit(1)
-					->one();
-			if($ticket == null)
-			{
-				return ['code' => 1, 'message' => 'ticket do not exist'];
-			}
-			
-			if($ticket->status != 0)
-			{
-				return ['code' => 1, 'message' => 'invalid ticket'];
-			}
+			$user = Yii::$app->user->identity;
 
-			$ticket -> status = 1;
-			$ticket->save(false);
+			$ticket_id = $request->post('ticket_id');   
 
-			$activity = Activity::find()
-						->where(['id'=>$ticket->activity->id])
-						->limit(1)
-						->one();
-			$activity->current_people--;
-			$activity->save(false);
+			if(!$ticket_id) return ['code'=>1, 'message'=>'empty ticket id'];
 
-			// TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,1,-1);
+			$ticket=Ticket::findOne(['id' => $ticket_id,'user_id' => $user->id,'status'=>Ticket::STATUS_VALID]);
 
-			return ['code' => 0, 'message' => 'success', 'data' => $ticket];
+	        if(!$ticket)
+	        {
+	            return ['code' => 1, 'message' => 'ticket do not exist or operation is invalid'];
+	        }
+
+			$act=Activity::findOne(['id'=>$ticket->activity->id,'status'=>Activity::STATUS_APPROVED]);
+
+	        $ticketForm=new TicketForm();
+	        $ticketForm->is_api=true;
+	        $ticketForm->status=Ticket::STATUS_WITHDRAW;
+
+	        $actForm=new ActivityForm();
+	        $actForm->is_api=true;
+	        $actForm->current_people=$act->current_people-1;
+
+	        if($actForm->current_people<0)$actForm->current_people=0;
+	        $actForm->current_serial=$act->current_serial;
+
+	        $transaction=Yii::$app->db->beginTransaction();
+	        try
+	        {
+	            if($ticketForm->infoUpdate($ticket,'ChangeStatus')&&$actForm->infoUpdate($act,'ChangeSerial')){
+					$transaction->commit();
+	            	return ['code' => 0, 'message' => 'success', 'data' => $ticket];
+	            }
+	            else
+	            {
+	                throw new \Exception('操作失败');
+	            }
+	        }
+	        catch(\Exception $e)
+	        {
+	            $transaction->rollBack();
+	            return ['code' => 1, 'message' => 'operation failed'];
+	        }
 		}
 }

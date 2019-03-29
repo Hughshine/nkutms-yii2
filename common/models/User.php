@@ -173,11 +173,6 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
         ->where(['>','expire_at',time()])
         ->limit(1)
         ->one();
-        //return static::findOne(['id' => 1]);
-        //throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
-        
-        
-        //  throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
     }
     // 
     public static function findIdentity($id)

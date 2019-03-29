@@ -21,6 +21,7 @@ class TicketForm extends ActiveRecord
     public $status;
     public $serial_number;
 
+    public $is_api = false;
     public $lastError;//用于存放最后一次异常信息
 
     public function rules()
@@ -167,7 +168,7 @@ class TicketForm extends ActiveRecord
                 'serial_number'=>'序列号',
             ];
     }
-
+   
      //根据这个表单的信息创建一个票务记录,返回新创建的模型或者null(创建失败)
     /*
      * 必须的字段为:user_id,activity_id,status,serial_number
@@ -184,8 +185,10 @@ class TicketForm extends ActiveRecord
             $model->activity_id=$this->activity_id;
             $model->status=$this->status;
             $model->serial_number=$this->serial_number;
-
-            if(!$model->save()) {var_dump($model->errors);throw new \Exception('票务创建失败!');}
+            if(!$model->save()) {
+                if(!$this->is_api) var_dump($model->errors);
+                throw new \Exception('票务创建失败!');
+            }
 
             $this->tk_id=$model->id;//用于创建后导向相关页面
 
@@ -196,7 +199,7 @@ class TicketForm extends ActiveRecord
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
+            if(!$this->is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
             return null;
         }
     }
@@ -216,14 +219,14 @@ class TicketForm extends ActiveRecord
                 $this->scenario=$scenario;
                 break;
             default:
-                Yii::$app->getSession()->setFlash('warning', '场景参数错误');
+                if(!$this->is_api) Yii::$app->getSession()->setFlash('warning', '场景参数错误');
                 return false;
         }
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
             if(!$this->validate()) {
-                var_dump($this->errors);
+                if(!$this->is_api) var_dump($this->errors);
                 throw new \Exception('修改信息需要调整');
             }
 
@@ -253,7 +256,7 @@ class TicketForm extends ActiveRecord
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
+            if(!$this->is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
             return false;
         }
     }

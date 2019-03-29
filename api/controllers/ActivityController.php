@@ -5,8 +5,10 @@ use Yii;
 use yii\rest\ActiveController;
 use yii\data\ActiveDataProvider;
 use common\models\Activity;
+use common\models\ActivityForm;
 use common\models\User;
 use common\models\Ticket;
+use common\models\TicketForm;
 // use common\models\TicketEvent;
 
 use yii\helpers\ArrayHelper;
@@ -115,59 +117,72 @@ class ActivityController extends ActiveController
 	{
 		$request = Yii::$app->request;
 
-		$user_id = $request->post('user_id');
+		$user = Yii::$app->user->identity;
+
+		$user_id = $user->id;
+
 		$activity_id = $request->post('activity_id');
-
-		//TODO验证传入的信息是否符合规则;
 		
-		if( $user_id == null || $activity_id == null )
-			return ['code'=> 1,'message' => 'empty paramters'];
-
-		$user = User::find()
-				->where(['id' => $user_id])
-				->limit(1)
-				->one();
+		if($activity_id == null)
+			return ['code'=> 1,'message' => 'empty activity_id'];
 
 		$activity = Activity::find()
 				->where(['id' => $activity_id])
 				->limit(1)
 				->one();
 
-		if( $user == null || $activity == null )
-			return ['code'=> 1, 'message' => 'wrong id'];
+		if( $user == null )//作用可能不大
+			return ['code' => 1, 'message' => 'inner problem -- user'];
 
-		if(time()<$activity->ticketing_start_at||time()>$activity->ticketing_end_at)
+		if( $activity == null )
+			return ['code'=> 1, 'message' => 'invalid activity id'];
+
+		if( $activity->status != Activity::STATUS_APPROVED)
 		{
-			return ['code'=> 1, 'message' => '未在抢票时间内'];
+			return ['code'=> 1, 'message' => 'invalid activity status'];
 		}
 
-		$current_serial = $activity->current_serial;
+		if(time()+7*3600<$activity->ticketing_start_at||time()+7*3600>$activity->ticketing_end_at)
+		{
+			return ['code'=> 1, 'message' => 'invalid ticketing time'];
+		}
 
-		$current_people = $activity->current_people;
-		if($current_people > $activity->max_people)
-			return ['code'=> 1, 'message'=>'已达上限'];
+		$ticketForm=new TicketForm();
+		$ticketForm->is_api=true;
+        $ticketForm->activity_id=$activity_id;
+        $ticketForm->user_id=$user->id;
+        $ticketForm->status=Ticket::STATUS_VALID;
+        $ticketForm->serial_number=$activity->current_serial;
 
-		$ticket = Ticket::find()
-				->where([
-					'activity_id' => $activity_id,
-					'user_id' => $user_id,
-					'status' => 0
-						])
-				->limit(1)
-				->one();
+		$actForm=new ActivityForm();
+        $actForm->is_api=true;
+        $actForm->current_serial=$activity->current_serial+1;
+        $actForm->current_people=$activity->current_people+1;
+        
+        $transaction=Yii::$app->db->beginTransaction();
+        try
+        {
+        	$ticket = $ticketForm->create();
+        	if(!$ticket)
+        	{
+ 				throw new \Exception('cannot ticket twice');
+        	}
 
-		if($ticket != null)
-			return ['code'=> 1,'message' => '已抢过票！'];
+            if($actForm->infoUpdate($activity,'ChangeSerial')){
+            	$transaction->commit();
+                return ['code'=> 0, 'message' => 'success', 'data' => $ticket];
+            }
+            else
+            {
+            	throw new \Exception('full');
+            }
 
-		$activity->current_people++;
-		$activity->current_serial++;
-		$activity->save(false);
+        }
+        catch(\Exception $e)
+        {
+            $transaction->rollBack();
+            return ['code' => 1, 'message' => $e->getMessage()];
+        }
 
-
-		$ticket = Ticket::generateAndWriteNewTicket($user_id,$activity_id,$current_serial,0);
-
-		// TicketEvent::generateAndWriteNewTicketEvent($ticket->id,$ticket->user_id,$ticket->activity_id,0,-1);
-
-		return ['code'=> 0, 'message' => 'success', 'data' => $ticket];
 	}
 }

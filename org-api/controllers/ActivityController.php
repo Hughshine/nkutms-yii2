@@ -380,6 +380,7 @@ class ActivityController extends ActiveController
 
 		if($activity->status == 3)
 			return ['code'=>1,'message' => 'already cancelled'];
+		
 		$activity->status = 1;
 		$activity->save(false);
 

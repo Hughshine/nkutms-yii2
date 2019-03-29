@@ -6,6 +6,7 @@ use Yii;
 use yii\rest\ActiveController;
 use yii\data\ActiveDataProvider;
 use common\models\User;
+use common\models\UserForm;
 
 use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
@@ -55,6 +56,7 @@ class UserController extends ActiveController
 		$request = Yii::$app->request;
 
 		$wechat_id = $request->post('wechat_id');   
+		$user_name = $request->post('user_name');  
 		$credential = $request->post('credential');   
 		$password = $request->post('password');
 		$category = $request->post('category');   
@@ -81,12 +83,15 @@ class UserController extends ActiveController
 		if($tmp_user!=null)
 		{
 			if($tmp_user->wechat_id!=null)
-				return ['code'=>1,'message'=>'credentail already bind user!'];
+				return ['code'=>1,'message'=>'credential already bind other user!'];
 			//credential未绑定账号，验证密码
 			if(Yii::$app->getSecurity()->validatePassword($password , $tmp_user->password))
 			{
 				$tmp_user->wechat_id = $wechat_id;
-				$tmp_user->save(false);//需要修改，体现对传入参数的控制
+				if(!$tmp_user->save())
+				{
+					return ['code' => 1, 'bind failed'];
+				}
 				return [ 
 					'code'=>0,
 					'message'=> 'bind success', 
@@ -99,41 +104,63 @@ class UserController extends ActiveController
 		}
 
 		//TODO
-		$user = new User();
-		$user->user_name = 'default-name';
-		$user->wechat_id = $wechat_id;
-		$user->credential = $credential;
-		$user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
-		$user->category = $category;
-		$user->expire_at = time()+3600*7;
-		$access_token = $user->generateAccessToken();
-		$user->save(false);
+		$user_form  = new UserForm();
+		$user_form->is_api = true;
+		$user_form->user_name = $user_name==null?'default-name':$user_name;
 
-		return [ 
-			'code'=>0,
-			'message'=> 'bind success', 
-			'data' => [
-				'user_info' => $user,
-				'access_token' => $access_token]
-			];
+		$user_form->wechat_id = $wechat_id;
+		$user_form->credential = $credential;
+		$user_form->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+		$user_form->category = $category;
+
+		$transaction=Yii::$app->db->beginTransaction();
+		try{
+			$user = $user_form->create();
+			if(!$user)
+			{
+				throw new \Exception('create failed');
+			}
+			$user->expire_at = time()+3600*7;
+			$access_token = $user->generateAccessToken();
+
+			if($user->save())
+			{
+				throw new \Exception('generate access-token failed');
+			}
+
+			$transaction->commit();
+			return [ 
+				'code'=>0,
+				'message'=> 'bind success', 
+				'data' => [
+					'user_info' => $user,
+					'access_token' => $access_token]
+				];
+		}
+		catch(\Exception $e)
+		{
+			$transaction->rollBack();
+			return ['code'=>1,'message'=>$e->getMessage()];
+		}
 		//credential未存在，绑定密码
 	}
 
 	public function actionWechatLogin()
 	{
-		//TODO
+		//TODO 验证来源是微信小程序
 		$request = Yii::$app->request;
 
 		$sql_wechat = $request->post('wechat_id');   
+
 		if($sql_wechat == null)
 			return ['code'=>1,'message'=>'empty wechat_id'];
+
 		$sql_category = $request->post('category', 3); 
 
 		$user = User::find()
 					->where(['wechat_id' => $sql_wechat])
 					->limit(1)
 					->one();
-
 		// 未绑定的微信号直接禁止
 		if($user == null){
 			return [
@@ -144,7 +171,10 @@ class UserController extends ActiveController
 
 		$access_token = $user->generateAccessToken();
 		$user->expire_at = time()+3600*24;
-		$user->save(false);//TODO
+		if (!$user->save()) 
+		{
+			return ['code'=>1, 'message'=>'generate access-token failed'];
+         }
 
 		return [ 'code'=>0,
 		'message'=> 'success', 
@@ -154,8 +184,13 @@ class UserController extends ActiveController
 		];
 	}
 
+	/*
+	接口暂取消；
+	 */
 	public function actionEditProfile()
 	{
+		return ['code' => 1, 'message' => 'api is suspended'];
+		/*
 		$request = Yii::$app->request;
 
 		$user_id = $request->post('user_id');
@@ -173,5 +208,6 @@ class UserController extends ActiveController
 		$user = User::editAndSaveUser($user,$user_name,null,null);
 
 		return ['code'=>0, 'message'=>'success', 'data'=>$user];
+		*/
 	}
 }

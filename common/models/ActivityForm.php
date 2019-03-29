@@ -34,6 +34,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
 
     public $org_name;//用于查找发布者名字
 
+    public $is_api = false;
     public $lastError;//用于存放最后一次异常信息
 
     public function rules()
@@ -264,7 +265,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
+            if(!$is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
             return null;
         }
     }
@@ -391,7 +392,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
+            if(!$this->is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
             return false;
         }
     }
