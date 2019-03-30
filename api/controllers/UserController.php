@@ -8,8 +8,12 @@ use yii\data\ActiveDataProvider;
 use common\models\User;
 use common\models\UserForm;
 
+use common\models\ApiConfig;
+
 use yii\helpers\ArrayHelper;
 use yii\filters\auth\QueryParamAuth;
+
+
 
 class UserController extends ActiveController
 {
@@ -56,6 +60,7 @@ class UserController extends ActiveController
 		$request = Yii::$app->request;
 
 		$wechat_id = $request->post('wechat_id');   
+		$js_code = $request->post('code');
 		$user_name = $request->post('user_name');  
 		$credential = $request->post('credential');   
 		$email = $request->post('email');   
@@ -64,13 +69,59 @@ class UserController extends ActiveController
 
 		if($wechat_id==null||$credential==null||$password==null||$category==null||$email==null)
 		{
-			return ['code'=>1,'message'=>'empty paramter'];
+			return ['code'=>1,'message'=>'empty wechat_id/credential/password/category/email'];
 		}
 
+	  	if(!$js_code)
+		{
+			return ['code'=>1, 'message'=>'empty code'];
+		}
+
+
+		$url = ApiConfig::code2session_url.'jscode2session?appid='.ApiConfig::app_id.'&secret='.ApiConfig::app_secret.'&js_code='.$js_code.'&grant_type=authorization_code';
+//调用微信接口
+		$headerArray =array("Content-type:application/json;","Accept:application/json");
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); 
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE); 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch,CURLOPT_HTTPHEADER,$headerArray);
+        $output = curl_exec($ch);
+        curl_close($ch);
+        $output = json_decode($output,true);
+
+        $err_msg = 'none';
+
+        $sql_wechat;
+        $sql_session_key;
+        
+        switch ($output['errcode']) {
+        	case 0:
+        		$wechat_id = $output['openid'];
+        		$sql_session_key = $output['session_key'];
+        		break;
+        	case 1:
+        		return ['code'=>1, 'message'=>'wx server is busy'];
+        		break;
+        	case 40029:
+	        	return ['code'=>1, 'message'=>'code invalid'];
+        		break;
+        	case 45011:
+	        	return ['code'=>1, 'message'=>'访问频繁'];
+        		break;
+        	default:
+        		$wechat_id = $request->post('wechat_id');//for development sake
+        		$err_msg = $output['errcode'];
+        }
+	  	/////
+	  	///
 		$user = User::find()
 					->where(['wechat_id' => $wechat_id])
 					->limit(1)
 					->one();
+
 
 		if($user != null)
 			return ['code'=>1,'message'=>'user already bind credential!'];
@@ -86,8 +137,13 @@ class UserController extends ActiveController
 			if($tmp_user->wechat_id!=null)
 				return ['code'=>1,'message'=>'credential already bind other user!'];
 			//credential未绑定账号，验证密码
+			if($email != $tmp_user->email)
+			{
+				return ['code'=>1,'message'=>'wrong email！'];
+			}
 			if(Yii::$app->getSecurity()->validatePassword($password , $tmp_user->password))
 			{
+
 				$tmp_user->wechat_id = $wechat_id;
 				if(!$tmp_user->save())
 				{
@@ -102,6 +158,15 @@ class UserController extends ActiveController
 					];
 			}
 				return ['code'=>1,'message'=>'password doesn\'t match'];
+		}
+
+		$user = User::find()
+					->where(['email' => $email])
+					->limit(1)
+					->one();
+		if($user)
+		{
+			return ['code'=>1,'message'=>'email has already been taken'];
 		}
 
 		//TODO
@@ -152,12 +217,53 @@ class UserController extends ActiveController
 		//TODO 验证来源是微信小程序
 		$request = Yii::$app->request;
 
-		$sql_wechat = $request->post('wechat_id');   
+		$js_code = $request->post('code');
 
-		if($sql_wechat == null)
-			return ['code'=>1,'message'=>'empty wechat_id'];
+		if(!$js_code)
+		{
+			return ['code'=>1, 'message'=>'empty code'];
+		}
 
-		$sql_category = $request->post('category', 3); 
+
+		$url = ApiConfig::code2session_url.'jscode2session?appid='.ApiConfig::app_id.'&secret='.ApiConfig::app_secret.'&js_code='.$js_code.'&grant_type=authorization_code';
+//调用微信接口
+		$headerArray =array("Content-type:application/json;","Accept:application/json");
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); 
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE); 
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch,CURLOPT_HTTPHEADER,$headerArray);
+        $output = curl_exec($ch);
+        curl_close($ch);
+        $output = json_decode($output,true);
+
+        $err_msg = 'none';
+        $sql_wechat;
+
+        switch ($output['errcode']) {
+        	case 0:
+        		$sql_wechat = $output['openid'];
+        		$sql_session_key = $output['session_key'];
+        		break;
+        	case 1:
+        		return ['code'=>1, 'message'=>'wx server is busy'];
+        		break;
+        	case 40029:
+	        	return ['code'=>1, 'message'=>'code invalid'];
+        		break;
+        	case 45011:
+	        	return ['code'=>1, 'message'=>'访问频繁'];
+        		break;
+        	default:
+        		$sql_wechat = $request->post('wechat_id');//for development sake
+        		$err_msg = $output['errcode'];
+        }
+
+		    
+
+		// $sql_category = $request->post('category', 0); 
 
 		$user = User::find()
 					->where(['wechat_id' => $sql_wechat])
@@ -168,11 +274,13 @@ class UserController extends ActiveController
 			return [
 					'code'=>2,
 					'message'=> 'please bind credential and password',
+					'err_msg' => $err_msg
 					];
 		}
 
 		$access_token = $user->generateAccessToken();
 		$user->expire_at = time()+3600*24;
+
 		if (!$user->save()) 
 		{
 			return ['code'=>1, 'message'=>'generate access-token failed'];
