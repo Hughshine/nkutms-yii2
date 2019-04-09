@@ -77,49 +77,50 @@ class UserController extends ActiveController
 			return ['code'=>1, 'message'=>'empty code'];
 		}
 
+		$wechat_id;
 
-		$url = ApiConfig::code2session_url.'jscode2session?appid='.ApiConfig::app_id.'&secret='.ApiConfig::app_secret.'&js_code='.$js_code.'&grant_type=authorization_code';
+		$redis = Yii::$app->redis;
+
+		if (!$wechat_id = $redis->get($js_code)) 
+		{
+			$url = ApiConfig::code2session_url.'jscode2session?appid='.ApiConfig::app_id.'&secret='.ApiConfig::app_secret.'&js_code='.$js_code.'&grant_type=authorization_code';
 //调用微信接口
-		$headerArray =array("Content-type:application/json;","Accept:application/json");
-        $ch = curl_init();
+			$headerArray =array("Content-type:application/json;","Accept:application/json");
+	        $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); 
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE); 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch,CURLOPT_HTTPHEADER,$headerArray);
-        $output = curl_exec($ch);
-        curl_close($ch);
-        $output = json_decode($output,true);
+	        curl_setopt($ch, CURLOPT_URL, $url);
+	        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE); 
+	        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE); 
+	        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	        curl_setopt($ch,CURLOPT_HTTPHEADER,$headerArray);
+	        $output = curl_exec($ch);
+	        curl_close($ch);
+	        $output = json_decode($output,true);
 
-        $err_msg = 'none';
+	        $err_msg = 'none';
 
-        $sql_wechat;
-        $sql_session_key;
-        
-        switch ($output['errcode']) {
-        	case 0:
-        		$wechat_id = $output['openid'];
-        		$sql_session_key = $output['session_key'];
-        		break;
-        	case 1:
-        		return ['code'=>1, 'message'=>'wx server is busy'];
-        		break;
-        	case 40029:
-	        	return ['code'=>1, 'message'=>'code invalid'];
-        		break;
-        	case 45011:
-	        	return ['code'=>1, 'message'=>'访问频繁'];
-        		break;
-        	default:
-        		// $wechat_id = $request->post('wechat_id');//for development sake
-        		$err_msg = $output['errcode'];
-        		return ['code','message'=>'wx invalid code'];
-        }
+	        switch ($output['errcode']) {
+	        	case 0:
+	        		$wechat_id = $output['openid'];
+	        		$sql_session_key = $output['session_key'];
+	        		break;
+	        	case 1:
+	        		return ['code'=>1, 'message'=>'wx server is busy'];
+	        		break;
+	        	case 40029:
+		        	return ['code'=>1, 'message'=>'code invalid'];
+	        		break;
+	        	case 45011:
+		        	return ['code'=>1, 'message'=>'访问频繁'];
+	        		break;
+	        	default:
+	        		// $wechat_id = $request->post('wechat_id');//for development sake
+	        		$err_msg = $output['errcode'];
+	        		return ['code'=>1,'message'=>'wx invalid code'];
+	        }
+		}
 
-        return $err_msg;
-	  	/////
-	  	///
+
 		$user = User::find()
 					->where(['wechat_id' => $wechat_id])
 					->limit(1)
@@ -180,7 +181,9 @@ class UserController extends ActiveController
 		$user_form->wechat_id = $wechat_id; 
 		$user_form->email = $email;//TODO
 		$user_form->credential = $credential;
-		$user_form->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+		$user_form->password = $password;
+		$user_form->rePassword = $password;
+
 		$user_form->category = $category;
 
 		$transaction=Yii::$app->db->beginTransaction();
@@ -245,35 +248,46 @@ class UserController extends ActiveController
         $err_msg = 'none';
         $sql_wechat;
 
-        switch ($output['errcode']) {
-        	case 0:
-        		$sql_wechat = $output['openid'];
-        		$sql_session_key = $output['session_key'];
-        		break;
-        	case 1:
-        		return ['code'=>1, 'message'=>'wx server is busy'];
-        		break;
-        	case 40029:
-	        	return ['code'=>1, 'message'=>'code invalid'];
-        		break;
-        	case 45011:
-	        	return ['code'=>1, 'message'=>'访问频繁'];
-        		break;
-        	default:
-        		$sql_wechat = $request->post('wechat_id');//for development sake
-        		$err_msg = $output['errcode'];
+        if(array_key_exists("errcode",$output))
+        {
+        	switch ($output['errcode']) {
+	        	case 0:
+	        		$sql_wechat = $output['openid'];
+	        		$sql_session_key = $output['session_key'];
+	        		break;
+	        	case 1:
+	        		return ['code'=>1, 'message'=>'wx server is busy'];
+	        		break;
+	        	case 40029:
+		        	return ['code'=>1, 'message'=>'code invalid'];
+	        		break;
+	        	case 45011:
+		        	return ['code'=>1, 'message'=>'访问频繁'];
+	        		break;
+	        	default:
+	        		$err_msg = $output['errcode'];
+	        		return ['code'=>1, 'message' => $err_msg];
+        	}
         }
-
-		    
-
+        else
+        {
+        	$sql_wechat = $output['openid'];
+	        $sql_session_key = $output['session_key'];
+        }
 		// $sql_category = $request->post('category', 0); 
 
 		$user = User::find()
 					->where(['wechat_id' => $sql_wechat])
 					->limit(1)
 					->one();
-		// 未绑定的微信号直接禁止
+		// 未绑定的微信号直接禁止，存入redis
 		if($user == null){
+			$redis = Yii::$app->redis;
+			if (!$val = $redis->get($js_code)) {
+				$redis->set($js_code, $sql_wechat);
+				$redis->expire($js_code, 3600);
+			} 
+
 			return [
 					'code'=>2,
 					'message'=> 'please bind credential and password',

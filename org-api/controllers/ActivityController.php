@@ -82,13 +82,12 @@ class ActivityController extends ActiveController
 				'query' => $modelClass::find()
 				->where(['and',
 					['category' => 0],
-					['status' => 0],])
+					['status' => Activity::STATUS_APPROVED]])
+				->andWhere(['>','ticketing_end_at',time()+3600*7])
 				->orderBy('release_at DESC'),//根据发布时间逆序排序
-				
 				'pagination' => ['pageSize'=>10],
 			]
 		);
-
 		return ['code'=>0,'message'=>'success','data'=>$provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/10+1)];
 	}
 

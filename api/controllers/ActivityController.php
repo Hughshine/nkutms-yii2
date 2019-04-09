@@ -63,7 +63,7 @@ class ActivityController extends ActiveController
 				'query' => $modelClass::find()
 				->where(['and',
 					['category' => 0],
-					['status' => 0],])
+					['status' => Activity::STATUS_APPROVED]])
 				->orderBy('release_at DESC'),//根据发布时间逆序排序
 				
 				'pagination' => ['pageSize'=>5],

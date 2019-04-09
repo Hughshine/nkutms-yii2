@@ -260,7 +260,7 @@ class UserForm extends ActiveRecord
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
             if($this->is_api) Yii::$app->getSession()->setFlash('warning', $this->lastError);
-            return null;
+            return $e->getMessage();//null
         }
     }
 
