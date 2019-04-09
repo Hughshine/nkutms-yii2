@@ -253,10 +253,14 @@ class ActivityController extends ActiveController
 		$act_form->activity_name = $activity_name;
 		$act_form->release_by = $organizer->id;
 		$act_form->status = 0;
-		$act_form->pic_url = "empty";
+		$act_form->pic_url = null;
 		$act_form->current_people = 0;
         $act_form->current_serial = 1;
         $act_form->release_at = time()+7*3600;
+        // $act_form->time_start_stamp=date('Y-m-d H:i' , $start_at);
+        // $act_form->time_end_stamp=date('Y-m-d H:i' , $end_at);
+        // $act_form->ticket_start_stamp=date('Y-m-d H:i' , $ticketing_start_at);
+        // $act_form->ticket_end_stamp=date('Y-m-d H:i' , $ticketing_end_at);
 
         $activity=$act_form->create();
 		if(!$activity)
