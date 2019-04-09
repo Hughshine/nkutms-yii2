@@ -249,14 +249,17 @@ class ActivityController extends ActiveController
 		$act_form->start_at = $start_at;
 		$act_form->end_at = $end_at;
 		$act_form->max_people = $max_people;
-		$act_form->intro = $intro;
+		$act_form->introduction = $intro;
 		$act_form->activity_name = $activity_name;
+		$act_form->release_by = $organizer->id;
 		$act_form->status = 0;
+		$act_form->pic_url = "empty";
 		$act_form->current_people = 0;
         $act_form->current_serial = 1;
         $act_form->release_at = time()+7*3600;
 
-		if(!$act_form->create())
+        $activity=$act_form->create();
+		if(!$activity)
 		{
 			return ['code'=>1,'message' => 'Activity created failed. Check your whether your parameters is valid.'];
 		}
@@ -299,7 +302,7 @@ class ActivityController extends ActiveController
 		if($activity == null)
 			return ['code'=>1, 'message' => 'activity inexists'];
 
-		if($activity->release_by != $org_id)
+		if($activity->release_by != $organizer->id)
 			return ['code'=>1, 'message' => 'illegal request'];
 
 		if($activity->status == Activity::STATUS_APPROVED)
@@ -343,7 +346,7 @@ class ActivityController extends ActiveController
 			$activity->start_at = $start_at==null?$activity->start_at:$start_at;
 			$activity->end_at = $end_at==null?$activity->end_at:$end_at;
 
-			if(!activity->save())
+			if(!$activity->save())
 			{
 				throw new \Exception('activity time update failed');
 			}
@@ -381,7 +384,6 @@ class ActivityController extends ActiveController
 
 			if($organizer == null)
 				throw new \Exception('empty activity id');
-				return ['code'=>1,'message' => 'organizer inexists'];
 
 			$activity = Activity::find()
 						->where(['id'=>$activity_id])
@@ -391,7 +393,7 @@ class ActivityController extends ActiveController
 			if($activity == null)
 				throw new \Exception('activity inexists');
 
-			if($activity->release_by != $org_id)
+			if($activity->release_by != $organizer->id)
 				throw new \Exception('illegal request');
 
 			if($activity->status == Activity::STATUS_CANCEL)

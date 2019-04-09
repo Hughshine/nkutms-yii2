@@ -305,15 +305,4 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
         $this->allowance_updated_at = $timestamp;//time();
         $this->save();
     }
-
-    public function editAndSaveUser($user,$name,$category,$credential)
-    {
-        $user->user_name = $name==null?$user->user_name:$name;
-        $user->category = $category==null?$user->category:$category;
-        $user->credential = $credential==null?$user->credential:$credential;
-
-        $user->save(false);
-
-        return $user;
-    }
 }

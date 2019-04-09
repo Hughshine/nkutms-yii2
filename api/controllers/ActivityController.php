@@ -17,7 +17,6 @@ use yii\filters\RateLimiter;
 
 use yii\behaviors\TimestampBehavior;
 
-
 class ActivityController extends ActiveController
 {
 	public $modelClass = 'common\models\Activity';

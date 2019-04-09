@@ -106,7 +106,6 @@ return [
                 ],
             ],
         ],
-        
     ],
     'params' => $params,
 ];

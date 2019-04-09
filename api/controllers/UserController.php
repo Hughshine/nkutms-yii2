@@ -67,7 +67,7 @@ class UserController extends ActiveController
 		$password = $request->post('password');
 		$category = $request->post('category');   
 
-		if($wechat_id==null||$credential==null||$password==null||$category==null||$email==null)
+		if($credential==null||$password==null||$category==null||$email==null)
 		{
 			return ['code'=>1,'message'=>'empty wechat_id/credential/password/category/email'];
 		}
@@ -112,9 +112,12 @@ class UserController extends ActiveController
 	        	return ['code'=>1, 'message'=>'访问频繁'];
         		break;
         	default:
-        		$wechat_id = $request->post('wechat_id');//for development sake
+        		// $wechat_id = $request->post('wechat_id');//for development sake
         		$err_msg = $output['errcode'];
+        		return ['code','message'=>'wx invalid code'];
         }
+
+        return $err_msg;
 	  	/////
 	  	///
 		$user = User::find()
@@ -174,7 +177,7 @@ class UserController extends ActiveController
 		$user_form->is_api = true;
 		$user_form->user_name = $user_name==null?'default-name':$user_name;
 
-		$user_form->wechat_id = $wechat_id;
+		$user_form->wechat_id = $wechat_id; 
 		$user_form->email = $email;//TODO
 		$user_form->credential = $credential;
 		$user_form->password = Yii::$app->getSecurity()->generatePasswordHash($password);

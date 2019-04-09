@@ -267,7 +267,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
-            if(!$is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
+            if(!$this->is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
             return null;
         }
     }
