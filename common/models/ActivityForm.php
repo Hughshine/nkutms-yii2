@@ -57,7 +57,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
                         'ticket_start_stamp',
                         'time_end_stamp',
                         'ticket_end_stamp',
-                        */
+                        */ 
                         'max_people',
                         'status',
                     ],
@@ -335,6 +335,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
                         $model->updated_at=time()+7*3600;
                         $model->ticketing_start_at=strtotime($this->ticket_start_stamp);
                         $model->ticketing_end_at=strtotime($this->ticket_end_stamp);
+                        
                         $model->category=$this->category;
                         break;
                     }

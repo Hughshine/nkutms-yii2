@@ -329,21 +329,16 @@ class ActivityController extends ActiveController
 		$act_form = new ActivityForm();
 		$act_form->is_api = true;
 
-        $act_form->activity_name = $activity_name==null?$activity->activity_name:$activity_name;
-		$act_form->status = Activity::STATUS_APPROVED;
-        $act_form->category = $category==null?$activity->category:$category;
-        $act_form->location = $location==null?$activity->location:$location;
-        $act_form->max_people = $max_people==null?$activity->max_people:$max_people;
-        $act_form->introduction = $intro==null?$activity->introduction:$intro;
+        $activity->activity_name = $activity_name==null?$activity->activity_name:$activity_name;
+		$activity->status = Activity::STATUS_UNAUDITED;
+        $activity->category = $category==null?$activity->category:$category;
+        $activity->location = $location==null?$activity->location:$location;
+        $activity->max_people = $max_people==null?$activity->max_people:$max_people;
+        $activity->introduction = $intro==null?$activity->introduction:$intro;
 
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-			if(!$act_form->infoUpdate($activity,'Update'))
-			{
-				throw new \Exception('activity update failed');
-			}
-
 			$activity->ticketing_start_at = $ticketing_start_at==null?$activity->ticketing_start_at:$ticketing_start_at;
 			$activity->ticketing_end_at = $ticketing_end_at==null?$activity->ticketing_end_at:$ticketing_end_at;
 			$activity->start_at = $start_at==null?$activity->start_at:$start_at;
@@ -351,6 +346,7 @@ class ActivityController extends ActiveController
 
 			if(!$activity->save())
 			{
+
 				throw new \Exception('activity time update failed');
 			}
 
