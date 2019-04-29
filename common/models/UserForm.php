@@ -21,6 +21,10 @@ class UserForm extends ActiveRecord
     public $oldPassword;
     public $img_url;
 
+    public $is_api;
+
+    public $wechat_id;//TODO 添加api相关属性rules
+
     public $lastError;//用于存放最后一个错误信息
 
 
@@ -228,6 +232,8 @@ class UserForm extends ActiveRecord
 
             $model = new User();
             $model->user_name = $this->user_name;
+            $model->wechat_id = $this->wechat_id;
+
             $model->category=$this->category;
             $model->credential=$this->credential;
             $model->email=$this->email;
@@ -253,8 +259,8 @@ class UserForm extends ActiveRecord
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('warning', $this->lastError);
-            return null;
+            if($this->is_api) Yii::$app->getSession()->setFlash('warning', $this->lastError);
+            return $e->getMessage();//null
         }
     }
 
@@ -331,7 +337,7 @@ class UserForm extends ActiveRecord
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('warning', $this->lastError);
+            if($this->is_api) Yii::$app->getSession()->setFlash('warning', $this->lastError);
             return false;
         }
     }
@@ -359,7 +365,7 @@ class UserForm extends ActiveRecord
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
+            if($this->is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
             return false;
         }
     }

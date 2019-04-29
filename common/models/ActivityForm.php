@@ -34,7 +34,10 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
 
     public $org_name;//用于查找发布者名字
 
+    public $is_api = false;
     public $lastError;//用于存放最后一次异常信息
+
+    public $release_at;//TODO:大概可以删掉
 
     public function rules()
     {
@@ -48,10 +51,13 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
                         'release_by',
                         'location',
                         'category',
+                        /*
+                        暂时注释掉，因为与api的调用不兼容。之后应创建新的场景
                         'time_start_stamp',
                         'ticket_start_stamp',
                         'time_end_stamp',
                         'ticket_end_stamp',
+                        */ 
                         'max_people',
                         'status',
                     ],
@@ -236,10 +242,21 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
                 $this->pic_url=null;
 
             $model = new Activity();
-            $model->start_at=strtotime($this->time_start_stamp);
-            $model->end_at=strtotime($this->time_end_stamp);
-            $model->ticketing_start_at=strtotime($this->ticket_start_stamp);
-            $model->ticketing_end_at=strtotime($this->ticket_end_stamp);
+            if($this->is_api)
+            {
+                $model->start_at=$this->start_at;
+                $model->end_at=$this->end_at;
+                $model->ticketing_start_at=$this->ticketing_start_at;
+                $model->ticketing_end_at=$this->ticketing_end_at;
+            }
+            else
+            {
+                $model->start_at=strtotime($this->time_start_stamp);
+                $model->end_at=strtotime($this->time_end_stamp);
+                $model->ticketing_start_at=strtotime($this->ticket_start_stamp);
+                $model->ticketing_end_at=strtotime($this->ticket_end_stamp);
+            }
+            
             $model->release_at=time()+7*3600;
             $model->current_people=0;
             $model->release_by=$this->release_by;
@@ -264,7 +281,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
+            if(!$this->is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
             return null;
         }
     }
@@ -318,6 +335,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
                         $model->updated_at=time()+7*3600;
                         $model->ticketing_start_at=strtotime($this->ticket_start_stamp);
                         $model->ticketing_end_at=strtotime($this->ticket_end_stamp);
+                        
                         $model->category=$this->category;
                         break;
                     }
@@ -391,7 +409,7 @@ class ActivityForm extends ActiveRecord//因为要查询,所以继承ActiveRecor
         {
             $transaction->rollBack();
             $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
+            if(!$this->is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
             return false;
         }
     }
