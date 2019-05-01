@@ -152,6 +152,28 @@ class NoticeForm extends BaseForm
         }
     }
 
+    /**
+     * 按条件查询并返回列表
+     * @param array $cond 条件
+     * @param integer $curPage
+     * @param integer $pageSize
+     * @param array $sortOrder
+     * @return array
+     */
+    public static function getList($cond, $curPage = 1, $pageSize = 5, $sortOrder = ['id' => SORT_DESC])
+    {
+        $model=new NoticeForm();
+        $select= ['id','title','summary','content',
+            'updated_at','created_at'
+            ];
+        $query=$model->find()
+            ->select($select)
+            ->where($cond)
+            ->orderBy($sortOrder);
+        $res=$model->getPages($query,$curPage,$pageSize);
+        return $res;
+    }
+
     /**从content里获取摘要存放到summary字段里
      * @param int $s
      * @param int $e
@@ -165,6 +187,8 @@ class NoticeForm extends BaseForm
         return(mb_substr(str_replace('&nbsp;',' ',
             strip_tags($this->content)),$s,$e,$char));
     }
+
+
 
 
 }

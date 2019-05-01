@@ -7,6 +7,7 @@
  */
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
+
 ?>
 <div class="panel">
     <div class="panel-title box-title">

@@ -295,10 +295,10 @@ class ActivityForm extends BaseForm
 
         switch($scenario)
         {
-            case 'Update':$model=$this->updateActionInUpdate($model);break;
-            case 'ChangePicture':$model=$this->updateActionInChangePicture($model);break;
+            case 'Update':$this->updateActionInUpdate($model);break;
+            case 'ChangePicture':$this->updateActionInChangePicture($model);break;
             case 'ChangeStatus':$model->status=$this->status;break;
-            case 'ChangeSerial':$model=$this->updateActionInChangeSerial($model);break;
+            case 'ChangeSerial':$this->updateActionInChangeSerial($model);break;
             default:throw new FieldException('ActivityForm::infoUpdate:场景参数不存在');break;
         }
 
@@ -452,10 +452,10 @@ class ActivityForm extends BaseForm
         $this->ticketing_start_at_string=date('Y-m-d H:i' , $ticketing_start_at);
         $this->ticketing_end_at_string=date('Y-m-d H:i' , $ticketing_end_at);
     }
+
     /**
-     * Update场景的写入模型动作
-     * @param $model Activity
-     * @return Activity
+     * 从模型读取数据到表单
+     * @param Activity $model
      */
     public function getModelInfo($model)
     {
@@ -467,17 +467,40 @@ class ActivityForm extends BaseForm
         $this->release_by=$model->release_by;
         $this->max_people=$model->max_people;
         $this->introduction=$model->introduction;
-        $this->summary=$this->getSummary();
         $this->getStringTimeFromIntTime($model->start_at,$model->end_at,$model->ticketing_start_at,$model->ticketing_end_at);
         $this->updated_at=time()+7*3600;
         $this->category=$model->category;
-        return $model;
+    }
+
+    /**
+     * 按条件查询并返回列表
+     * @param array $cond 条件
+     * @param integer $curPage
+     * @param integer $pageSize
+     * @param array $sortOrder
+     * @return array
+     */
+    public static function getList($cond, $curPage = 1, $pageSize = 5, $sortOrder = ['id' => SORT_DESC])
+    {
+        $model=new ActivityForm();
+        $select= ['id','activity_name','release_by','release_at',
+            'summary','max_people','current_people',
+            'location','status','start_at','end_at',
+            'ticketing_start_at','ticketing_end_at',
+            'pic_url'];
+        $query=$model->find()
+            ->select($select)
+            ->where($cond)
+            ->with('releaseBy')//根据关系releaseBy
+            ->orderBy($sortOrder);
+        $model=new ActivityForm();
+        $res=$model->getPages($query,$curPage,$pageSize);
+        return $res;
     }
 
     /**
      * Update场景的写入模型动作
      * @param $model Activity
-     * @return Activity
      */
     private function updateActionInUpdate($model)
     {
@@ -496,7 +519,6 @@ class ActivityForm extends BaseForm
         $model->ticketing_end_at=strtotime($this->ticketing_end_at_string);
         $model->updated_at=time()+7*3600;
         $model->category=$this->category;
-        return $model;
     }
 
     /**
@@ -584,7 +606,6 @@ class ActivityForm extends BaseForm
      * ChangePicture场景的写入模型动作
      * @param $model Activity
      * @throws ProcessException
-     * @return Activity
      */
     private function updateActionInChangePicture($model)
     {
@@ -610,7 +631,6 @@ class ActivityForm extends BaseForm
             }
             $model->status=Activity::STATUS_UNAUDITED;
         }
-        return $model;
     }
 
     /**
