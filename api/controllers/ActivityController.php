@@ -121,7 +121,7 @@ class ActivityController extends ActiveController
 
         try
         {
-            $ticket=ActivityForm::createTicket($activity_id,Yii::$app->user->id);
+            $ticket=ActivityForm::createTicket(Yii::$app->user->id,$activity_id);
             return ['code'=> 0, 'message' => 'success', 'data' => $ticket];
         }
         catch (ProjectException $exception)

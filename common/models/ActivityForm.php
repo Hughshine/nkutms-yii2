@@ -452,13 +452,34 @@ class ActivityForm extends BaseForm
         $this->ticketing_start_at_string=date('Y-m-d H:i' , $ticketing_start_at);
         $this->ticketing_end_at_string=date('Y-m-d H:i' , $ticketing_end_at);
     }
+    /**
+     * Update场景的写入模型动作
+     * @param $model Activity
+     * @return Activity
+     */
+    public function getModelInfo($model)
+    {
+        $this->activity_name = $model->activity_name;
+        $this->status=$model->status;
+        if($model->status==Activity::STATUS_APPROVED)
+            $this->release_at=time()+7*3600;
+        $this->location=$model->location;
+        $this->release_by=$model->release_by;
+        $this->max_people=$model->max_people;
+        $this->introduction=$model->introduction;
+        $this->summary=$this->getSummary();
+        $this->getStringTimeFromIntTime($model->start_at,$model->end_at,$model->ticketing_start_at,$model->ticketing_end_at);
+        $this->updated_at=time()+7*3600;
+        $this->category=$model->category;
+        return $model;
+    }
 
     /**
      * Update场景的写入模型动作
      * @param $model Activity
      * @return Activity
      */
-    public function updateActionInUpdate($model)
+    private function updateActionInUpdate($model)
     {
         $model->activity_name = $this->activity_name;
         $model->status=$this->status;

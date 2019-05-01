@@ -214,6 +214,7 @@ class ActivityController extends ActiveController
 			end_at
 			max_people
 			intro
+     * TODO: 小程序前端，也应使用北京时间
 		discription: 传入参数，新建活动。不允许发布相同名称的活动。
 	 */
 	public function actionAddActivity()
@@ -343,9 +344,10 @@ class ActivityController extends ActiveController
 		//$act_form->is_api = true;
 
         //复制模型的信息给表单
-        $act_form->updateActionInUpdate($activity);
-        $act_form->activity_name = $activity_name==null?$activity->activity_name:$activity_name;
+        $act_form->getModelInfo($activity);
+        $act_form->activity_name = 'asf';//$activity_name==null?$activity->activity_name:$activity_name;
         $act_form->status = Activity::STATUS_UNAUDITED;
+        $act_form->release_by = $activity->release_by;
         $act_form->category = $category==null?$activity->category:$category;
         $act_form->location = $location==null?$activity->location:$location;
         $act_form->max_people = $max_people==null?$activity->max_people:$max_people;

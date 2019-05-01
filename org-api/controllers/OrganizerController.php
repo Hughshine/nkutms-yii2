@@ -125,37 +125,39 @@ class OrganizerController extends ActiveController
 	 */
 	public function actionEditProfile()
 	{
-		$request = Yii::$app->request;
-		$organizer = Yii::$app->user->identity;
 
-		$sql_name = $request->post('org_name');
-		$sql_category = $request->post('category');
-		$sql_credential = $request->post('credential');
-
-		$sql_oldpassword = $request->post('oldpassword');
-		$sql_newpassword = $request->post('newpassword');
-
-		if($sql_oldpassword == null)
-			return ['code' => 1, 'message' => 'no password'];
-
-		if(!Yii::$app->getSecurity()->validatePassword($sql_oldpassword , $organizer->password))
-		{
-			return ['code' => 1, 'message' => 'wrong password'];
-		}
-
-		if($organizer == null)
-			return ['code'=>1, 'message'=>'organizer inexists'];
-
-        $organizer->org_name = $category==null?$organizer->org_name:$org_name;
-        $organizer->category = $category==null?$organizer->category:$category;
-        $organizer->credential = $credential==null?$organizer->credential:$credential;
-        $organizer->password = Yii::$app->getSecurity()->generatePasswordHash($newpassword);
-        if(!$organizer->save())
-        {
-        	return ['code'=>1, 'message' => 'organizer update failed'];
-        }
-
-		return ['code'=>0, 'message'=>'success','data'=>$organizer];
+//		$request = Yii::$app->request;
+//		$organizer = Yii::$app->user->identity;
+//
+//		$sql_name = $request->post('org_name');
+//		$sql_category = $request->post('category');
+//		$sql_credential = $request->post('credential');
+//
+//		$sql_oldpassword = $request->post('oldpassword');
+//		$sql_newpassword = $request->post('newpassword');
+//
+//		if($sql_oldpassword == null)
+//			return ['code' => 1, 'message' => 'no password'];
+//
+//		if(!Yii::$app->getSecurity()->validatePassword($sql_oldpassword , $organizer->password))
+//		{
+//			return ['code' => 1, 'message' => 'wrong password'];
+//		}
+//
+//		if($organizer == null)
+//			return ['code'=>1, 'message'=>'organizer inexists'];
+//
+//        $organizer->org_name = $category==null?$organizer->org_name:$org_name;
+//        $organizer->category = $category==null?$organizer->category:$category;
+//        $organizer->credential = $credential==null?$organizer->credential:$credential;
+//        $organizer->password = Yii::$app->getSecurity()->generatePasswordHash($newpassword);
+//
+//        if(!$organizer->save())
+//        {
+//        	return ['code'=>1, 'message' => 'organizer update failed'];
+//        }
+//
+//		return ['code'=>0, 'message'=>'success','data'=>$organizer];
 	}
 }
 

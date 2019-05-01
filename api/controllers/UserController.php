@@ -145,6 +145,7 @@ class UserController extends ActiveController
 			{
 				return ['code'=>1,'message'=>'wrong email！'];
 			}
+
 			if(Yii::$app->getSecurity()->validatePassword($password , $tmp_user->password))
 			{
 
@@ -246,7 +247,6 @@ class UserController extends ActiveController
         $output = json_decode($output,true);
 
         $err_msg = 'none';
-        $sql_wechat;
 
         if(array_key_exists("errcode",$output))
         {

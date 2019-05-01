@@ -7,6 +7,8 @@ use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
+use yii\filters\RateLimitInterface;
+
 
 /**
  * This is the model class for table "tk_organizer".
@@ -30,7 +32,7 @@ use yii\web\IdentityInterface;
  *
  */
 
-class Organizer extends ActiveRecord implements IdentityInterface
+class Organizer extends ActiveRecord implements IdentityInterface, RateLimitInterface
 {
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
@@ -331,5 +333,22 @@ class Organizer extends ActiveRecord implements IdentityInterface
         $organizer->password = Yii::$app->getSecurity()->generatePasswordHash($newpassword);
 
         $organizer->save(false);
+    }
+
+    public function getRateLimit($request, $action)
+    {
+        return [1,1];
+    }
+
+    public function loadAllowance($request, $action)
+    {
+        return [$this->allowance, $this->allowance_updated_at];
+    }
+
+    public function saveAllowance($request,$action,$allowance,$timestamp)
+    {
+        $this->allowance = $allowance;
+        $this->allowance_updated_at = $timestamp;//time();
+        $this->save();
     }
 }
