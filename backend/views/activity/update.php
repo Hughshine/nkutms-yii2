@@ -8,6 +8,11 @@
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use kartik\datetime\DateTimePicker;
+
+/* @var $this yii\web\View */
+/* @var $modelForm common\models\ActivityForm */
+/* @var $scenario string */
+
 $this->title = '活动信息修改';
 $this->params['breadcrumbs'][] = ['label' => '我的发布记录', 'url' => ['mine']];
 $this->params['breadcrumbs'][] = ['label' => $modelForm->activity_name, 'url' => ['view','id'=>$modelForm->act_id]];
@@ -35,7 +40,31 @@ $this->params['breadcrumbs'][] = '活动信息修改';
 
             <?= $form->field($modelForm, 'max_people')->textInput() ?>
 
-            <?= $form->field($modelForm, 'time_start_stamp')->widget(DateTimePicker::classname(),
+                <?= $form->field($modelForm, 'ticketing_start_at_string')->widget(DateTimePicker::classname(),
+                    [
+                        'options' => ['placeholder' => ''],
+                        'pluginOptions' =>
+                            [
+                                'autoclose' => true,
+                                'todayHighlight' => true,
+                                'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
+                            ]
+                    ]);
+                ?>
+
+                <?= $form->field($modelForm, 'ticketing_end_at_string')->widget(DateTimePicker::classname(),
+                    [
+                        'options' => ['placeholder' => ''],
+                        'pluginOptions' =>
+                            [
+                                'autoclose' => true,
+                                'todayHighlight' => true,
+                                'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
+                            ]
+                    ]);
+                ?>
+
+            <?= $form->field($modelForm, 'start_at_string')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
                     'pluginOptions' =>
@@ -47,7 +76,7 @@ $this->params['breadcrumbs'][] = '活动信息修改';
                 ]);
             ?>
 
-            <?= $form->field($modelForm, 'time_end_stamp')->widget(DateTimePicker::classname(),
+            <?= $form->field($modelForm, 'end_at_string')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
                     'pluginOptions' =>
@@ -59,29 +88,6 @@ $this->params['breadcrumbs'][] = '活动信息修改';
                 ]);
             ?>
 
-            <?= $form->field($modelForm, 'ticket_start_stamp')->widget(DateTimePicker::classname(),
-                [
-                    'options' => ['placeholder' => ''],
-                    'pluginOptions' =>
-                        [
-                            'autoclose' => true,
-                            'todayHighlight' => true,
-                            'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
-                        ]
-                ]);
-            ?>
-
-            <?= $form->field($modelForm, 'ticket_end_stamp')->widget(DateTimePicker::classname(),
-                [
-                    'options' => ['placeholder' => ''],
-                    'pluginOptions' =>
-                        [
-                            'autoclose' => true,
-                            'todayHighlight' => true,
-                            'startDate' =>date('Y-m-d'), //设置今天之前的日期不能选择
-                        ]
-                ]);
-            ?>
             <?php break;
             case 'ChangePicture':?>
                 <p>

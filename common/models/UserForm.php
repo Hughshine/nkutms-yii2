@@ -1,14 +1,19 @@
 <?php
 namespace common\models;
 
+use common\exceptions\FieldException;
 use Yii;
-use yii\db\ActiveRecord;
+use common\exceptions\ValidateException;
 
 /**
  * 用户表单
  */
 
-class UserForm extends ActiveRecord
+/**
+ * Class UserForm
+ * @package common\models
+ */
+class UserForm extends BaseForm
 {
     public $user_name;
     public $user_id;//用于管理端修改密码时向页面传递参数
@@ -20,12 +25,12 @@ class UserForm extends ActiveRecord
     public $password;
     public $oldPassword;
     public $img_url;
+    public $status;
 
     public $is_api;
 
     public $wechat_id;//TODO 添加api相关属性rules
 
-    public $lastError;//用于存放最后一个错误信息
 
 
     /**
@@ -151,12 +156,16 @@ class UserForm extends ActiveRecord
             ];
     }
 
-    //rules中调用的验证旧密码的函数
-    public function validatePassword($attribute, $params)
+
+    /**
+     * rules中调用的验证旧密码的函数
+     * @param $attribute
+     */
+    public function validatePassword($attribute)
     {
-        if (!$this->hasErrors())
+        if(!$this->hasErrors())
         {
-            $model=Yii::$app->user->identity;
+            $model=User::findIdentity(Yii::$app->user->id);
             if (!$model || !$model->validatePassword($this->oldPassword))
                 $this->addError($attribute, '旧密码不正确');
 
@@ -164,11 +173,11 @@ class UserForm extends ActiveRecord
     }
 
     //验证修改邮箱时的规则
-    public function validateEmail($attribute, $params)
+    public function validateEmail($attribute)
     {
         if (!$this->hasErrors())
         {
-            $user=static::findOne(['email' => $this->email,]);
+            $user=User::findOne(['email' => $this->email,]);
             if ($user)
             {
                 if(Yii::$app->user->id!=$user->id)
@@ -176,7 +185,6 @@ class UserForm extends ActiveRecord
                 else
                     $this->addError($attribute, '与原来邮箱相同');
             }
-
         }
     }
 
@@ -202,98 +210,78 @@ class UserForm extends ActiveRecord
     }
 
     /**
-     * create a user .
-     *
-     * @return User|null the saved model or null if saving fails
-     */
-    //需要传入$scenario作为场景变量,接受的参数必须为'Create'或'SignUp'
-    //区别是Create不需要填写验证码且可以规定用户类别
-    /*
+     * 创建一个用户模型
+     * 需要传入$scenario作为场景变量,接受的参数必须为'Create'或'SignUp'
+     *区别是Create不需要填写验证码且可以规定用户类别
      * 需要的字段为:
      * user_name,credential,category,email,password,rePassword
-     * */
+     * @param string $scenario
+     * @return User
+     * @throws FieldException
+     * @throws ValidateException
+     * @throws \Exception
+     */
     public function create($scenario)
     {
         $this->scenario=$scenario;
+        if(!is_string($scenario)||$scenario!='Create'&&$scenario!='SignUp')
+            throw new FieldException('UserForm::create:场景参数错误');
+
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if($scenario!='Create'&&$scenario!='SignUp')
-                throw new \Exception('场景参数错误');
-            if(!$this->validate())throw new \Exception('注册信息需要调整');
+            if(!$this->validate())
+                $this->throwValidateException('UserForm::create:注册信息需要调整');
 
-            if($this->img_url)
-            {
-                if(!$this->setImg())
-                    throw new \Exception('图片上传失败,请稍后重试');
-            }
-            else
-                $this->img_url=null;
+            $this->createAction_HandleImgUrl();
 
-            $model = new User();
-            $model->user_name = $this->user_name;
-            $model->wechat_id = $this->wechat_id;
+            $model=$this->createAction_FillANewModel();
 
-            $model->category=$this->category;
-            $model->credential=$this->credential;
-            $model->email=$this->email;
-            $model->setPassword($this->password);
-            //默认参数
-            $model->status=User::STATUS_ACTIVE;
-            $model->expire_at=0;
-            $model->access_token='';
-            $model->allowance=2;
-            $model->allowance_updated_at=0;
-            $model->img_url=$this->img_url;
-            
-            $model->generateAuthKey();
-
-            if(!$model->save())throw new \Exception('注册失败!');
+            if(!$model->save())
+                $this->throwValidateException('UserForm::create:模型创建失败');
 
             //此处可以写一个afterCreate方法来处理创建后事务
 
             $transaction->commit();
             return $model;
         }
-        catch(\Exception $e)
+        catch (ValidateException $exception)
         {
             $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            if($this->is_api) Yii::$app->getSession()->setFlash('warning', $this->lastError);
-            return $e->getMessage();//null
+            throw $exception;
+        }
+        catch(\Exception $exception)
+        {
+            $transaction->rollBack();
+            throw $exception;
         }
     }
 
-
-    //以该表单的信息更新一个已存在的模型$model,返回是否修改成功
-    /*
-     *  场景的必须字段为:
+    /**
+     * 以该表单的信息更新一个已存在的模型$model,返回是否修改成功
+     * 场景的必须字段为:
      *  ChangeStatus:status
      *  ChangeCategory:category
      *  ChangeUserName:user_name
      *  ChangeEmail:email
      *  ChangeAvatar:img_url
      *  RemoveAvatar: img_url允许为空
-     * */
+     * @param $model
+     * @param $scenario
+     * @return bool
+     * @throws FieldException
+     * @throws ValidateException
+     * @throws \Exception
+     */
     public function infoUpdate($model,$scenario)
     {
+        $this->updateAction_FilterScenario($scenario);
+
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            switch($scenario)//过滤无效场景
-            {
-                case 'ChangeStatus':
-                case 'ChangeCategory':
-                case 'ChangeUserName':
-                case 'ChangeEmail':
-                case 'ChangeAvatar':
-                case 'RemoveAvatar':
-                    $this->scenario=$scenario;break;
-                default:
-                    throw new \Exception('场景参数错误');
-                    break;
-            }
-            if(!$this->validate())throw new \Exception('修改信息需要调整');
+            if(!$this->validate())
+                $this->throwValidateException('UserForm::infoUpdate:修改信息需调整');
 
             switch($scenario)
             {
@@ -306,72 +294,130 @@ class UserForm extends ActiveRecord
                 case 'ChangeEmail':
                     $model->email = $this->email;break;
                 case 'ChangeAvatar':
-                {
-                    //如果没改头像就不做动作
-                    if($this->img_url!=$model->img_url)
-                    {
-                        $this->credential=$model->credential;
-                        if(!$this->setImg()) throw new \Exception('图片上传失败,请稍后重试');
-                        //删除原有的图像文件
-                        $oldFile=BASE_PATH.$model->img_url;
-                        if($model->img_url&&file_exists($oldFile))unlink($oldFile);
-                        $model->img_url=$this->img_url;
-                    }
+                    $model=$this->updateActionInChangeAvatar($model);
                     break;
-                }
                 case 'RemoveAvatar':
-                {
-                    //删除原有的图像文件
-                    $oldFile=BASE_PATH.$model->img_url;
-                    if($model->img_url&&file_exists($oldFile))unlink($oldFile);
-                    $model->img_url=null;
+                    $model=$this->updateActionInRemoveAvatar($model);
                     break;
-                }
                 default:break;
             }
-            if(!$model->save())throw new \Exception('修改失败!');
+
+            if(!$model->save())
+                $this->throwValidateException('UserForm::infoUpdate:模型保存失败');
             $transaction->commit();
             return true;
         }
-        catch(\Exception $e)
+        catch(ValidateException $exception)
         {
             $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            if($this->is_api) Yii::$app->getSession()->setFlash('warning', $this->lastError);
-            return false;
+            throw $exception;
+        }
+        catch(\Exception $exception)
+        {
+            $transaction->rollBack();
+            throw $exception;
         }
     }
 
+    /**
+     * @param User $model
+     * @return User
+     */
+    private function updateActionInRemoveAvatar($model)
+    {
+        //删除原有的图像文件
+        $oldFile=BASE_PATH.$model->img_url;
+        if($model->img_url&&file_exists($oldFile))unlink($oldFile);
+        $model->img_url=null;
+        return $model;
+    }
 
-    //向数据库更新该模型对应的修改的密码,返回是否修改成功
-    /*
+
+    /**
+     * @param User $model
+     * @return User
+     * @throws \Exception
+     */
+    private function updateActionInChangeAvatar($model)
+    {
+        //如果没改头像就不做动作
+        if($this->img_url!=$model->img_url)
+        {
+            $this->credential=$model->credential;
+            if(!$this->setImg()) throw new \Exception('UserForm::infoUpdate:图片上传失败,请稍后重试');
+            //删除原有的图像文件
+            $oldFile=BASE_PATH.$model->img_url;
+            if($model->img_url&&file_exists($oldFile))unlink($oldFile);
+            $model->img_url=$this->img_url;
+        }
+        return $model;
+    }
+
+    /**
+     * infoUpdate函数里用到的过滤场景参数的方法
+     * @param string $scenario
+     * @throws FieldException
+     */
+    private function updateAction_FilterScenario($scenario)
+    {
+        if(!is_string($scenario))
+            throw new FieldException('UserForm::updateAction_FilterScenario:场景参数必须为字符串');
+        switch($scenario)//过滤无效场景
+        {
+            case 'ChangeStatus':
+            case 'ChangeCategory':
+            case 'ChangeUserName':
+            case 'ChangeEmail':
+            case 'ChangeAvatar':
+            case 'RemoveAvatar':
+                $this->scenario=$scenario;break;
+            default:
+                throw new FieldException('UserForm::updateAction_FilterScenario:场景参数错误');
+                break;
+        }
+    }
+
+    /**
+     * 向数据库更新该模型对应的修改的密码,返回是否修改成功
      * 必须的字段:password,rePassword,
      * 第二个参数为true时oldPassword也是必须的
-     * */
+     * @param User $model
+     * @param bool $validateOldPassword 是否进行旧密码的检查
+     * @return bool
+     * @throws ValidateException
+     * @throws \Exception
+     */
     public function RePassword($model,$validateOldPassword=true)
     {
         $this->scenario=($validateOldPassword)?'RePassword':'RePasswordByAdmin';
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('修改信息需要调整');
+            if(!$this->validate())
+                $this->throwValidateException('UserForm::RePassword:修改信息需要调整');
+
             $model->setPassword($this->password);
-            if(!$model->save())throw new \Exception('密码修改失败!');
+
+            if(!$model->save())
+                $this->throwValidateException('UserForm::RePassword:模型保存失败');
 
             $transaction->commit();
             return true;
         }
-        catch(\Exception $e)
+        catch(ValidateException $exception)
         {
             $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            if($this->is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
-            return false;
+            throw $exception;
+        }
+        catch(\Exception $exception)
+        {
+            $transaction->rollBack();
+            throw $exception;
         }
     }
 
-    //将表单的img_url正确处理,返回是否处理成功
-    /*
+    /**
+     * 将表单的img_url正确处理,返回是否处理成功
      * 主要是将上传的文件复制到用户的文件夹下,
      * 因为这个图片上传组件只要一点击图片就会将图片上传到服务器,
      * 在表单中重复选择图片会导致多张图片上传至服务器,这样会有很多的无效图片
@@ -379,7 +425,8 @@ class UserForm extends ActiveRecord
      * 服务器定期清理组件所指定的upload_files/temp里的文件夹,这样就可以省去很多空间,
      * 注意:由于这里用了credential字段来建立文件夹,所以需要提前向$form里写入
      * credential
-     * */
+     * @return bool
+     */
     private function setImg()
     {
         if($this->img_url&&$this->credential)
@@ -397,6 +444,49 @@ class UserForm extends ActiveRecord
             }
         }
         return false;
+    }
+
+    /**
+     * 创建过程中将表单信息填写至一个新模型,并返回之
+     * @return User
+     * @throws \Exception
+     */
+    private function createAction_FillANewModel()
+    {
+        $model = new User();
+        $model->user_name = $this->user_name;
+        $model->wechat_id = $this->wechat_id;
+
+        $model->category=$this->category;
+        $model->credential=$this->credential;
+        $model->email=$this->email;
+        $model->setPassword($this->password);
+        //默认参数
+        $model->status=User::STATUS_ACTIVE;
+        $model->expire_at=0;
+        $model->access_token='';
+        $model->allowance=2;
+        $model->allowance_updated_at=0;
+        $model->img_url=$this->img_url;
+
+        $model->generateAuthKey();
+
+        return $model;
+    }
+
+    /**
+     * 处理创建过程中的图像处理
+     * @throws \Exception
+     */
+    private function createAction_HandleImgUrl()
+    {
+        if($this->img_url)
+        {
+            if(!$this->setImg())
+                throw new \Exception('UserForm::create:图片上传失败,请稍后重试');
+        }
+        else
+            $this->img_url=null;
     }
 
 }

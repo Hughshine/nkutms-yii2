@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use Yii;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -13,6 +12,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string $content 内容
  * @property int $updated_at 上一次编辑时间
  * @property int $created_at 创建时间
+ * @property string $summary 创建时间
  */
 class Notice extends \yii\db\ActiveRecord
 {

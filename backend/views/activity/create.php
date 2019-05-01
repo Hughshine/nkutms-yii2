@@ -8,6 +8,10 @@
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use kartik\datetime\DateTimePicker;
+
+/* @var $this yii\web\View */
+/* @var $model common\models\ActivityForm */
+
 $this->title = '活动发布';
 $this->params['breadcrumbs'][] = '活动发布';
 
@@ -40,7 +44,7 @@ $this->params['breadcrumbs'][] = '活动发布';
 
             <?= $form->field($model, 'max_people')->textInput() ?>
 
-            <?= $form->field($model, 'ticket_start_stamp')->widget(DateTimePicker::classname(),
+            <?= $form->field($model, 'ticketing_start_at_string')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
                     'pluginOptions' =>
@@ -52,7 +56,7 @@ $this->params['breadcrumbs'][] = '活动发布';
                 ]);
             ?>
 
-            <?= $form->field($model, 'ticket_end_stamp')->widget(DateTimePicker::classname(),
+            <?= $form->field($model, 'ticketing_end_at_string')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
                     'pluginOptions' =>
@@ -64,7 +68,7 @@ $this->params['breadcrumbs'][] = '活动发布';
                 ]);
             ?>
 
-            <?= $form->field($model, 'time_start_stamp')->widget(DateTimePicker::classname(),
+            <?= $form->field($model, 'start_at_string')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
                     'pluginOptions' =>
@@ -76,7 +80,7 @@ $this->params['breadcrumbs'][] = '活动发布';
                 ]);
             ?>
 
-            <?= $form->field($model, 'time_end_stamp')->widget(DateTimePicker::classname(),
+            <?= $form->field($model, 'end_at_string')->widget(DateTimePicker::classname(),
                 [
                     'options' => ['placeholder' => ''],
                     'pluginOptions' =>

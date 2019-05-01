@@ -4,7 +4,6 @@ namespace common\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use yii\db\Expression;
 use yii\web\IdentityInterface;
 use yii\filters\RateLimitInterface;
 
@@ -14,18 +13,22 @@ use yii\filters\RateLimitInterface;
  * @property int $id
  * @property string $user_name
  * @property string $wechat_id
+ * @property string $password_reset_token
  * @property int $category 用户类别
  * @property string $credential 账号
  * @property string $password
+ * @property string $auth_key
  * @property string $access_token
  * @property string $created_at
+ * @property string $img_url
+ * @property string $email
  * @property int $expire_at
+ * @property int $status
  * @property int $updated_at
  * @property int $allowance 用于限制访问频率
  * @property int $allowance_updated_at
  *
  * @property Ticket[] $tkTickets
- * @property TicketEvent[] $tkTicketEvents
  */
 
 
@@ -126,7 +129,8 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
         ];
     }
 
-    public function fields(){
+    public function fields()
+    {
         return [
             'user_id' => 'id',
             'user_name',
@@ -150,36 +154,38 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
         return $this->hasMany(Ticket::className(), ['user_id' => 'id']);
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getTicketEvents()
-    {
-        return $this->hasMany(TicketEvent::className(), ['user_id' => 'id']);
-    }
 
+    /**
+     * @return string
+     * @throws \yii\base\Exception
+     */
     public function generateAccessToken()
     {
         return $this->access_token = Yii::$app->security->generateRandomString();
     }
-    
 
+    /**
+     * @param mixed $token
+     * @param null $type
+     * @return array|\yii\db\ActiveRecord|IdentityInterface|null
+     */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        
         //findIdentityByAccessToken()方法的实现是系统定义的
         //例如，一个简单的场景，当每个用户只有一个access token, 可存储access token 到user表的access_token列中， 方法可在User类中简单实现，如下所示：
-        return static::find(['access_token' => $token])
+        return static::find()
+        ->andWhere(['access_token' => $token])
         ->where(['>','expire_at',time()])
         ->limit(1)
         ->one();
     }
+
     // 
     public static function findIdentity($id)
     {
         return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
     }
-    //用于admin端查找User
+    //用于admin端查找User,不检查是否有效
     public static function findIdentity_admin($id)
     {
         return static::findOne(['id' => $id]);
@@ -188,7 +194,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
     /**
      * Finds user by user_name
      *
-     * @param string $user_name
+     * @param string $credential
      * @return static|null
      */
     public static function findByCredential($credential)
@@ -251,7 +257,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
 
     /**
      * Generates password hash from password and sets it to the model
-     *
+     * @throws \Exception
      * @param string $password
      */
     public function setPassword($password)
@@ -261,6 +267,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
 
     /**
      * Generates "remember me" authentication key
+     * @throws \yii\base\Exception
      */
     public function generateAuthKey()
     {
@@ -269,6 +276,7 @@ class User extends \yii\db\ActiveRecord  implements IdentityInterface, RateLimit
 
     /**
      * Generates new password reset token
+     * @throws \yii\base\Exception
      */
     public function generatePasswordResetToken()
     {

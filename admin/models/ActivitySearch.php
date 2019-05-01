@@ -40,7 +40,7 @@ class ActivitySearch extends Activity
      *
      * @return ActiveDataProvider
      */
-    /*面向CSDN编程结果如下：
+    /*面向C S D N编程结果如下：
      * 原理未知，用于将release_by替换成对应的组织者名字
      * */
     public function search($params)
@@ -78,7 +78,7 @@ class ActivitySearch extends Activity
             '{{%tk_activity}}.category' => $this->category,
             '{{%tk_activity}}.status' => $this->status,
             //'max_people' => $this->max_people,
-            //'people_corrent' => $this->people_corrent,
+            //'people_current' => $this->people_current,
             //'time_start' => $this->time_start,
             //'time_end' => $this->time_end,
             //'release_by' => $this->release_by,

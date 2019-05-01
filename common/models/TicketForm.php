@@ -7,13 +7,15 @@
  */
 namespace common\models;
 
+use common\exceptions\FieldException;
+use common\exceptions\ModelNotFoundException;
+use common\exceptions\ValidateException;
 use Yii;
-use yii\db\ActiveRecord;
 
 /*
  * 票务表单
  * */
-class TicketForm extends ActiveRecord
+class TicketForm extends BaseForm
 {
     public $tk_id;
     public $user_id;
@@ -22,7 +24,6 @@ class TicketForm extends ActiveRecord
     public $serial_number;
 
     public $is_api = false;
-    public $lastError;//用于存放最后一次异常信息
 
     public function rules()
     {
@@ -120,7 +121,11 @@ class TicketForm extends ActiveRecord
             ];
     }
 
-    public function validateTicket($attribute, $params)
+    /**
+     * 验证用户是否已经参与了该活动
+     * @param $attribute
+     */
+    public function validateTicket($attribute)
     {
         if (!$this->hasErrors())
         {
@@ -136,7 +141,11 @@ class TicketForm extends ActiveRecord
         }
     }
 
-    public function validateSerial($attribute, $params)
+    /**
+     * 检查票务对应的活动里是否有相同序列号的票,如果有,就出错
+     * @param $attribute
+     */
+    public function validateSerial($attribute)
     {
         if (!$this->hasErrors())
         {
@@ -168,48 +177,131 @@ class TicketForm extends ActiveRecord
                 'serial_number'=>'序列号',
             ];
     }
-   
-     //根据这个表单的信息创建一个票务记录,返回新创建的模型或者null(创建失败)
-    /*
+
+    /**
+     * 根据这个表单的信息创建一个票务记录,返回新创建的模型
      * 必须的字段为:user_id,activity_id,status,serial_number
-     * */
+     * @return Ticket
+     * @throws ValidateException
+     * @throws \Exception
+     */
     public function create()
     {
         $this->scenario='Create';
+
+        if(!$this->validate())
+            $this->throwValidateException('TicketForm::create:票务信息有误');
+
+        $model = new Ticket();
+        $model->user_id=$this->user_id;
+        $model->activity_id=$this->activity_id;
+        $model->status=$this->status;
+        $model->serial_number=$this->serial_number;
+
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate()) throw new \Exception('票务信息有冲突');
-            $model = new Ticket();
-            $model->user_id=$this->user_id;
-            $model->activity_id=$this->activity_id;
-            $model->status=$this->status;
-            $model->serial_number=$this->serial_number;
+            if(!$model->save())
+                $this->throwValidateException('TicketForm::create:票务创建失败!');
 
-            if(!$model->save()) throw new \Exception('票务创建失败!');
-
-            $this->tk_id=$model->id;//用于创建后导向相关页面
+            $this->tk_id=$model->id;//用于创建后导向相关页面,id会在model save后自动获得
 
             $transaction->commit();
             return $model;
         }
-        catch(\Exception $e)
+        catch(ValidateException $exception)
         {
             $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            if(!$this->is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
-            return null;
+            throw $exception;
+        }
+        catch(\Exception $exception)
+        {
+            $transaction->rollBack();
+            throw $exception;
         }
     }
 
 
-    //根据表单的信息更新$model
-    /*
+    /**
+     * 根据表单的信息更新$model
      * 必须的字段为:
      * user_id, activity_id,status,serial_number
-     * */
+     * @param $model Ticket
+     * @param $scenario string
+     * @return bool
+     * @throws ValidateException
+     * @throws \Exception
+     */
     public function infoUpdate($model,$scenario)
     {
+        $this->updateAction_FilterScenario($scenario);
+
+        if(!$this->validate())
+            $this->throwValidateException('TicketForm::infoUpdate:修改信息需要调整');
+
+        switch($scenario)
+        {
+            case 'Update':$model=$this->updateActionInUpdate($model);break;
+            case 'ChangeStatus':$model->status=$this->status;break;
+            default:break;
+        }
+
+        $transaction=Yii::$app->db->beginTransaction();
+        try
+        {
+            if(!$model->save())
+                $this->throwValidateException('TicketForm::infoUpdate:模型保存失败');
+
+            $transaction->commit();
+            return true;
+        }
+        catch(ValidateException $exception)
+        {
+            $transaction->rollBack();
+            throw $exception;
+        }
+        catch(\Exception $exception)
+        {
+            $transaction->rollBack();
+            throw $exception;
+        }
+    }
+
+
+
+    //取消id为tk_id的票务,返回是否操作成功
+    //如果tk_id不存在,返回也为false
+    /**
+     * @param $tk_id
+     * @return bool
+     * @throws FieldException
+     * @throws ModelNotFoundException
+     * @throws \Exception
+     */
+    public static function invalidateTicket($tk_id)
+    {
+        if(!is_numeric($tk_id))
+            throw new FieldException('TicketForm::invalidateTicket:票ID必须为整数');
+
+        $model=Ticket::findOne(['id'=>$tk_id]);
+
+        if(!$model)throw new ModelNotFoundException(sprintf('TicketForm::invalidateTicket:找不到ID为%d的票',$tk_id));
+
+        $form=new TicketForm();
+        $form->status=Ticket::STATUS_INVALID;
+        return $form->infoUpdate($model,'ChangeStatus');
+    }
+
+
+    /**
+     * infoUpdate函数里用到的过滤场景参数的方法
+     * @param string $scenario
+     * @throws FieldException
+     */
+    private function updateAction_FilterScenario($scenario)
+    {
+        if(!is_string($scenario))
+            throw new FieldException('TicketForm::updateAction_FilterScenario:场景参数必须为字符串');
         switch($scenario)//过滤无效场景参数
         {
             case 'Update':
@@ -217,58 +309,21 @@ class TicketForm extends ActiveRecord
                 $this->scenario=$scenario;
                 break;
             default:
-                if(!$this->is_api) Yii::$app->getSession()->setFlash('warning', '场景参数错误');
-                return false;
-        }
-        $transaction=Yii::$app->db->beginTransaction();
-        try
-        {
-            if(!$this->validate()) {
-                if(!$this->is_api) var_dump($this->errors);
-                throw new \Exception('修改信息需要调整');
-            }
-
-            switch($scenario)//过滤无效场景参数
-            {
-                case 'Update':
-                    {
-                        $model->user_id=$this->user_id;
-                        $model->activity_id=$this->activity_id;
-                        $model->status=$this->status;
-                        $model->serial_number=$this->serial_number;
-                        break;
-                    }
-                case 'ChangeStatus':
-                    {
-                        $model->status=$this->status;
-                        break;
-                    }
-                default:break;
-            }
-
-            if(!$model->save())throw new \Exception('票务修改失败!');
-            $transaction->commit();
-            return true;
-        }
-        catch(\Exception $e)
-        {
-            $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            if(!$this->is_api) Yii::$app->getSession()->setFlash('error', $this->lastError);
-            return false;
+                throw new FieldException('TicketForm::infoUpdate:场景参数不存在');
         }
     }
 
-    //取消id为tk_id的票务,返回是否操作成功
-    //如果tk_id不存在,返回也为false
-    public static function invalidateTicket($tk_id)
+    /**
+     * @param Ticket $model
+     * @return Ticket
+     */
+    private function updateActionInUpdate($model)
     {
-        $model=Ticket::findOne(['id'=>$tk_id]);
-        if(!$model)return false;
-        $form=new TicketForm();
-        $form->status=Ticket::STATUS_INVALID;
-        return $form->infoUpdate($model,'ChangeStatus');
+        $model->user_id=$this->user_id;
+        $model->activity_id=$this->activity_id;
+        $model->status=$this->status;
+        $model->serial_number=$this->serial_number;
+        return $model;
     }
-
 
 }

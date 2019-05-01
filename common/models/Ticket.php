@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -18,7 +17,7 @@ use yii\db\ActiveRecord;
  *
  * @property Activity $activity
  * @property User $user
- * @property TicketEvent[] $tkTicketEvents
+ *
  */
 class Ticket extends ActiveRecord
 {
@@ -26,7 +25,6 @@ class Ticket extends ActiveRecord
     const STATUS_WITHDRAW=1;
     const STATUS_INVALID=2;
     const STATUS_UNKNOWN=3;
-    public $lastError;
 
     /**
      * {@inheritdoc}
@@ -162,7 +160,6 @@ class Ticket extends ActiveRecord
         catch(\Exception $e)
         {
             $transaction->rollBack();
-            $this->lastError=$e->getMessage();
             Yii::$app->getSession()->setFlash('error', $this->lastError);
             return false;
         }
@@ -216,6 +213,7 @@ class Ticket extends ActiveRecord
                 },
             ];
         }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -232,7 +230,13 @@ class Ticket extends ActiveRecord
         return $this->hasOne(User::className(), ['id' => 'user_id']);
     }
 
-
+    /**
+     * @param integer $user_id
+     * @param integer $activity_id
+     * @param integer $current_serial
+     * @param integer $status
+     * @return Ticket
+     */
     public function generateAndWriteNewTicket($user_id,$activity_id,$current_serial,$status)
     {
         $ticket = new Ticket();

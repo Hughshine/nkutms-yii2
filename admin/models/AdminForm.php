@@ -7,13 +7,15 @@
  */
 namespace admin\models;
 
+use common\exceptions\ProjectException;
+use common\exceptions\ValidateException;
+use common\models\BaseForm;
 use Yii;
-use yii\db\ActiveRecord;
 
 /*
- * 组织者表单
+ * 管理者表单
  * */
-class AdminForm extends ActiveRecord
+class AdminForm extends BaseForm
 {
     public $admin_id;//用于给validatePassword方法传递模型实例
     public $admin_name;
@@ -22,8 +24,6 @@ class AdminForm extends ActiveRecord
     public $password;
     public $rePassword;
     public $oldPassword;
-
-    public $lastError;//用于存放最后一次异常信息
 
     public function rules()
     {
@@ -73,7 +73,11 @@ class AdminForm extends ActiveRecord
         ];
     }
 
-    public function validatePassword($attribute, $params)
+    /**
+     * 验证密码是否正确的函数,需要提前向admin_id字段写入对应的id
+     * @param $attribute
+     */
+    public function validatePassword($attribute)
     {
         if (!$this->hasErrors())
         {
@@ -93,29 +97,40 @@ class AdminForm extends ActiveRecord
             ];
     }
 
-    /*
+    /**
      * 向数据库更新该模型对应的修改的密码
-     * 注意:需要先往$this->admin_id,$this->admin_name写入相应的数据
-     * */
+     * 注意:需要先往$this->admin_id写入相应的数据
+     * @param Admin $model
+     * @return bool
+     * @throws ValidateException
+     * @throws \Exception
+     */
     public function rePassword($model)
     {
-        $this->admin_id=$model->id;
+        $this->admin_id=$model->id;//为了给验证旧密码的时候传入信息指明是哪个admin修改密码
         $this->scenario='RePassword';
+
+        if(!$this->validate())
+            $this->throwValidateException('AdminForm::rePassword:表单数据验证异常');
+
+        $model->setPassword($this->password);
+
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('数据不符合要求');
-            $model->setPassword($this->password);
-            if(!$model->save())throw new \Exception('密码修改失败!');
+            if(!$model->save())
+                $this->throwValidateException('AdminForm::rePassword:保存验证异常');
+
             $transaction->commit();
             return true;
         }
-        catch(\Exception $e)
+        catch (ValidateException $exception)
         {
-            $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
-            return false;
+            throw $exception;
+        }
+        catch(\Exception $exception)
+        {
+            throw $exception;
         }
     }
 }

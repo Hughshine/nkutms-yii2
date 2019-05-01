@@ -3,6 +3,7 @@ namespace common\models;
 
 use Yii;
 
+use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
@@ -12,18 +13,19 @@ use yii\web\IdentityInterface;
  *
  * @property int $id
  * @property string $org_name 应必须填写
- * @property string $wechat_id1 一个社团最多有三个管理者，暂时不考虑一个人管理多个社团
+ * @property string $wechat_id
  * @property int $category 标记用户类别 0-校级组织，1-学生社团
  * @property string $credential 该用户类别下，他的证件号
  * @property string $password
  * @property string $access_token
+ * @property string $password_reset_token
  * @property string $created_at
+ * @property string $auth_key
  * @property int $updated_at
  * @property int $expire_at
+ * @property int $status
  * @property int $allowance 用于限制访问频率
  * @property int $allowance_updated_at
- * @property string $wechat_id2
- * @property string $wechat_id3
  *
  *
  */
@@ -32,6 +34,7 @@ class Organizer extends ActiveRecord implements IdentityInterface
 {
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
+
     /**
      * {@inheritdoc}
      */
@@ -151,15 +154,9 @@ class Organizer extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return string
+     * @throws \yii\base\Exception
      */
-    public function getActivityEvents()
-    {
-        return $this->hasMany(ActivityEvent::className(), ['organizer_id' => 'id']);
-    }
-
-
-
     public function generateAccessToken()
     {
         return $this->access_token = Yii::$app->security->generateRandomString();
@@ -183,6 +180,7 @@ class Organizer extends ActiveRecord implements IdentityInterface
 
     /**
      * {@inheritdoc}
+     * @throws NotSupportedException
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
@@ -190,8 +188,7 @@ class Organizer extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Finds user by org_name
-     *
+     *通过组织者名字查找对应的组织者模型
      * @param string $org_name
      * @return static|null
      */
@@ -200,13 +197,18 @@ class Organizer extends ActiveRecord implements IdentityInterface
         return static::findOne(['org_name' => $org_name, 'status' => self::STATUS_ACTIVE]);
     }
 
+    /**
+     * 通过账号查找对应的模型
+     * @param string $cre
+     * @return Organizer|null
+     */
     public static function findByCredential($cre)
     {
         return static::findOne(['credential' => $cre, 'status' => self::STATUS_ACTIVE]);
     }
 
     /**
-     * Finds user by password reset token
+     * 通过密码重置标记寻找对应的模型
      *
      * @param string $token password reset token
      * @return static|null
@@ -277,7 +279,7 @@ class Organizer extends ActiveRecord implements IdentityInterface
 
     /**
      * Generates password hash from password and sets it to the model
-     *
+     * @throws \Exception
      * @param string $password
      */
     public function setPassword($password)
@@ -287,6 +289,7 @@ class Organizer extends ActiveRecord implements IdentityInterface
 
     /**
      * Generates "remember me" authentication key
+     * @throws \Exception
      */
     public function generateAuthKey()
     {
@@ -295,6 +298,7 @@ class Organizer extends ActiveRecord implements IdentityInterface
 
     /**
      * Generates new password reset token
+     * @throws \Exception
      */
     public function generatePasswordResetToken()
     {
@@ -309,7 +313,15 @@ class Organizer extends ActiveRecord implements IdentityInterface
         $this->password_reset_token = null;
     }
 
-
+    /**
+     * @param $organizer Organizer
+     * @param integer $org_id
+     * @param string $org_name
+     * @param integer $category
+     * @param string $credential
+     * @param string $newpassword
+     * @throws \yii\base\Exception
+     */
     public function editAndSaveOrganizer($organizer,$org_id,$org_name,$category,$credential,$newpassword)
     {
         $organizer->org_id = $org_id==null?$organizer->org_id:$org_id;

@@ -3,6 +3,7 @@
 namespace admin\controllers;
 
 
+use common\exceptions\ProjectException;
 use Yii;
 use common\models\Organizer;
 use common\models\OrganizerForm;
@@ -90,11 +91,21 @@ class OrganizerController extends Controller
     public function actionCreate()
     {
         $form = new OrganizerForm();
-        if ($form->load(Yii::$app->request->post())&&(($organizer = $form->create())!==null) )
-            return $this->redirect(['view', 'id' => $organizer->id]);
-        return $this->render('create', [
-            'model' => $form,
-        ]);
+
+        try
+        {
+            if ($form->load(Yii::$app->request->post())&&(($organizer = $form->create())!==null) )
+                return $this->redirect(['view', 'id' => $organizer->id]);
+        }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->session->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->session->setFlash('warning','未知异常'.$exception->getMessage());
+        }
+        return $this->render('create', ['model' => $form,]);
     }
 
     /**
@@ -102,36 +113,80 @@ class OrganizerController extends Controller
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $model = Organizer::findIdentity_admin($id);
+
+        if(!$model)
+        {
+            Yii::$app->session->setFlash('warning','找不到ID为'.$id.'的组织者');
+            return $this->redirect('index');
+        }
+
         $form =new OrganizerForm();
         $form->org_id=$model->id;
         $form->org_name=$model->org_name;
-        if ($form->load(Yii::$app->request->post()) &&
-            $form->infoUpdate($model))
+
+        try
         {
-            Yii::$app->getSession()->setFlash('success', '资料修改成功');
-            return $this->redirect(['view', 'id' => $model->id]);
+            if ($form->load(Yii::$app->request->post()) &&
+                $form->infoUpdate($model))
+            {
+                Yii::$app->getSession()->setFlash('success', '资料修改成功');
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->session->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->session->setFlash('warning','未知异常'.$exception->getMessage());
+        }
+
         return $this->render('update', ['model' => $form,]);
     }
 
+    /**
+     * 组织者主动重设密码
+     * @param integer $id
+     * @return string|\yii\web\Response
+     */
     public function actionRepassword($id)
     {
-        $model = $this->findModel($id);
+        $model = Organizer::findIdentity_admin($id);
+
+        if(!$model)
+        {
+            Yii::$app->session->setFlash('warning','找不到ID为'.$id.'的组织者');
+            return $this->redirect('index');
+        }
+
         $form =new OrganizerForm();
         /*注意:需要先往$this->ord_id,$this->org_name写入相应的数据
         因为页面显示需要id和名字数据,而传递的模型是表单模型而不是实例模型,所以需要补充数据*/
         $form->org_name=$model->org_name;
         $form->org_id=$model->id;
-        if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model,false))
+
+        try
         {
-            Yii::$app->getSession()->setFlash('success', '密码修改成功');
-            return $this->redirect(['view', 'id' => $model->id]);
+            if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model,false))
+            {
+                Yii::$app->getSession()->setFlash('success', '密码修改成功');
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->session->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->session->setFlash('warning','未知异常'.$exception->getMessage());
+        }
+
         return $this->render('password', ['model' => $form,]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace admin\controllers;
 
+use common\exceptions\ProjectException;
 use Yii;
 use common\models\Notice;
 use common\models\NoticeForm;
@@ -90,16 +91,27 @@ class NoticeController extends Controller
     /**
      * Creates a new Notice model.
      * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
         $form = new NoticeForm();
-        if ($form->load(Yii::$app->request->post()) &&
-            ($model=$form->create())!=null)
+        try
         {
-            Yii::$app->getSession()->setFlash('success','创建成功');
-            return $this->redirect(['view', 'id' => $model->id]);
+            if ($form->load(Yii::$app->request->post()) &&
+                ($model=$form->create())!=null)
+            {
+                Yii::$app->getSession()->setFlash('success','创建成功');
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning','未知异常'.$exception->getMessage());
         }
         return $this->render('create', ['model' => $form,]);
     }
@@ -109,36 +121,53 @@ class NoticeController extends Controller
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $model = Notice::findOne(['id'=>$id]);
+        if(!$model)
+        {
+            Yii::$app->getSession()->setFlash('warning',sprintf('找不到ID为%d的公告',$id));
+            return $this->redirect('index');
+        }
+
         $form=new NoticeForm();
         $form->title=$model->title;
         $form->content=$model->content;
-        if ($form->load(Yii::$app->request->post()) &&
-            $form->infoUpdate($model))
+
+        try
         {
-            Yii::$app->getSession()->setFlash('success','修改成功');
-            return $this->redirect(['view', 'id' => $model->id]);
+            if ($form->load(Yii::$app->request->post()) &&
+                $form->infoUpdate($model))
+            {
+                Yii::$app->getSession()->setFlash('success','修改成功');
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning','未知异常'.$exception->getMessage());
         }
         return $this->render('update', ['model' => $form,]);
     }
 
     /**
+     * 删除接口,目前不需要
      * Deletes an existing Notice model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+    /*public function actionDelete($id)
     {
         $this->findModel($id)->delete();
-
         return $this->redirect(['index']);
-    }
+    }*/
 
     /**
      * Finds the Notice model based on its primary key value.
@@ -149,10 +178,8 @@ class NoticeController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = Notice::findOne($id)) !== null) {
+        if (($model = Notice::findOne($id)) !== null)
             return $model;
-        }
-
         throw new NotFoundHttpException('The requested page does not exist.');
     }
 }

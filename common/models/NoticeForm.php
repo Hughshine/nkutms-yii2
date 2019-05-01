@@ -7,19 +7,16 @@
  */
 namespace  common\models;
 
+use common\exceptions\ValidateException;
 use Yii;
-use yii\db\ActiveRecord;
-use yii\db\Exception;
 
 /*
  * 通知表单
  * */
-class NoticeForm extends ActiveRecord//因为要查询,所以继承ActiveRecord
+class NoticeForm extends BaseForm
 {
     public $title;
     public $content;
-
-    public $lastError;//用于存放最后一次异常信息
 
     public function rules()
     {
@@ -77,113 +74,90 @@ class NoticeForm extends ActiveRecord//因为要查询,所以继承ActiveRecord
             ];
     }
 
-    //以当前表单的信息创建一个活动,返回这个活动的模型
-    /*
+    /**以当前表单的信息创建一个活动,返回这个活动的模型
      * 必须字段为:
      * title content
-     * */
+     * @return Notice
+     * @throws ValidateException
+     * @throws \Exception
+     */
     public function create()
     {
         $this->scenario='Create';
+        $model = new Notice();
+        $model->title=$this->title;
+        $model->summary=$this->getSummary();
+        $model->content=$this->content;
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('创建信息需要调整!');
+            if(!$this->validate())
+                $this->throwValidateException('NoticeForm::create:创建信息需要调整');
 
-            $model = new Notice();
-            $model->title=$this->title;
-            $model->summary=$this->getSummary();
-            $model->content=$this->content;
-            
-            if(!$model->save())throw new \Exception('通知发布失败!');
+            if(!$model->save())
+                $this->throwValidateException('NoticeForm::create:模型创建失败');
 
              //此处可以写一个afterCreate方法来处理创建后事务
 
             $transaction->commit();
             return $model;
         }
-        catch(\Exception $e)
+        catch(ValidateException $exception)
         {
             $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
-            return null;
+            throw $exception;
+        }
+        catch(\Exception $exception)
+        {
+            $transaction->rollBack();
+            throw $exception;
         }
     }
 
-    //以当前表单的信息更新$activity活动信息,返回是否成功
-    //之所以不用update做名字,因为父类有update方法,不想重写
-    /*
+    /**以当前表单的信息更新$activity活动信息,返回是否成功
      * 必须字段为:
      * title content
-     * */
+     * @param $model Notice
+     * @return bool
+     * @throws ValidateException
+     * @throws \Exception
+     */
     public function infoUpdate($model)
     {
         $this->scenario='Update';
         $transaction=Yii::$app->db->beginTransaction();
+        $model->title=$this->title;
+        $model->summary=$this->getSummary();
+        $model->content=$this->content;
         try
         {
-            if(!$this->validate())throw new \Exception('更新信息需要调整');
+            if(!$this->validate())
+                $this->throwValidateException('NoticeForm::infoUpdate:更新信息需要调整');
 
-            $model->title=$this->title;
-            $model->summary=$this->getSummary();
-            $model->content=$this->content;
-
-            if(!$model->save())throw new \Exception('活动信息修改失败!');
+            if(!$model->save())
+                $this->throwValidateException('NoticeForm::infoUpdate:模型创建失败');
 
             $transaction->commit();
             return true;
         }
-        catch(\Exception $e)
+        catch(ValidateException $exception)
         {
             $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
-            return false;
+            throw $exception;
+        }
+        catch(\Exception $exception)
+        {
+            $transaction->rollBack();
+            throw $exception;
         }
     }
 
-    //查询结果并返回成列表
-    public static function getList($cond,$curPage = 1,$pageSize = 5,$sortOrder=['id'=>SORT_DESC])
-    {
-        $form=new NoticeForm();
-        $select= ['id','title','summary'];
-        $query=$form->find()
-            ->select($select)
-            ->where($cond)
-            ->orderBy($sortOrder);
-        //获取分页信息
-        $res=$form->getPages($query,$curPage,$pageSize);
-        return $res;
-    }
-
-    //获取分页数据
-    public function getPages($query,$curPage=1,$pageSize=10,$search=null)
-    {
-        if($search)$query=$query->andFilterWhere($search);
-        $data['count']=$query->count();
-        if(!$data['count'])
-            return ['count'=>0,'curPage'=>1,'pageSize'=>$pageSize,'start'=>0,'end'=>0,'data'=>[]];
-        //防止页数超过总数
-        $curPage=(ceil($data['count']/$pageSize)<$curPage)?
-            ceil($data['count']/$pageSize):$curPage;
-        $data['curPage']=$curPage;
-        //每页显示条数
-        $data['pageSize']=$pageSize;
-        //起始页
-        $data['start']=($curPage-1)*$pageSize+1;
-        //末页
-        $data['end']=(ceil($data['count']/$pageSize)==$curPage)?
-            $data['count']:($curPage-1)*$pageSize+$pageSize;
-        //取数据
-        $data['data']=$query
-            ->offset(($curPage-1)*$pageSize)
-            ->limit($pageSize)
-            ->asArray()->all();
-        return $data;
-    }
-
-    //获取摘要
+    /**从content里获取摘要存放到summary字段里
+     * @param int $s
+     * @param int $e
+     * @param string $char
+     * @return string|null
+     */
     private function getSummary($s=0,$e=90,$char='utf-8')
     {
         if(empty($this->content))
@@ -191,5 +165,6 @@ class NoticeForm extends ActiveRecord//因为要查询,所以继承ActiveRecord
         return(mb_substr(str_replace('&nbsp;',' ',
             strip_tags($this->content)),$s,$e,$char));
     }
+
 
 }

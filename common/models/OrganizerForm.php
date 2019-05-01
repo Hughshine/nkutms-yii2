@@ -7,13 +7,13 @@
  */
 namespace common\models;
 
+use common\exceptions\ValidateException;
 use Yii;
-use yii\db\ActiveRecord;
 
 /*
  * 组织者表单
  * */
-class OrganizerForm extends ActiveRecord
+class OrganizerForm extends BaseForm
 {
     public $category;
     public $credential;
@@ -26,7 +26,6 @@ class OrganizerForm extends ActiveRecord
     public $rePassword;
     public $oldPassword;
 
-    public $lastError;//用于存放最后一次异常信息
 
     public function rules()
     {
@@ -159,7 +158,7 @@ class OrganizerForm extends ActiveRecord
     }
 
     //rules中调用的验证旧密码的函数
-    public function validatePassword($attribute, $params)
+    public function validatePassword($attribute)
     {
         if (!$this->hasErrors())
         {
@@ -185,101 +184,154 @@ class OrganizerForm extends ActiveRecord
     }
 
 
-    //根据这个表单的信息创建一个账号,返回新创建的模型或者null(创建失败)
-    /*
+    /**
+     * 根据这个表单的信息创建一个账号,返回新创建的模型
      * 必须的字段为:
      * org_name,category,credential,password,rePassword,
      * status
-     * */
+     * @return Organizer
+     * @throws ValidateException
+     * @throws \Exception
+     */
     public function create()
     {
         $this->scenario='Create';
+        try
+        {
+            $model=$this->createAction_FillModel();
+        }
+        catch (\Exception $exception)
+        {
+            throw new \Exception(sprintf('OrganizerForm::create:获取auth_key失败:%s',$exception->getMessage()));
+        }
+
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('创建信息需要调整');
-            $model = new Organizer();
-            $model->org_name = $this->org_name;
-            $model->category=$this->category;
-            $model->credential = $this->credential;
-            $model->setPassword($this->password);
-            $model->status=$this->status;
-            $model->generateAuthKey();//原理不明，保留就对了，据说是用于自动登录的
-            $model->access_token=' ';
-            $model->wechat_id=' ';
-            $model->expire_at = 0;
-            $model->allowance = 2;
-            $model->allowance_updated_at = 0;
+            if(!$this->validate())
+                $this->throwValidateException('OrganizerForm::create:创建信息需要修改');
 
-            if(!$model->save())throw new \Exception('组织者创建失败!');
+            //设置密码函数会抛出一个\Exception的异常,所以放在这
+            $model->setPassword($this->password);
+
+            if(!$model->save())
+                $this->throwValidateException('OrganizerForm::create:创建模型失败');
 
             //此处可以写一个afterCreate方法来处理创建后事务
 
             $transaction->commit();
             return $model;
         }
-        catch(\Exception $e)
+        catch(ValidateException $exception)
         {
             $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
-            return null;
+            throw $exception;
+        }
+        catch(\Exception $exception)
+        {
+            $transaction->rollBack();
+            throw new \Exception(sprintf('OrganizerForm::create:设置密码发生异常:%s',$exception->getMessage()));
         }
     }
 
-
-    //根据表单的信息更新$model的信息,返回是否修改成功
-    /*
+    /**
+     * 根据表单的信息更新$model的信息,返回是否修改成功
      * 必须的字段为:
      * status,category,org_name
-     * */
+     * @param $model Organizer
+     * @return bool
+     * @throws ValidateException
+     * @throws \Exception
+     */
     public function infoUpdate($model)
     {
         $this->scenario='Update';
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('修改信息需要调整');
+            if(!$this->validate())
+                $this->throwValidateException('OrganizerForm::infoUpdate:修改信息需要调整');
 
             $model->status=$this->status;
             $model->category=$this->category;
             $model->org_name=$this->org_name;
-            if(!$model->save())throw new \Exception('资料修改失败!');
+
+            if(!$model->save())
+                $this->throwValidateException('OrganizerForm::infoUpdate:资料修改失败!');
             $transaction->commit();
             return true;
         }
-        catch(\Exception $e)
+        catch (ValidateException $exception)
         {
             $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
-            return false;
+            throw $exception;
+        }
+        catch(\Exception $exception)
+        {
+            $transaction->rollBack();
+            throw $exception;
         }
     }
+
     //向数据库更新该模型对应的修改的密码,返回是否修改成功
     /*
      * 必须的字段:password,rePassword,
      * 第二个参数为true时oldPassword也是必须的
      * */
+    /**
+     * @param Organizer $model
+     * @param bool $validateOldPassword
+     * @return bool
+     * @throws ValidateException
+     * @throws \Exception
+     */
     public function RePassword($model,$validateOldPassword=true)
     {
         $this->scenario=($validateOldPassword)?'RePassword':'RePasswordByAdmin';
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if(!$this->validate())throw new \Exception('修改信息需要调整');
+            if(!$this->validate())
+                $this->throwValidateException('OrganizerForm::RePassword:修改信息需要调整');
+
             $model->setPassword($this->password);
-            if(!$model->save())throw new \Exception('密码修改失败!');
+
+            if(!$model->save())
+                $this->throwValidateException('OrganizerForm::RePassword:密码修改失败');
 
             $transaction->commit();
             return true;
         }
-        catch(\Exception $e)
+        catch(ValidateException $exception)
         {
             $transaction->rollBack();
-            $this->lastError=$e->getMessage();
-            Yii::$app->getSession()->setFlash('error', $this->lastError);
-            return false;
+            throw $exception;
         }
+        catch(\Exception $exception)
+        {
+            $transaction->rollBack();
+            throw $exception;
+        }
+    }
+
+    /**
+     * 将表单的信息生成一个组织者模型
+     * @return Organizer
+     * @throws \Exception
+     */
+    private function createAction_FillModel()
+    {
+        $model = new Organizer();
+        $model->org_name = $this->org_name;
+        $model->category=$this->category;
+        $model->credential = $this->credential;
+        $model->status=$this->status;
+        $model->generateAuthKey();//原理不明，保留就对了，据说是用于自动登录的
+        $model->access_token=' ';
+        $model->wechat_id=' ';
+        $model->expire_at = 0;
+        $model->allowance = 2;
+        $model->allowance_updated_at = 0;
+        return $model;
     }
 }

@@ -7,11 +7,21 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 
+/**
+ * Class Admin
+ * @package admin\models
+ * @property string $password
+ * @property string $admin_name
+ * @property integer $id
+ */
 class Admin extends ActiveRecord implements IdentityInterface
 {
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
 
+    /**
+     * {@inheritdoc}
+     */
     public function rules()
     {
         return
@@ -46,17 +56,6 @@ class Admin extends ActiveRecord implements IdentityInterface
         ];
     }
 
-    // /**
-    //  * {@inheritdoc}
-    //  */
-    // public function rules()
-    // {
-    //     return [
-    //         ['status', 'default', 'value' => self::STATUS_ACTIVE],
-    //         ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
-    //     ];
-    // }
-
     /**
      * {@inheritdoc}
      */
@@ -72,10 +71,10 @@ class Admin extends ActiveRecord implements IdentityInterface
 
     /**
      * {@inheritdoc}
+     * @throws NotSupportedException
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        return null;
         throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
     }
 
@@ -88,22 +87,6 @@ class Admin extends ActiveRecord implements IdentityInterface
     public static function findByUsername($admin_name)
     {
         return static::findOne(['admin_name' => $admin_name, 'status' => self::STATUS_ACTIVE]);
-    }
-
-    /**
-     * Finds out if password reset token is valid
-     *
-     * @param string $token password reset token
-     * @return bool
-     */
-    public static function isPasswordResetTokenValid($token)
-    {
-        if (empty($token)) {
-            return false;
-        }
-        $timestamp = (int) substr($token, strrpos($token, '_') + 1);
-        $expire = Yii::$app->params['user.passwordResetTokenExpire'];
-        return $timestamp + $expire >= time();
     }
 
     /**
@@ -123,7 +106,6 @@ class Admin extends ActiveRecord implements IdentityInterface
     public function getAuthKey()
     {
         return '';
-        //return $this->auth_key;
     }
 
     /**
@@ -132,7 +114,6 @@ class Admin extends ActiveRecord implements IdentityInterface
     public function validateAuthKey($authKey)
     {
         return true;
-        //return $this->getAuthKey() === $authKey;
     }
 
     /**
@@ -150,6 +131,7 @@ class Admin extends ActiveRecord implements IdentityInterface
      * Generates password hash from password and sets it to the model
      *
      * @param string $password
+     * @throws \Exception
      */
     public function setPassword($password)
     {

@@ -2,6 +2,7 @@
 
 namespace api\controllers;
 
+use common\exceptions\ProjectException;
 use Yii;
 use yii\rest\ActiveController;
 
@@ -94,8 +95,29 @@ class TicketController extends ActiveController
 		{
 			$request = Yii::$app->request;
 
-			$user = Yii::$app->user->identity;
+            $ticket_id = $request->post('ticket_id');
 
+            $ticket=Ticket::findOne(['id' => $ticket_id,'user_id' => Yii::$app->user->id,'status'=>Ticket::STATUS_VALID]);
+
+            if(!$ticket)
+            {
+                return ['code' => 1, 'message' => 'ticket do not exist or operation is invalid'];
+            }
+
+            try
+            {
+                ActivityForm::cancelTicket($ticket->activity->id,Yii::$app->user->id);
+                return ['code' => 0, 'message' => 'success', 'data' => $ticket];
+            }
+            catch (ProjectException $exception)
+            {
+                return ['code' => 1, 'message' => $exception->getExceptionMsg()];
+            }
+            catch (\Exception $exception)
+            {
+                return ['code' => 1, 'message' => $exception->getMessage()];
+            }
+            /*
 			$ticket_id = $request->post('ticket_id');   
 
 			if(!$ticket_id) return ['code'=>1, 'message'=>'empty ticket id'];
@@ -136,6 +158,6 @@ class TicketController extends ActiveController
 	        {
 	            $transaction->rollBack();
 	            return ['code' => 1, 'message' => 'operation failed'];
-	        }
+	        }*/
 		}
 }

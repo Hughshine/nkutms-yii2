@@ -1,6 +1,7 @@
 <?php
 namespace frontend\controllers;
 
+use common\exceptions\ProjectException;
 use Yii;
 use yii\base\InvalidArgumentException;
 use yii\web\BadRequestHttpException;
@@ -10,7 +11,6 @@ use yii\filters\AccessControl;
 use frontend\models\LoginForm;
 use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
-use frontend\models\ContactForm;
 use common\models\User;
 use common\models\UserForm;
 
@@ -68,7 +68,6 @@ class SiteController extends Controller
 
     /**
      * {@inheritdoc}
-     * {@inheritdoc}
      */
     public function actions()
     {
@@ -99,6 +98,10 @@ class SiteController extends Controller
         return $this->render('index');
     }
 
+    /**
+     * 展示个人资料页面
+     * @return string|\yii\web\Response
+     */
     public function actionView()
     {
         if(Yii::$app->user->isGuest)
@@ -106,6 +109,10 @@ class SiteController extends Controller
         return $this->render('view');
     }
 
+    /**
+     * 展示我参与的活动页面
+     * @return string|\yii\web\Response
+     */
     public function actionMyActivities()
     {
         if(Yii::$app->user->isGuest)
@@ -125,47 +132,65 @@ class SiteController extends Controller
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()))
-            {
-                $user=User::findByCredential($model->credential);
-                if(!$user)
-                {
-                    $model->password = '';
-                    Yii::$app->getSession()->setFlash('warning', '此账号已被封禁或不存在');
-                    return $this->render('login', ['model' => $model,]);
-                }
-                else
-                {
-                    if($model->login()) return $this->goBack();
-                    else
-                    {
-                        $model->password = '';
-                        return $this->render('login', ['model' => $model,]);
-                    }
-                }
-
-            }
-        else
+        {
+            $user=User::findByCredential($model->credential);
+            if(!$user)
             {
                 $model->password = '';
+                Yii::$app->getSession()->setFlash('warning', '此账号已被封禁或不存在');
                 return $this->render('login', ['model' => $model,]);
             }
+            else
+            {
+                if($model->login()) return $this->goBack();
+                else
+                {
+                    $model->password = '';
+                    return $this->render('login', ['model' => $model,]);
+                }
+            }
+        }
+        else
+        {
+            $model->password = '';
+            return $this->render('login', ['model' => $model,]);
+        }
     }
 
-    //修改密码功能
+    /**
+     * 修改密码功能
+     * @return string|\yii\web\Response
+     */
     public function actionRepassword()
     {
-        $model = Yii::$app->user->identity;
+        $model = User::findIdentity(Yii::$app->user->id);
+
         $form =new UserForm();
         /*注意:需要先往$this->user_id,$this->user_name写入相应的数据
         因为页面显示需要id和名字数据,而传递的模型是表单模型而不是实例模型,所以需要补充数据*/
         $form->user_name=$model->user_name;
         $form->user_id=$model->id;
-        if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model,true))
+
+        try
         {
-            Yii::$app->getSession()->setFlash('success', '密码修改成功');
-            return $this->redirect(['view']);
+            if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model,true))
+            {
+                Yii::$app->getSession()->setFlash('success', '密码修改成功');
+                return $this->redirect(['view']);
+            }
+            return $this->render('password', ['model' => $form,]);
         }
-        return $this->render('password', ['model' => $form,]);
+        catch(ProjectException $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning', $exception->getExceptionMsg());
+            return $this->render('password', ['model' => $form,]);
+        }
+        catch(\Exception $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning', '未知异常:'.$exception->getMessage());
+            return $this->render('password', ['model' => $form,]);
+        }
+
     }
 
     /**
@@ -180,8 +205,8 @@ class SiteController extends Controller
         return $this->goHome();
     }
 
-    //在contact页面填写表单并向邮箱发送邮件,目前不需要
     /**
+     * 在contact页面填写表单并向邮箱发送邮件,目前不需要
      * Displays contact page.
      *
      * @return mixed
@@ -226,49 +251,74 @@ class SiteController extends Controller
         if ($form->load(Yii::$app->request->post()))
         {
             $form->category=0;
-            if($model=$form->create('SignUp'))
+            try
             {
-                if(Yii::$app->getUser()->login($model))
+                if($model=$form->create('SignUp'))
                 {
-                    Yii::$app->getSession()->setFlash('success', '注册成功');
+                    if(Yii::$app->getUser()->login($model))
+                        Yii::$app->getSession()->setFlash('success', '注册成功');
+                    else
+                        Yii::$app->getSession()->setFlash('warning', '登陆失败');
                     return $this->goHome();
                 }
             }
+            catch (ProjectException $exception)
+            {
+                Yii::$app->getSession()->setFlash('warning', $exception->getExceptionMsg());
+            }
+            catch (\Exception $exception)
+            {
+                Yii::$app->getSession()->setFlash('warning', $exception->getMessage());
+            }
+
         }
         return $this->render('signup', ['model' => $form,]);
     }
 
-    //修改用户资料
-    //$scenario:'ChangeCategory':'ChangeUserName':'ChangeEmail':'ChangeAvatar'
+    /**
+     * 修改用户资料
+     * $scenario:'ChangeCategory':'ChangeUserName':
+     * 'ChangeEmail':'ChangeAvatar'
+     * @param string $scenario
+     * @return string|\yii\web\Response
+     */
     public function actionUpdate($scenario)
     {
         $form =new UserForm();
-        $model=Yii::$app->user->identity;
+
+        $model=User::findIdentity(Yii::$app->user->id);
+        if(!$model) return $this->goBack();
+
         switch($scenario)//检测场景参数是否错误
         {
             case 'ChangeUserName':
             case 'ChangeEmail':
             case 'ChangeAvatar':$form->scenario=$scenario;break;
-            case 'RemoveAvatar'://当删除头像场景时,要求是点击即完成,不需要也不会有表单提交动作
-                if($form->infoUpdate($model,$scenario))
-                {
-                    Yii::$app->getSession()->setFlash('success', '修改成功');
-                    return $this->redirect(['view']);
-                }
-                else
-                    return $this->render('update', ['model' => $form,'scenario'=>$scenario]);
-                break;
+            case 'RemoveAvatar':return $this->updateActionInRemoveAvatar($form,$model,$scenario);break;
             default:
                 Yii::$app->getSession()->setFlash('warning', '场景参数错误');
                 return $this->redirect(['view']);
         }
+
         $form->user_name=$model->user_name;
         $form->email=$model->email;
         $form->category=$model->category;
-        if ($form->load(Yii::$app->request->post())&&$form->infoUpdate($model,$scenario))
+
+        try
         {
-            Yii::$app->getSession()->setFlash('success', '修改成功');
-            return $this->redirect(['view']);
+            if ($form->load(Yii::$app->request->post())&&$form->infoUpdate($model,$scenario))
+            {
+                Yii::$app->getSession()->setFlash('success', '修改成功');
+                return $this->redirect(['view']);
+            }
+        }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning', $exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning', $exception->getMessage());
         }
         return $this->render('update', ['model' => $form,'scenario'=>$scenario]);
     }
@@ -282,12 +332,15 @@ class SiteController extends Controller
     public function actionRequestPasswordReset()
     {
         $model = new PasswordResetRequestForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            if ($model->sendEmail()) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate())
+        {
+            if ($model->sendEmail())
+            {
                 Yii::$app->session->setFlash('success', 'Check your email for further instructions.');
-
                 return $this->goHome();
-            } else {
+            }
+            else
+            {
                 Yii::$app->session->setFlash('error', 'Sorry, we are unable to reset password for the provided email address.');
             }
         }
@@ -298,6 +351,7 @@ class SiteController extends Controller
     }
 
     /**
+     * 通过邮箱验证重设密码
      * Resets password.
      *
      * @param string $token
@@ -306,20 +360,51 @@ class SiteController extends Controller
      */
     public function actionResetPassword($token)
     {
-        try {
+        try
+        {
             $model = new ResetPasswordForm($token);
-        } catch (InvalidArgumentException $e) {
+        }
+        catch (InvalidArgumentException $e)
+        {
             throw new BadRequestHttpException($e->getMessage());
         }
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate() && $model->resetPassword()) {
+        if ($model->load(Yii::$app->request->post()) &&
+            $model->validate() && $model->resetPassword())
+        {
             Yii::$app->session->setFlash('success', 'New password saved.');
-
             return $this->goHome();
         }
 
-        return $this->render('resetPassword', [
-            'model' => $model,
-        ]);
+        return $this->render('resetPassword', ['model' => $model,]);
     }
+
+    /**
+     * 更新动作中在删除头像下的子动作
+     * @param UserForm $form
+     * @param User $model
+     * @param string $scenario
+     * @return string|\yii\web\Response
+     */
+    private function updateActionInRemoveAvatar($form,$model,$scenario)
+    {
+        //当删除头像场景时,要求是点击即完成,不需要也不会有表单提交动作
+        try
+        {
+            $form->infoUpdate($model,$scenario);
+            Yii::$app->getSession()->setFlash('success', '修改成功');
+            return $this->redirect(['view']);
+        }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning', $exception->getExceptionMsg());
+            return $this->render('update', ['model' => $form,'scenario'=>$scenario]);
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning', $exception->getMessage());
+            return $this->render('update', ['model' => $form,'scenario'=>$scenario]);
+        }
+    }
+
 }

@@ -1,6 +1,9 @@
 <?php
 namespace orgapi\controllers;
 
+use common\exceptions\FieldException;
+use common\exceptions\ModelNotFoundException;
+use common\exceptions\ProjectException;
 use Yii;
 use yii\rest\ActiveController;
 use yii\data\ActiveDataProvider;
@@ -239,14 +242,15 @@ class ActivityController extends ActiveController
 		// 	return ['code'=>1,'message' => 'duplicate activity name'];
 
 		$act_form = new ActivityForm();
-		$act_form->is_api = true;
+		//$act_form->is_api = true;
 
 		$act_form->category = $category;
 		$act_form->location = $location;
-		$act_form->ticketing_start_at = $ticketing_start_at;
+		$act_form->getStringTimeFromIntTime($start_at,$end_at,$ticketing_start_at,$ticketing_end_at);
+		/*$act_form->ticketing_start_at = $ticketing_start_at;
 		$act_form->ticketing_end_at = $ticketing_end_at;
 		$act_form->start_at = $start_at;
-		$act_form->end_at = $end_at;
+		$act_form->end_at = $end_at;*/
 		$act_form->max_people = $max_people;
 		$act_form->introduction = $intro;
 		$act_form->activity_name = $activity_name;
@@ -261,13 +265,20 @@ class ActivityController extends ActiveController
         // $act_form->ticket_start_stamp=date('Y-m-d H:i' , $ticketing_start_at);
         // $act_form->ticket_end_stamp=date('Y-m-d H:i' , $ticketing_end_at);
 
-        $activity=$act_form->create();
-		if(!$activity)
-		{
-			return ['code'=>1,'message' => 'Activity created failed. Check your whether your parameters is valid.'];
-		}
+        try
+        {
+            $activity=$act_form->create();
+            return ['code'=>0, 'message' => 'success', 'data' => $activity];
+        }
+        catch (ProjectException $exception)
+        {
+            return ['code'=>1,'message' => $exception->getExceptionMsg()];
+        }
+        catch (\Exception $exception)
+        {
+            return ['code'=>1,'message' => $exception->getMessage()];
+        }
 
-		return ['code'=>0, 'message' => 'success', 'data' => $activity];
 	}
 
 	/*
@@ -297,10 +308,11 @@ class ActivityController extends ActiveController
 		if($organizer == null)
 			return ['code'=>1, 'message' => 'inner problem -- organizer not found'];
 
-		$activity = Activity::find()
+		/*$activity = Activity::find()
 					->where(['id'=>$activity_id])
 					->limit(1)
-					->one();
+					->one();*/
+        $activity=Activity::findOne(['id'=>$activity_id]);
 
 		if($activity == null)
 			return ['code'=>1, 'message' => 'activity inexists'];
@@ -310,6 +322,7 @@ class ActivityController extends ActiveController
 
 		if($activity->status == Activity::STATUS_APPROVED)
 		{
+		    //这里的信息应该是审核已通过
 			return ['code'=>1, 'message' => '已经成功发布，无法修改'];
 		}
 		if($activity->status == Activity::STATUS_CANCEL)
@@ -327,26 +340,66 @@ class ActivityController extends ActiveController
 		$intro = $request->post('intro');
 
 		$act_form = new ActivityForm();
-		$act_form->is_api = true;
+		//$act_form->is_api = true;
 
-        $activity->activity_name = $activity_name==null?$activity->activity_name:$activity_name;
+        //复制模型的信息给表单
+        $act_form->updateActionInUpdate($activity);
+        $act_form->activity_name = $activity_name==null?$activity->activity_name:$activity_name;
+        $act_form->status = Activity::STATUS_UNAUDITED;
+        $act_form->category = $category==null?$activity->category:$category;
+        $act_form->location = $location==null?$activity->location:$location;
+        $act_form->max_people = $max_people==null?$activity->max_people:$max_people;
+        //注意:introduction是html格式,可以直接渲染
+        $act_form->introduction = $intro==null?$activity->introduction:$intro;
+        $act_form->getStringTimeFromIntTime
+        (
+            $start_at==null?$activity->start_at:$start_at,
+            $end_at==null?$activity->end_at:$end_at,
+            $ticketing_start_at==null?$activity->ticketing_start_at:$ticketing_start_at,
+            $ticketing_end_at==null?$activity->ticketing_end_at:$ticketing_end_at
+        );
+
+        try
+        {
+            $act_form->infoUpdate($activity,'Update');
+            return ['code'=>0,'message' => 'success' , 'data'=>$activity];
+        }
+        catch (ProjectException $exception)
+        {
+            return ['code' => 1, 'message' => $exception->getExceptionMsg()];
+        }
+        catch (\Exception $exception)
+        {
+            return ['code' => 1, 'message' => $exception->getMessage()];
+        }
+
+        /*$activity->activity_name = $activity_name==null?$activity->activity_name:$activity_name;
 		$activity->status = Activity::STATUS_UNAUDITED;
         $activity->category = $category==null?$activity->category:$category;
         $activity->location = $location==null?$activity->location:$location;
         $activity->max_people = $max_people==null?$activity->max_people:$max_people;
         $activity->introduction = $intro==null?$activity->introduction:$intro;
+        $activity->ticketing_start_at = $ticketing_start_at==null?$activity->ticketing_start_at:$ticketing_start_at;
+        $activity->ticketing_end_at = $ticketing_end_at==null?$activity->ticketing_end_at:$ticketing_end_at;
+        $activity->start_at = $start_at==null?$activity->start_at:$start_at;
+        $activity->end_at = $end_at==null?$activity->end_at:$end_at;
+        */
 
-        $transaction=Yii::$app->db->beginTransaction();
+        /*
+         * 'activity_name', 'release_by', 'category',
+                    'status','location','release_at',
+                    'start_at_string',
+                    'end_at_string',
+                    'ticketing_start_at_string',
+                    'ticketing_end_at_string',
+                    'introduction', 'max_people','updated_at',
+         * */
+
+        /*$transaction=Yii::$app->db->beginTransaction();
         try
         {
-			$activity->ticketing_start_at = $ticketing_start_at==null?$activity->ticketing_start_at:$ticketing_start_at;
-			$activity->ticketing_end_at = $ticketing_end_at==null?$activity->ticketing_end_at:$ticketing_end_at;
-			$activity->start_at = $start_at==null?$activity->start_at:$start_at;
-			$activity->end_at = $end_at==null?$activity->end_at:$end_at;
-
 			if(!$activity->save())
 			{
-
 				throw new \Exception('activity time update failed');
 			}
 
@@ -357,8 +410,7 @@ class ActivityController extends ActiveController
         {
             $transaction->rollBack();
             return ['code' => 1, 'message' => $e->getMessage()];
-        }
-        
+        }*/
 	}
 
 
@@ -370,10 +422,48 @@ class ActivityController extends ActiveController
 	*/
 	public function actionCancelActivity()
 	{
-		$request = Yii::$app->request;
+        $request = Yii::$app->request;
+
+        $activity_id = $request->post('activity_id');
+
+        $organizer = Yii::$app->user->identity;
+
+        try
+        {
+            if($activity_id == null)
+                throw new FieldException('empty activity id');
+
+            if($organizer == null)
+                throw new FieldException('illegal organizer');
+
+            $model=Activity::findOne(['id'=>$activity_id]);
+            if(!$model)
+                throw new ModelNotFoundException('activity inexists');
+
+            if($model->release_by != $organizer->id)
+                throw new FieldException('illegal request');
+
+            $form=new ActivityForm();
+            $form->status=Activity::STATUS_CANCEL;
+            $form->infoUpdate($model,'ChangeStatus');
+
+            return ['code'=>0,'message' => 'cancel success','data'=>$model];
+
+        }
+        catch (ProjectException $exception)
+        {
+            return ['code'=>1, 'message'=> $exception->getExceptionMsg()];
+        }
+        catch (\Exception $exception)
+        {
+            return ['code'=>1, 'message'=> $exception->getMessage()];
+        }
+
+		/*$request = Yii::$app->request;
 		$organizer = Yii::$app->user->identity;
 
 		$activity_id = $request->post('activity_id');
+
 
         $transaction=Yii::$app->db->beginTransaction();
 		try
@@ -412,6 +502,6 @@ class ActivityController extends ActiveController
 		{
 			$transaction->rollBack();
 			return ['code'=>1, 'message'=> $e->getMessage()];
-		}
+		}*/
 	}
 }

@@ -1,6 +1,7 @@
 <?php
 namespace api\controllers;
 
+use common\exceptions\ProjectException;
 use Yii;
 use yii\rest\ActiveController;
 use yii\data\ActiveDataProvider;
@@ -116,7 +117,24 @@ class ActivityController extends ActiveController
 	{
 		$request = Yii::$app->request;
 
-		$user = Yii::$app->user->identity;
+        $activity_id = $request->post('activity_id');
+
+        try
+        {
+            $ticket=ActivityForm::createTicket($activity_id,Yii::$app->user->id);
+            return ['code'=> 0, 'message' => 'success', 'data' => $ticket];
+        }
+        catch (ProjectException $exception)
+        {
+            return ['code' => 1, 'message' => $exception->getExceptionMsg()];
+        }
+        catch(\Exception $exception)
+        {
+            return ['code' => 1, 'message' => $exception->getMessage()];
+        }
+
+
+		/*$user = Yii::$app->user->identity;
 
 		$user_id = $user->id;
 
@@ -124,14 +142,12 @@ class ActivityController extends ActiveController
 		
 		if($activity_id == null)
 			return ['code'=> 1,'message' => 'empty activity_id'];
-
+        if( $user == null )//作用可能不大
+            return ['code' => 1, 'message' => 'inner problem -- user'];
 		$activity = Activity::find()
 				->where(['id' => $activity_id])
 				->limit(1)
 				->one();
-
-		if( $user == null )//作用可能不大
-			return ['code' => 1, 'message' => 'inner problem -- user'];
 
 		if( $activity == null )
 			return ['code'=> 1, 'message' => 'invalid activity id'];
@@ -181,7 +197,7 @@ class ActivityController extends ActiveController
         {
             $transaction->rollBack();
             return ['code' => 1, 'message' => $e->getMessage()];
-        }
+        }*/
 
 	}
 }

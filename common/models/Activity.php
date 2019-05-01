@@ -2,7 +2,6 @@
 
 namespace common\models;
 
-use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -23,12 +22,12 @@ use yii\db\ActiveRecord;
  * @property int $current_people
  * @property int $max_people
  * @property int $current_serial 用于产生票务的序列号
+ * @property int $ticketing_start_at 票务开始时间
+ * @property int $ticketing_end_at 票务开始时间
  * @property string $pic_url 暂不支持传入图片
- *
+ * @property string $summary 摘要字段
  * @property Organizer $releaseBy
- * @property ActivityEvent[] $tkActivityEvents
  * @property Ticket[] $tkTickets
- * @property TicketEvent[] $tkTicketEvents
  */
 
 
@@ -39,9 +38,7 @@ class Activity extends ActiveRecord
     const STATUS_REJECTED= 2;//被驳回状态
     const STATUS_CANCEL= 3;//被取消状态
 
-
     public $org_name;//用于admin端查找发布者名字
-
 
     /**
      * {@inheritdoc}
@@ -165,7 +162,21 @@ class Activity extends ActiveRecord
         ];
     }
 
-    //用于admin端查找活动的名称
+    /**
+     * 用于查找一个有效的活动
+     * @param integer $id
+     * @return Activity|null
+     */
+    public static function findIdentity($id)
+    {
+        return static::findOne(['id' => $id,'status'=>self::STATUS_APPROVED]);
+    }
+
+    /**
+     * 用于查找一个活动
+     * @param integer $id
+     * @return Activity|null
+     */
     public static function findIdentity_admin($id)
     {
         return static::findOne(['id' => $id]);

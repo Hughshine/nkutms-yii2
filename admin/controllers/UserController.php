@@ -2,6 +2,7 @@
 
 namespace admin\controllers;
 
+use common\exceptions\ProjectException;
 use Yii;
 use common\models\User;
 use common\models\UserForm;
@@ -50,9 +51,8 @@ class UserController extends Controller
         ];
     }
 
-    //下面的我没碰，magic
-
     /**
+     * 下面的我没碰，magic
      * Lists all User models.
      * @return mixed
      */
@@ -75,9 +75,7 @@ class UserController extends Controller
      */
     public function actionView($id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
+        return $this->render('view', ['model' => $this->findModel($id),]);
     }
 
     /**
@@ -85,77 +83,131 @@ class UserController extends Controller
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $model = User::findIdentity_admin($id);
+        if(!$model)
+        {
+            Yii::$app->session->setFlash('warning','找不到ID为'.$id.'的用户');
+            return $this->redirect('index');
+        }
+
+        //由于只有改变用户分类功能,所以没有那么多场景,在这里直接调用save即可
         if ($model->load(Yii::$app->request->post()) && $model->save())
         {
             Yii::$app->getSession()->setFlash('success', '修改成功');
             return $this->redirect(['view', 'id' => $model->id]);
         }
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        return $this->render('update', ['model' => $model,]);
     }
 
-    //创建一个新的用户
-    public function actionCreate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save())
-        {
-            Yii::$app->getSession()->setFlash('success', '创建成功');
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
-
-    //一键封号功能
+    /**
+     * 一键封号功能
+     * @param integer $id
+     * @param string $status
+     * @return \yii\web\Response
+     */
     public function actionChangestatus($id,$status)
     {
-        $model = $this->findModel($id);
+        $model = User::findIdentity_admin($id);
+        if(!$model)
+        {
+            Yii::$app->session->setFlash('warning','找不到ID为'.$id.'的用户');
+            return $this->redirect('index');
+        }
+
         $form=new UserForm();
         $form->status=$status;
-        if($form->infoUpdate($model,'ChangeStatus'))
-            Yii::$app->getSession()->setFlash('success', '修改成功');
+        try
+        {
+            if($form->infoUpdate($model,'ChangeStatus'))
+                Yii::$app->getSession()->setFlash('success', '修改成功');
+        }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->session->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->session->setFlash('warning','未知异常'.$exception->getMessage());
+        }
+
         return $this->redirect(['view', 'id' => $model->id]);
     }
 
     //修改分类功能
     public function actionChangeCategory($id,$category)
     {
-        $model = $this->findModel($id);
+        $model = User::findIdentity_admin($id);
+        if(!$model)
+        {
+            Yii::$app->session->setFlash('warning','找不到ID为'.$id.'的用户');
+            return $this->redirect('index');
+        }
+
         $form=new UserForm();
         $form->category=$category;
-        if($form->infoUpdate($model,'ChangeCategory'))
-            Yii::$app->getSession()->setFlash('success', '修改成功');
+
+        try
+        {
+            if($form->infoUpdate($model,'ChangeCategory'))
+                Yii::$app->getSession()->setFlash('success', '修改成功');
+        }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->session->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->session->setFlash('warning','未知异常'.$exception->getMessage());
+        }
+
         return $this->redirect(['view', 'id' => $model->id]);
     }
 
-    //修改用户密码功能
+    /**
+     * 修改用户密码功能
+     * @param integer $id
+     * @return string|\yii\web\Response
+     */
     public function actionRepassword($id)
     {
-        $model = $this->findModel($id);
+        $model = User::findIdentity_admin($id);
+        if(!$model)
+        {
+            Yii::$app->session->setFlash('warning','找不到ID为'.$id.'的用户');
+            return $this->redirect('index');
+        }
+
         $form =new UserForm();
         /*注意:需要先往$this->user_id,$this->user_name写入相应的数据
         因为页面显示需要id和名字数据,而传递的模型是表单模型而不是实例模型,所以需要补充数据*/
         $form->user_name=$model->user_name;
         $form->user_id=$model->id;
-        if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model,false))
+
+        try
         {
-            Yii::$app->getSession()->setFlash('success', '密码修改成功');
-            return $this->redirect(['view', 'id' => $model->id]);
+            if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model,false))
+            {
+                Yii::$app->getSession()->setFlash('success', '密码修改成功');
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->session->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->session->setFlash('warning','未知异常'.$exception->getMessage());
+        }
+
         return $this->render('password', ['model' => $form,]);
     }
 
     /**
+     * 删除功能不需要
      * Deletes an existing User model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
@@ -177,10 +229,9 @@ class UserController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = User::findOne($id)) !== null) {
+        if (($model = User::findOne($id)) !== null)
             return $model;
-        }
-
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+
 }

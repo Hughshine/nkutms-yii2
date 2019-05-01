@@ -6,7 +6,7 @@ use kartik\datetime\DateTimePicker;
 
 
 /* @var $this yii\web\View */
-/* @var $model admin\models\NOW */
+/* @var $model common\models\ActivityForm */
 
 $this->title = '创建一条活动记录';
 $this->params['breadcrumbs'][] = ['label' => '活动管理', 'url' => ['index']];
@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'max_people')->textInput() ?>
 
-                <?= $form->field($model, 'ticket_start_stamp')->widget(DateTimePicker::classname(),
+                <?= $form->field($model, 'ticketing_start_at_string')->widget(DateTimePicker::classname(),
                     [
                         'options' => ['placeholder' => ''],
                         'pluginOptions' =>
@@ -48,7 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]);
                 ?>
 
-                <?= $form->field($model, 'ticket_end_stamp')->widget(DateTimePicker::classname(),
+                <?= $form->field($model, 'ticketing_end_at_string')->widget(DateTimePicker::classname(),
                     [
                         'options' => ['placeholder' => ''],
                         'pluginOptions' =>
@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]);
                 ?>
 
-                <?= $form->field($model, 'time_start_stamp')->widget(DateTimePicker::classname(),
+                <?= $form->field($model, 'start_at_string')->widget(DateTimePicker::classname(),
                     [
                         'options' => ['placeholder' => ''],
                         'pluginOptions' =>
@@ -72,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]);
                 ?>
 
-                <?= $form->field($model, 'time_end_stamp')->widget(DateTimePicker::classname(),
+                <?= $form->field($model, 'end_at_string')->widget(DateTimePicker::classname(),
                     [
                         'options' => ['placeholder' => ''],
                         'pluginOptions' =>

@@ -1,13 +1,13 @@
 <?php
 namespace backend\controllers;
 
+use common\exceptions\ProjectException;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\Organizer;
 use common\models\OrganizerForm;
 use backend\models\LoginForm;
-use yii\web\NotFoundHttpException;
 use yii\web\Controller;
 
 /**
@@ -75,24 +75,41 @@ class SiteController extends Controller
         return $this->render('index');
     }
 
-    /*
+    /**
      * 修改密码
-     * */
+     * @return string|\yii\web\Response
+     */
     public function actionPassword()
     {
-        if (Yii::$app->user->isGuest) {
+        if (Yii::$app->user->isGuest)
             return $this->redirect('site/login');
-        }
-        $model = Yii::$app->user->identity;
+
+        $model=Organizer::findIdentity(Yii::$app->user->id);
+        if(!$model)return $this->redirect('site/login');
+
         $form =new OrganizerForm();
         $form->org_id=$model->id;
         $form->org_name=$model->org_name;
-        if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model))
+
+        try
         {
-            Yii::$app->getSession()->setFlash('success', '密码修改成功!');
-            return $this->redirect('index.php');
+            if ($form->load(Yii::$app->request->post()) &&$form->rePassword($model))
+            {
+                Yii::$app->getSession()->setFlash('success', '密码修改成功!');
+                return $this->redirect('index');
+            }
+            return $this->render('password', ['model' => $form,]);
         }
-        return $this->render('password', ['model' => $form,]);
+        catch (ProjectException $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning',$exception->getExceptionMsg());
+            return $this->render('password', ['model' => $form,]);
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning','未知异常:'.$exception->getMessage());
+            return $this->render('password', ['model' => $form,]);
+        }
     }
 
     /**
@@ -102,20 +119,17 @@ class SiteController extends Controller
      */
     public function actionLogin()
     {
-        if (!Yii::$app->user->isGuest) {
+        if (!Yii::$app->user->isGuest)
             return $this->goHome();
-        }
         $this->layout='main-login.php';
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post())&&$model->login())
             return $this->goBack();
         else
-            {
-                $model->password = '';
-                return $this->render('login', [
-                    'model' => $model,
-                ]);
-            }
+        {
+            $model->password = '';
+            return $this->render('login', ['model' => $model,]);
+        }
     }
 
 
@@ -130,21 +144,16 @@ class SiteController extends Controller
         return $this->goHome();
     }
 
+    /**
+     * 我的资料页面
+     * @return string|\yii\web\Response
+     */
     public function actionView()
     {
         if (Yii::$app->user->isGuest) {
             return $this->redirect('site/login');
         }
-        return $this->render('view', [
-            'model' => Yii::$app->user->identity,
-        ]);
+        return $this->render('view', ['model' => Yii::$app->user->identity,]);
     }
 
-    protected function findModel($id)
-    {
-        if (($model = Organizer::findOne($id)) !== null) {
-            return $model;
-        }
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
 }

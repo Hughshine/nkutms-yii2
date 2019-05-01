@@ -11,16 +11,14 @@
  * */
 namespace frontend\controllers;
 
+use common\exceptions\ProjectException;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use yii\web\NotFoundHttpException;
 use common\models\Activity;
 use common\models\ActivityForm;
 use common\models\Ticket;
-use common\models\TicketForm;
 use yii\web\Controller;
-use yii\widgets\ActiveForm;
 
 class ActivityController extends Controller
 {
@@ -57,125 +55,89 @@ class ActivityController extends Controller
         ];
     }
 
-    /*
+    /**
      * 活动列表
-     * */
+     * @return string
+     */
     public function actionIndex()
     {
         return $this->render('index');
     }
 
-    /*
+    /**
      * 创建一条票记录,接受活动id作为参数
      * 此方法为合法创建记录,创建时间必须在票务开始之后,结束之前
-     * */
+     * @param integer $act_id
+     * @return \yii\web\Response
+     */
     public function actionCreateTicket($act_id)
     {
         if(Yii::$app->user->isGuest)
             return $this->redirect('site/login');
-        $act=Activity::findOne(['id'=>$act_id,'status'=>Activity::STATUS_APPROVED]);
-        if(!$act)
-        {
-            Yii::$app->getSession()->setFlash('warning','该活动不存在');
-            return $this->redirect(['view', 'id' => $act->id]);
-        }
-        if(time()+7*3600<$act->ticketing_start_at)
-        {
-            Yii::$app->getSession()->setFlash('warning','票务尚未开始,别急');
-            return $this->redirect(['view', 'id' => $act->id]);
-        }
-        if(time()+7*3600>$act->ticketing_end_at)
-        {
-            Yii::$app->getSession()->setFlash('warning','票务已过期');
-            return $this->redirect(['view', 'id' => $act->id]);
-        }
-        $ticketForm=new TicketForm();
-        $actForm=new ActivityForm();
-        $ticketForm->activity_id=$act_id;
-        $ticketForm->user_id=Yii::$app->user->id;
-        $ticketForm->status=Ticket::STATUS_VALID;
-        $ticketForm->serial_number=$act->current_serial;
-        $actForm->current_serial=$act->current_serial+1;
-        $actForm->current_people=$act->current_people+1;
-
-        $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if($ticketForm->create()&&$actForm->infoUpdate($act,'ChangeSerial'))
-                Yii::$app->getSession()->setFlash('success', '操作成功');
-            else
-                throw new \Exception('操作失败');
-
-            $transaction->commit();
+            ActivityForm::createTicket(Yii::$app->user->id,$act_id);
+            Yii::$app->getSession()->setFlash('success', '操作成功');
         }
-        catch(\Exception $e)
+        catch(ProjectException $exception)
         {
-            $transaction->rollBack();
-            Yii::$app->getSession()->setFlash('warning', $e->getMessage());
+            Yii::$app->getSession()->setFlash('warning', $exception->getExceptionMsg());
         }
-        return $this->redirect(['view', 'id' => $act->id]);
+        catch (\Exception $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning', '未知异常:'.$exception->getMessage());
+        }
+        return $this->redirect(['view', 'id' => $act_id]);
     }
 
-    /*
+    /**
      * 取消参与一个活动
-     * */
+     * @param integer $act_id 活动id
+     * @return \yii\web\Response
+     */
     public function actionCancelTicket($act_id)
     {
         if(Yii::$app->user->isGuest)
             return $this->redirect('site/login');
-        $ticket=Ticket::findOne(['user_id'=>Yii::$app->user->id,'activity_id'=>$act_id,'status'=>Ticket::STATUS_VALID]);
-        $act=Activity::findOne(['id'=>$act_id,'status'=>Activity::STATUS_APPROVED]);
-        if(!$ticket)
-        {
-            Yii::$app->getSession()->setFlash('warning','所操作票记录不存在');
-            return $this->redirect(['view', 'id' => $act->id,'isTicketed'=>false]);
-        }
-        $ticketForm=new TicketForm();
-        $actForm=new ActivityForm();
-        $ticketForm->status=Ticket::STATUS_WITHDRAW;
-        $actForm->current_people=$act->current_people-1;
-        if($actForm->current_people<0)$actForm->current_people=0;
-        $actForm->current_serial=$act->current_serial;
-
-        $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            if($ticketForm->infoUpdate($ticket,'ChangeStatus')&&$actForm->infoUpdate($act,'ChangeSerial'))
-                Yii::$app->getSession()->setFlash('success', '操作成功');
-            else
-                throw new \Exception('操作失败');
-            $transaction->commit();
+            ActivityForm::cancelTicket($act_id,Yii::$app->user->id);
+            Yii::$app->getSession()->setFlash('success', '操作成功');
         }
-        catch(\Exception $e)
+        catch(ProjectException $exception)
         {
-            $transaction->rollBack();
-            Yii::$app->getSession()->setFlash('warning', $e->getMessage());
-
+            Yii::$app->getSession()->setFlash('warning', $exception->getExceptionMsg());
         }
-        return $this->redirect(['view', 'id' => $act->id]);
+        catch(\Exception $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning', '未知异常:'.$exception->getMessage());
+        }
+        return $this->redirect(['view', 'id' => $act_id]);
     }
 
-    /*
+    /**
      * 活动详情页面调用
-     * */
+     * @param integer $id 活动id
+     * @return string|\yii\web\Response
+     */
     public function actionView($id)
     {
+        $model= Activity::findIdentity_admin($id);
+        if(!$model)
+        {
+            Yii::$app->session->setFlash('warning','你要查找的活动不存在');
+            return $this->goBack();
+        }
+
         if (Yii::$app->user->isGuest)
-            return $this->render('view', ['model' => $this->findModel($id),'isTicketed'=>false]);
+            return $this->render('view', ['model' => $model,'isTicketed'=>false]);
+
         $ticket=Ticket::findOne(['user_id'=>Yii::$app->user->id,'activity_id'=>$id,'status'=>Ticket::STATUS_VALID]);
-        $model= $this->findModel($id);
-        if(!$model)return $this->redirect('index');
+
         if($ticket)
             return $this->render('view', ['model' =>$model,'isTicketed'=>$ticket!=null,'serialNumber'=>$ticket->serial_number]);
         else
             return $this->render('view', ['model' =>$model,'isTicketed'=>$ticket!=null]);
     }
 
-
-    protected function findModel($id)
-    {
-        if (($model = Activity::findOne($id)) !== null)
-            return $model;
-        throw new NotFoundHttpException('The requested page does not exist.');
-    }
 }

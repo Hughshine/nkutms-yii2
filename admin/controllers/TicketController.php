@@ -2,6 +2,7 @@
 
 namespace admin\controllers;
 
+use common\exceptions\ProjectException;
 use common\models\TicketForm;
 use Yii;
 use common\models\Ticket;
@@ -15,7 +16,6 @@ use yii\filters\VerbFilter;
  */
 class TicketController extends Controller
 {
-    public $lastError;//用于事务跑出异常后记录异常信息
     /**
      * {@inheritdoc}
      */
@@ -86,11 +86,24 @@ class TicketController extends Controller
     {
         $form=new TicketForm();
         $form->status=Ticket::STATUS_VALID;
-        if ($form->load(Yii::$app->request->post()) && $form->create())
+
+        try
         {
-            Yii::$app->getSession()->setFlash('success', '创建成功');
-            return $this->redirect(['view', 'id' => $form->tk_id]);
+            if ($form->load(Yii::$app->request->post()) && $form->create())
+            {
+                Yii::$app->getSession()->setFlash('success', '创建成功');
+                return $this->redirect(['view', 'id' => $form->tk_id]);
+            }
         }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->session->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->session->setFlash('warning','未知异常'.$exception->getMessage());
+        }
+
         return $this->render('create', ['model' => $form,]);
     }
 
@@ -99,43 +112,81 @@ class TicketController extends Controller
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $model = Ticket::findOne(['id'=>$id]);
+        if(!$model)
+        {
+            Yii::$app->session->setFlash('warning','找不到ID为'.$id.'的票务');
+            return $this->redirect('index');
+        }
+
         $form=new TicketForm();
         $form->tk_id=$model->id;
         $form->user_id=$model->user_id;
         $form->activity_id=$model->activity_id;
         $form->serial_number=$model->serial_number;
-        if ($form->load(Yii::$app->request->post()) && $form->infoUpdate($model))
+
+        try
         {
-            Yii::$app->getSession()->setFlash('success', '修改成功');
-            return $this->redirect(['view', 'id' => $form->tk_id]);
+            if ($form->load(Yii::$app->request->post()) &&
+                $form->infoUpdate($model,'Update'))
+            {
+                Yii::$app->getSession()->setFlash('success', '修改成功');
+                return $this->redirect(['view', 'id' => $form->tk_id]);
+            }
+
         }
-        return $this->render('update', [
-            'model' => $form,
-        ]);
+        catch (ProjectException $exception)
+        {
+            Yii::$app->session->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->session->setFlash('warning','未知异常'.$exception->getMessage());
+        }
+
+        return $this->render('update', ['model' => $form,]);
     }
 
 
-    /*
-        一键退票或置为有效功能
-    */
+    /**
+     * 一键退票或置为有效功能
+     * @param integer $id
+     * @param string $status
+     * @return \yii\web\Response
+     */
     public function actionChangestatus($id,$status)
     {
-        $model = $this->findModel($id);
+        $model = Ticket::findOne(['id'=>$id]);
+        if(!$model)
+        {
+            Yii::$app->session->setFlash('warning','找不到ID为'.$id.'的票务');
+            return $this->redirect('index');
+        }
+
         $form=new TicketForm();
         $form->tk_id=$model->id;
         $form->user_id=$model->user_id;
         $form->activity_id=$model->activity_id;
         $form->serial_number=$model->serial_number;
         $form->status=$status;
-        if($form->infoUpdate($model,'ChangeStatus'))
-            Yii::$app->getSession()->setFlash('success', '修改成功');
-        else
-            Yii::$app->getSession()->setFlash('success', '修改失败');
+
+        try
+        {
+            if($form->infoUpdate($model,'ChangeStatus'))
+                Yii::$app->getSession()->setFlash('success', '修改成功');
+        }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->session->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->session->setFlash('warning','未知异常'.$exception->getMessage());
+        }
+
         return $this->redirect(['view', 'id' => $model->id]);
     }
 
