@@ -114,33 +114,22 @@ class UserController extends ActiveController
 		        	return ['code'=>1, 'message'=>'访问频繁'];
 	        		break;
 	        	default:
-	        		// $wechat_id = $request->post('wechat_id');//for development sake
-	        		$err_msg = $output['errcode'];
 	        		return ['code'=>1,'message'=>'wx invalid code'];
 	        }
 		}
-
-
-		$user = User::find()
-					->where(['wechat_id' => $wechat_id])
-					->limit(1)
-					->one();
-
+		$user = User::findOne(['wechat_id' => $wechat_id]);
 
 		if($user != null)
 			return ['code'=>1,'message'=>'user already bind credential!'];
 
-		//TODO:改成hasOne？
-		$tmp_user = User::find()
-					->where(['credential' => $credential])
-					->limit(1)
-					->one();
+		$tmp_user = User::findOne(['credential' => $credential]);
 
 		if($tmp_user!=null)
 		{
 			if($tmp_user->wechat_id!=null)
 				return ['code'=>1,'message'=>'credential already bind other user!'];
 			//credential未绑定账号，验证密码
+
 			if($email != $tmp_user->email)
 			{
 				return ['code'=>1,'message'=>'wrong email！'];
@@ -148,9 +137,9 @@ class UserController extends ActiveController
 
 			if(Yii::$app->getSecurity()->validatePassword($password , $tmp_user->password))
 			{
-
 				$tmp_user->wechat_id = $wechat_id;
-				if(!$tmp_user->save())
+                $access_token = $tmp_user->generateAccessToken();
+                if(!$tmp_user->save())
 				{
 					return ['code' => 1, 'bind failed'];
 				}
@@ -165,28 +154,24 @@ class UserController extends ActiveController
 				return ['code'=>1,'message'=>'password doesn\'t match'];
 		}
 
-		$user = User::find()
-					->where(['email' => $email])
-					->limit(1)
-					->one();
+		$user = User::findOne(['email' => $email]);
+
 		if($user)
 		{
 			return ['code'=>1,'message'=>'email has already been taken'];
 		}
 
-		//TODO
 		$user_form  = new UserForm();
 		$user_form->is_api = true;
 		$user_form->user_name = $user_name==null?'default-name':$user_name;
 
 		$user_form->wechat_id = $wechat_id; 
-		$user_form->email = $email;//TODO
+		$user_form->email = $email;
 		$user_form->credential = $credential;
 		$user_form->password = $password;
 		$user_form->rePassword = $password;
 
 		$user_form->category = $category;
-
 		$transaction=Yii::$app->db->beginTransaction();
 		try{
 			$user = $user_form->create('Create');
@@ -276,10 +261,7 @@ class UserController extends ActiveController
         }
 		// $sql_category = $request->post('category', 0); 
 
-		$user = User::find()
-					->where(['wechat_id' => $sql_wechat])
-					->limit(1)
-					->one();
+		$user = User::findOne(['wechat_id' => $sql_wechat]);
 		// 未绑定的微信号直接禁止，存入redis
 		if($user == null){
 			$redis = Yii::$app->redis;
@@ -317,24 +299,5 @@ class UserController extends ActiveController
 	public function actionEditProfile()
 	{
 		return ['code' => 1, 'message' => 'this api is suspended, please turn to web version'];
-		/*
-		$request = Yii::$app->request;
-
-		$user_id = $request->post('user_id');
-		$user_name = $request->post('name');
-
-		$user = User::find()
-				->where(['id' => $user_id])
-				->limit(1)
-				->one();
-
-		if($user == null)
-			return ['code'=>1, 'message'=>'user inexists'];
-
-
-		$user = User::editAndSaveUser($user,$user_name,null,null);
-
-		return ['code'=>0, 'message'=>'success', 'data'=>$user];
-		*/
 	}
 }
