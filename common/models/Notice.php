@@ -12,11 +12,13 @@ use yii\behaviors\TimestampBehavior;
  * @property string $content 内容
  * @property int $updated_at 上一次编辑时间
  * @property int $created_at 创建时间
+ * @property int $status 创建时间
  * @property string $summary 创建时间
  */
 class Notice extends \yii\db\ActiveRecord
 {
-
+    const STATUS_DELETED = 0;
+    const STATUS_ACTIVE = 10;
     //TODO
     public function behaviors()
     {
@@ -42,9 +44,13 @@ class Notice extends \yii\db\ActiveRecord
      */
     public function rules()
     {
-        return [
-            [['updated_at', 'created_at'], 'integer'],
+        return
+        [
+            [['updated_at', 'created_at','status'], 'integer'],
             [['title'], 'string', 'max' => 32],
+
+            ['status', 'default', 'value' => self::STATUS_ACTIVE],
+            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
         ];
     }
 

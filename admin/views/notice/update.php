@@ -10,7 +10,7 @@ $this->params['breadcrumbs'][] = ['label' => '通知管理', 'url' => ['index']]
 $this->params['breadcrumbs'][] = ['label' => $model->title, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = '编辑';
 ?>
-<div class="notice-update">
+<div class="container">
 
     <h1><?= Html::encode($this->title) ?></h1>
 

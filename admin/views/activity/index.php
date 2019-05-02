@@ -12,13 +12,11 @@ use kartik\daterange\DateRangePicker;
 $this->title = '活动管理';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="tk-activity-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
+<div class="container">
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('创造一个活动记录', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('创造一个活动记录', ['create'], ['class' => 'btn btn-success pull-right']) ?>
     </p>
 
     <?= GridView::widget([

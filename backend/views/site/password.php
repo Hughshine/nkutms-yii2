@@ -1,12 +1,13 @@
 <?php
 
 /* @var $this yii\web\View */
+/* @var $model \common\models\Organizer */
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-$this->title = '修改密码:'.$model->org_name;
+$this->title = '修改密码';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-
+<div class="container">
 <div class="col-lg-8">
 <div class="admin-form">
     <?php $form = ActiveForm::begin(); ?>
@@ -23,5 +24,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php ActiveForm::end(); ?>
 
+</div>
 </div>
 </div>

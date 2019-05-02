@@ -12,10 +12,8 @@ use kartik\daterange\DateRangePicker;
 $this->title = '票务管理';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="ticket-index">
-
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?= Html::a('创建票务记录', ['create'], ['class' => 'btn btn-success']) ?>
+<div class="container">
+    <?= Html::a('创建票务记录', ['create'], ['class' => 'btn btn-warning pull-right']) ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

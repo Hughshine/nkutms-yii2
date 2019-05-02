@@ -4,18 +4,18 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel common\models\OrganizerSearch */
+/* @var $searchModel admin\models\OrganizerSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = '组织者管理';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="organizer-index">
+<div class="container">
 
-    <h3><?= Html::encode($this->title) ?></h3>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('创建一个组织者', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('创建一个组织者账号', ['create'], ['class' => 'btn btn-success pull-right']) ?>
     </p>
 
     <?= GridView::widget([

@@ -8,6 +8,7 @@
 
 namespace admin\widgets\notice;
 
+use common\models\Notice;
 use common\models\NoticeForm;
 use Yii;
 use yii\base\Widget;
@@ -20,11 +21,12 @@ class NoticeWidget extends Widget
     public$limit=5;//每页的数量
     public$more=false;//是否显示更多
     public$page=true;//是否显示分页
+    public$option='user';
 
     public function run()
     {
         $curPage=Yii::$app->request->get('page',1);
-        $cond=[];
+        $cond=['=','status',Notice::STATUS_ACTIVE];
         $res=NoticeForm::getList($cond,$curPage,$this->limit,['updated_at'=>SORT_DESC]);
         $result['title']=$this->title?:"通知";
         $result['body']=$res['data']?:[];

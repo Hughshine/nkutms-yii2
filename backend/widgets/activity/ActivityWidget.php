@@ -28,6 +28,40 @@ class ActivityWidget extends Widget
     {
         switch($this->option)
         {
+            case 'admin-index':
+            case 'admin-index-out-of-date':
+                {
+                    $curPage=Yii::$app->request->get('page',1);
+
+                    if($this->option!='admin-index-out-of-date')
+                        $cond=
+                            ['and',['>','ticketing_start_at',time()+7*3600],
+                                ['=','status',Activity::STATUS_UNAUDITED]
+                            ];
+                    else
+                        $cond=
+                            ['and',['<','ticketing_start_at',time()+7*3600],
+                            ['and',['>','ticketing_start_at',time()-(7+24)*3600],
+                            ['=','status',Activity::STATUS_UNAUDITED]
+                        ]];
+
+                    $res=ActivityForm::getList($cond,$curPage,$this->limit,['ticketing_start_at'=>SORT_ASC],10);
+
+                    if($this->option!='admin-index-out-of-date')
+                        $result['title']=$this->title?:"未审核(最近十条)";
+                    else
+                        $result['title']=$this->title?:"已过期未审核(24小时内)";
+                    $result['more']=Url::to(['activity/index']);
+
+                    $result['body']=$res['data']?:[];
+                    if($this->page)
+                    {
+                        $page=new Pagination(['totalCount'=>$res['count'],'pageSize'=>$res['pageSize']]);
+                        $result['page']=$page;
+                    }
+                    return $this->render('admin-review-index',['data'=>$result,'option'=>$this->option]);
+                    break;
+                }
             case 'index':
                 {
                     $curPage=Yii::$app->request->get('page',1);
@@ -57,7 +91,8 @@ class ActivityWidget extends Widget
                         $page=new Pagination(['totalCount'=>$res['count'],'pageSize'=>$res['pageSize']]);
                         $result['page']=$page;
                     }
-                    $status=array('<font color="gray">未审核</font>',
+                    $status=array('
+                        <font color="gray">未审核</font>',
                         '<font color="#339933">已通过</font>',
                         '<font color="#FF0000">被驳回</font>',
                         '<font color="black">已取消</font>');

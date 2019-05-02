@@ -11,7 +11,7 @@ $this->params['breadcrumbs'][] = ['label' => '组织者管理', 'url' => ['index
 $this->params['breadcrumbs'][] = ['label' => $model->org_name, 'url' => ['view', 'id' => $model->org_id]];
 $this->params['breadcrumbs'][] = '编辑';
 ?>
-<div class="row">
+<div class="container">
     <div class="col-lg-9">
         <div class="organizer-form">
 

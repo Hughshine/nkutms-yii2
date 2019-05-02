@@ -12,7 +12,7 @@ $this->title = '创建一条活动记录';
 $this->params['breadcrumbs'][] = ['label' => '活动管理', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="tk-activity-create">
+<div class="container">
 
     <h1><?= Html::encode($this->title) ?></h1>
 

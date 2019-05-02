@@ -7,6 +7,7 @@
  */
 namespace  common\models;
 
+use common\exceptions\FieldException;
 use common\exceptions\ValidateException;
 use Yii;
 
@@ -15,6 +16,7 @@ use Yii;
  * */
 class NoticeForm extends BaseForm
 {
+    public $status;
     public $title;
     public $content;
 
@@ -24,10 +26,15 @@ class NoticeForm extends BaseForm
             [
                 //要求必须存在值
                 [
-                    ['content', 'title',],
+                    ['content', 'title','status'],
                     'required',
                     'on'=>['Create','Update','default',]//对于这些场景有效
                 ],
+
+                ['status', 'default', 'value' => Notice::STATUS_ACTIVE],
+
+                ['status', 'in', 'range' => [Notice::STATUS_ACTIVE, Notice::STATUS_DELETED]],
+
 
                 [['title'], 'string', 'max' => 32,'on'=>['Create','Update','default',]],
 
@@ -41,17 +48,21 @@ class NoticeForm extends BaseForm
         return [
             'Create' =>//表示某个场景所用到的信息,没标记出来的不会有影响
                 [
-                    'title','content',
+                    'title','content','status',
                     'updated_at','created_at',
                 ],
             'Update' =>
                 [
-                    'title','content',
+                    'title','content','status',
                     'updated_at',
+                ],
+            'ChangeStatus' =>
+                [
+                    'status',
                 ],
             'default'=>
                 [
-                    'title','content',
+                    'title','content','status',
                     'updated_at','created_at',
                 ],
         ];
@@ -69,6 +80,7 @@ class NoticeForm extends BaseForm
                 'id' => 'ID',
                 'title' => '标题',
                 'content' => '内容',
+                'status'=>'是否对用户可见',
                 'updated_at' => '上一次编辑时间',
                 'created_at' => '创建时间',
             ];
@@ -88,6 +100,7 @@ class NoticeForm extends BaseForm
         $model->title=$this->title;
         $model->summary=$this->getSummary();
         $model->content=$this->content;
+        $model->status=Notice::STATUS_DELETED;
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
@@ -117,18 +130,27 @@ class NoticeForm extends BaseForm
     /**以当前表单的信息更新$activity活动信息,返回是否成功
      * 必须字段为:
      * title content
-     * @param $model Notice
+     * @param Notice $model
+     * @param string $scenario
      * @return bool
      * @throws ValidateException
      * @throws \Exception
      */
-    public function infoUpdate($model)
+    public function infoUpdate($model,$scenario='Update')
     {
-        $this->scenario='Update';
+        if($scenario!='Update'&&$scenario!='ChangeStatus')
+            throw new FieldException('Notice::infoUpdate:场景参数错误');
+        $this->scenario=$scenario;
+        if($scenario=='Update')
+        {
+            $model->title=$this->title;
+            $model->summary=$this->getSummary();
+            $model->content=$this->content;
+        }
+        else
+            $model->status=$this->status;
+
         $transaction=Yii::$app->db->beginTransaction();
-        $model->title=$this->title;
-        $model->summary=$this->getSummary();
-        $model->content=$this->content;
         try
         {
             if(!$this->validate())
@@ -157,10 +179,11 @@ class NoticeForm extends BaseForm
      * @param array $cond 条件
      * @param integer $curPage
      * @param integer $pageSize
+     * @param integer $limit
      * @param array $sortOrder
      * @return array
      */
-    public static function getList($cond, $curPage = 1, $pageSize = 5, $sortOrder = ['id' => SORT_DESC])
+    public static function getList($cond, $curPage = 1, $pageSize = 5, $sortOrder = ['id' => SORT_DESC],$limit=50)
     {
         $model=new NoticeForm();
         $select= ['id','title','summary','content',
@@ -169,7 +192,8 @@ class NoticeForm extends BaseForm
         $query=$model->find()
             ->select($select)
             ->where($cond)
-            ->orderBy($sortOrder);
+            ->orderBy($sortOrder)
+            ->limit($limit);
         $res=$model->getPages($query,$curPage,$pageSize);
         return $res;
     }
@@ -185,7 +209,7 @@ class NoticeForm extends BaseForm
         if(empty($this->content))
             return null;
         return(mb_substr(str_replace('&nbsp;',' ',
-            strip_tags($this->content)),$s,$e,$char));
+            strip_tags($this->content)),$s,$e,$char)).'......';
     }
 
 

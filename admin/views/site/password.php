@@ -1,16 +1,15 @@
 <?php
 
 /* @var $this yii\web\View */
+/* @var $model \admin\models\Admin */
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-$this->title = '修改管理员密码:'.$model->admin_name;
+$this->title = '修改密码:'.$model->admin_name;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
 <div class="col-lg-8">
 <div class="admin-form">
-
-	<h1><?= Html::encode($this->title) ?></h1>
     <?php $form = ActiveForm::begin(); ?>
 
     <?= $form->field($model, 'oldPassword')->passwordInput()?>

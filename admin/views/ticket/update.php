@@ -10,7 +10,7 @@ $this->params['breadcrumbs'][] = ['label' => '票务管理', 'url' => ['index']]
 $this->params['breadcrumbs'][] = ['label' => '票务详情 ID:'.$model->tk_id, 'url' => ['view', 'id' => $model->tk_id]];
 $this->params['breadcrumbs'][] = '修改票务信息';
 ?>
-<div class="ticket-update">
+<div class="container">
 	<h1><?= Html::encode($this->title) ?></h1>
 	<h3>注意:非必要时请勿修改票务信息</h3>
 	<div class="row">

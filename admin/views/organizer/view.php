@@ -10,7 +10,7 @@ $this->title = $model->org_name;
 $this->params['breadcrumbs'][] = ['label' => '组织者管理', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="organizer-view">
+<div class="container">
 
     <h1><?= Html::encode($this->title) ?></h1>
 

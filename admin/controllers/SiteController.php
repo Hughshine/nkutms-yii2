@@ -119,7 +119,7 @@ class SiteController extends Controller
     public function actionLogin()
     {
         Yii::$app->log->targets['debug'] = null;
-        $this->layout='login.php';
+        $this->layout='main-login.php';
         if (!Yii::$app->user->isGuest)
             return $this->goHome();
 
