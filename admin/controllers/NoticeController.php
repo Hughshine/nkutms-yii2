@@ -37,7 +37,7 @@ class NoticeController extends Controller
                             [//登录用户能访问这个控制器里的方法
                                 'allow'=>true,
                                 //可访问的页面名字
-                                'actions'=>['index','view','create','update','ueditor','delete'],
+                                'actions'=>['index','view','create','update','ueditor','delete','change-status'],
                                 'roles'=>['@'],//登录用户
                             ],
                         ],
@@ -98,6 +98,7 @@ class NoticeController extends Controller
         $form = new NoticeForm();
         try
         {
+            $form->status=Notice::STATUS_DELETED;
             if ($form->load(Yii::$app->request->post()) &&
                 ($model=$form->create())!=null)
             {
@@ -138,7 +139,7 @@ class NoticeController extends Controller
         try
         {
             if ($form->load(Yii::$app->request->post()) &&
-                $form->infoUpdate($model))
+                $form->infoUpdate($model,'Update'))
             {
                 Yii::$app->getSession()->setFlash('success','修改成功');
                 return $this->redirect(['view', 'id' => $model->id]);
@@ -153,6 +154,40 @@ class NoticeController extends Controller
             Yii::$app->getSession()->setFlash('warning','未知异常'.$exception->getMessage());
         }
         return $this->render('update', ['model' => $form,]);
+    }
+
+    /**
+     * 一键发布功能
+    * @param integer $id
+    * @param bool $isVisible
+     * @return mixed
+     */
+    public function actionChangeStatus($id,$isVisible)
+    {
+        $model = Notice::findOne(['id'=>$id]);
+        if(!$model)
+        {
+            Yii::$app->getSession()->setFlash('warning',sprintf('找不到ID为%d的公告',$id));
+            return $this->redirect('index');
+        }
+
+        $form=new NoticeForm();
+        $form->status=$isVisible?Notice::STATUS_ACTIVE:Notice::STATUS_DELETED;
+
+        try
+        {
+            $form->infoUpdate($model,'ChangeStatus');
+            Yii::$app->getSession()->setFlash('success','修改成功');
+        }
+        catch (ProjectException $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning',$exception->getExceptionMsg());
+        }
+        catch (\Exception $exception)
+        {
+            Yii::$app->getSession()->setFlash('warning','未知异常'.$exception->getMessage());
+        }
+        return $this->redirect(['view', 'id' => $model->id]);
     }
 
     /**

@@ -5,61 +5,25 @@ use yii\widgets\DetailView;
 use common\models\Organizer;
 
 /* @var $this yii\web\View */
-/* @var $model admin\models\NOW */
+/* @var $model common\models\Activity */
 
 $this->title = $model->activity_name;
 $this->params['breadcrumbs'][] = ['label' => '活动管理', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="tk-activity-view">
+<div class="container">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-    <p>
-        <?php if($model->pic_url):?>
-            <img src= "<?=$model->pic_url?>" width="256px" height="256px" alt="pic">
-        <?php else:?>
-            <img src="/statics/images/activity_default_pic.png" width="256px" height=256px" alt="pic">
-        <?php endif;?>
-    </p>
 
-    <p>
-        <?php if($model->status!=common\models\Activity::STATUS_CANCEL):?>
-            <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-        <?php endif;?>
-        <?php switch($model->status):
-            case \common\models\Activity::STATUS_UNAUDITED :?>
-                <?= Html::a('通过该活动',
-                [
-                    'review',
-                    'id' => $model->id,
-                    'status'=>\common\models\Activity::STATUS_APPROVED
-                ],
-                [
-                    'class' => 'btn btn-success',
-                    'data' =>
-                        [
-                            'confirm' => '确定通过?',
-                            'method' => 'post',
-                        ],
-                ]) ?>
-            <?php case \common\models\Activity::STATUS_APPROVED :?>
-                <?= Html::a('驳回该活动',
-                [
-                    'review',
-                    'id' => $model->id,
-                    'status'=>\common\models\Activity::STATUS_REJECTED
-                ],
-                [
-                    'class' => 'btn btn-warning',
-                    'data' =>
-                        [
-                            'confirm' => '确定驳回?',
-                            'method' => 'post',
-                        ],
-                ]) ?>
-                <?php break;?>
-            <?php case \common\models\Activity::STATUS_REJECTED :?>
-                <?= Html::a('通过该活动',
+    <?php if($model->ticketing_start_at>time()+7*3600):?>
+        <h1><?= Html::encode($this->title) ?></h1>
+        <p>
+            <?php if($model->status!=common\models\Activity::STATUS_CANCEL):?>
+                <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+            <?php endif;?>
+            <?php switch($model->status):
+                case \common\models\Activity::STATUS_UNAUDITED :?>
+
+                    <?= Html::a('通过该活动',
                     [
                         'review',
                         'id' => $model->id,
@@ -73,10 +37,48 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'method' => 'post',
                             ],
                     ]) ?>
+
+                <?php case \common\models\Activity::STATUS_APPROVED :?>
+                    <?= Html::a('驳回该活动',
+                    [
+                        'review',
+                        'id' => $model->id,
+                        'status'=>\common\models\Activity::STATUS_REJECTED
+                    ],
+                    [
+                        'class' => 'btn btn-warning',
+                        'data' =>
+                            [
+                                'confirm' => '确定驳回?',
+                                'method' => 'post',
+                            ],
+                    ]) ?>
+                    <?php break;?>
+                <?php case \common\models\Activity::STATUS_REJECTED :?>
+                    <?= Html::a('通过该活动',
+                        [
+                            'review',
+                            'id' => $model->id,
+                            'status'=>\common\models\Activity::STATUS_APPROVED
+                        ],
+                        [
+                            'class' => 'btn btn-success',
+                            'data' =>
+                                [
+                                    'confirm' => '确定通过?',
+                                    'method' => 'post',
+                                ],
+                        ]) ?>
+        </p>
                 <?php break;
             default:break;
         endswitch;?>
-    </p>
+    <?php else:?>
+
+        <h1 style="color:darkred"><?= Html::encode($this->title) ?> (已过期)</h1>
+
+    <?php endif;?>
+
 
     <?= DetailView::widget([
         'model' => $model,
@@ -184,5 +186,14 @@ $this->params['breadcrumbs'][] = $this->title;
     ]) ?>
 
 </div>
-<h3>活动介绍</h3>
-<?=$model->introduction?>
+<div class="container">
+    <p align="center">
+        <?php if($model->pic_url):?>
+            <img src= "<?=$model->pic_url?>" width="256px" height="256px" alt="pic">
+        <?php else:?>
+            <img src="/statics/images/activity_default_pic.png" width="256px" height=256px" alt="pic">
+        <?php endif;?>
+    </div>
+    <h3>活动介绍</h3>
+    <?=$model->introduction?>
+</div>

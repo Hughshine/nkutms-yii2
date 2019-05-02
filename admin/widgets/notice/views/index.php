@@ -11,7 +11,7 @@ use yii\widgets\LinkPager;
 ?>
 <div class="panel">
     <div class="panel-title box-title">
-        <h2><span>&nbsp <?=$data['title']?></span></h2>
+        <h3><span>&nbsp <?=$data['title']?></span></h3>
         <!--< ?php if($this->context->more):?>
         <span class="pull-right"><a href="< ?=$data['more']?>" class="font-12">更多»&nbsp&nbsp</a></span>
         < ?php endif;?>-->
@@ -27,6 +27,7 @@ use yii\widgets\LinkPager;
                         <!--评论数<span class="glyphicon glyphicon-comment"></span><a href="< ? =Url::to(['post/detail','id'=>$list['id']])?>">< ? =isset($list['extend']['comment'])?$list['extend']['comment']:0?></a>-->
                     </span>
                     <p class="activity-content"><?=$list['summary']?></p>
+                    <span class="fa fa-clock-o"></span>发布时间<?=date('m-d H:i:s',$list['created_at'])?>
                 </div>
                 <div class="col-lg-2 label-img-size">
                     <!--<a href="#" class="activity-label">

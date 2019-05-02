@@ -10,7 +10,7 @@ $this->title = '创建一个票务记录';
 $this->params['breadcrumbs'][] = ['label' => '票务管理', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="ticket-create">
+<div class="container">
 
     <h1><?= Html::encode($this->title) ?></h1>
     <h3>注意:非必要时请勿创建票务信息</h3>

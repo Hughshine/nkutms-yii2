@@ -11,7 +11,7 @@ $this->params['breadcrumbs'][] = ['label' => '用户信息', 'url' => ['index']]
 $this->params['breadcrumbs'][] = ['label' => $model->user_name, 'url' => ['view', 'id' => $model->id]];
 $this->params['breadcrumbs'][] = '确定';
 ?>
-<div class="user-update">
+<div class="container">
 
     <h1><?= Html::encode($this->title) ?></h1>
 

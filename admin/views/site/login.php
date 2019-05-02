@@ -1,46 +1,68 @@
 <?php
+use yii\helpers\Html;
+use yii\bootstrap\ActiveForm;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $form yii\bootstrap\ActiveForm */
 /* @var $model \admin\models\LoginForm */
 
-use yii\helpers\Html;
-use yii\bootstrap\ActiveForm;
+$this->title = '登录';
 
-//$this->title = '登录';
-//$this->params['breadcrumbs'][] = $this->title;
+$fieldOptions1 = [
+    'options' => ['class' => 'form-group has-feedback'],
+    'inputTemplate' => "{input}<span class='glyphicon glyphicon-envelope form-control-feedback'></span>"
+];
+
+$fieldOptions2 = [
+    'options' => ['class' => 'form-group has-feedback'],
+    'inputTemplate' => "{input}<span class='glyphicon glyphicon-lock form-control-feedback'></span>"
+];
 ?>
-<div class="sign-overlay"></div>
-<div class="signpanel"></div>
 
-<div class="panel signin">
-    <div class="panel-heading">
-        <h4 class="panel-title">南开大学学生票务管理系统</h4>
+<div class="login-box">
+    <div class="login-logo">
+        <a href="#"><b>票务系统管理端</b></a>
     </div>
-    <div class="panel-body">
-      <!--<button class="btn btn-primary btn-quirk btn-fb btn-block">联系我们</button>
-      <div class="or">or</div>-->
-            <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
-                <?= $form->field($model, 'admin_name',
-                ['inputOptions'=>['placeholder'=>'请输入管理员账号'],
-                'inputTemplate'=>
-                    '<div class="input-group">
-                        <span class="input-group-addon">
-                        <i class="fa fa-user"></i></span>{input}
-                    </div>', 
-                ])->textInput(['autofocus' => true])->label(false) ?>
-                <?= $form->field($model, 'password',['inputOptions'=>['placeholder'=>'请输入管理员密码'],
-                    'inputTemplate'=>
-                    '<div class="input-group">
-                        <span class="input-group-addon">
-                        <i class="fa fa-lock"></i></span>{input}
-                    </div>', 
-                    ])->passwordInput()->label(false)?>
-                <div class="form-group">
-                    <?= Html::submitButton('登录', ['class' => 'btn btn-primary btn-quirk btn-block', 'name' => 'login-button']) ?>
-                </div>
-            <?php ActiveForm::end(); ?>
-    <!--</div>-->
-</div><!-- panel -->
-  
+    <!-- /.login-logo -->
+    <div class="login-box-body">
+        <p class="login-box-msg">请输入信息以登录</p>
 
+        <?php $form = ActiveForm::begin(['id' => 'login-form', 'enableClientValidation' => false]); ?>
+
+        <?= $form
+            ->field($model, 'admin_name', $fieldOptions1)
+            ->label(false)
+            ->textInput(['placeholder' => $model->getAttributeLabel('admin_name')]) ?>
+
+        <?= $form
+            ->field($model, 'password', $fieldOptions2)
+            ->label(false)
+            ->passwordInput(['placeholder' => $model->getAttributeLabel('password')]) ?>
+
+        <div class="row">
+            <div class="col-xs-8">
+            </div>
+            <!-- /.col -->
+            <div class="col-xs-4">
+                <?= Html::submitButton('登录', ['class' => 'btn btn-primary btn-block btn-flat', 'name' => 'login-button']) ?>
+            </div>
+            <!-- /.col -->
+        </div>
+
+
+        <?php ActiveForm::end(); ?>
+
+        <!--
+        <div class="social-auth-links text-center">
+            <p>- OR -</p>
+            <a href="#" class="btn btn-block btn-social btn-facebook btn-flat"><i class="fa fa-facebook"></i> Sign in
+                using Facebook</a>
+            <a href="#" class="btn btn-block btn-social btn-google-plus btn-flat"><i class="fa fa-google-plus"></i> Sign
+                in using Google+</a>
+        </div>
+        -->
+        <!-- /.social-auth-links -->
+    </div>
+    <!-- /.login-box-body -->
+</div><!-- /.login-box -->

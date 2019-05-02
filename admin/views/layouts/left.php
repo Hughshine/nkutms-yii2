@@ -4,14 +4,14 @@
 
         <!-- Sidebar user panel -->
         <div class="user-panel">
-            <div class="pull-left info">
+            <div class="pull-right info">
                 <p>欢迎回来:</p>
-                <p><?=Yii::$app->user->identity->org_name ?></p>
+                <p><?=Yii::$app->user->identity->admin_name ?></p>
 
                 <!--<p><i class="fa fa-circle text-success"></i> 在线</p>-->
             </div>
             <div class="pull-left image" style="height:35px;width:35px">
-                <img src="/statics/images/organizer.jpg" class="img-circle" alt="Admin Image"/>
+                <img src="/statics/images/admin.jpg" class="img-circle" alt="Admin Image"/>
             </div>
 
         </div>
@@ -34,33 +34,25 @@
                 'items' => [
                     ['label' => '菜单', 'options' => ['class' => 'header']],
                     [
-                        'label' => '活动',
+                        'label' => '事务管理',
                         'icon' => 'server',
                         'url' => '#',
                         'items' => [
-                            ['label' => '活动列表', 'icon' => 'file-excel-o', 'url' => ['activity/index']],
-                            [
-                                'label' => '我的',
-                                'icon' => 'user-circle-o',
-                                'url' => '#',
-                                'items' => [
-                                    ['label' => '发布活动记录', 'icon' => 'file-excel-o', 'url' => ['activity/mine'],],
-                                    ['label' => '发布活动', 'icon' => 'file-word-o', 'url' => ['activity/create'],]
-                                    /*[
-                                        'label' => 'Level Two',
-                                        'icon' => 'circle-o',
-                                        'url' => '#',
-                                        'items' => [
-                                            ['label' => 'Level Three', 'icon' => 'circle-o', 'url' => '#',],
-                                            ['label' => 'Level Three', 'icon' => 'circle-o', 'url' => '#',],
-                                        ],
-                                    ],*/
-                                ],
-                            ],
+                            ['label' => '活动管理', 'icon' => 'grav', 'url' => ['activity/index']],
+                            ['label' => '票务管理', 'icon' => 'ticket', 'url' => ['ticket/index']],
+                            ['label' => '通知管理', 'icon' => 'info-circle', 'url' => ['notice/index']],
                         ],
                     ],
-                    ['label' => '我的资料', 'icon' => 'user', 'url' => ['site/view'],],
-                    ['label' => '修改密码', 'icon' => 'user-secret', 'url' => ['site/password'],],
+                    [
+                        'label' => '用户管理',
+                        'icon' => 'server',
+                        'url' => '#',
+                        'items' => [
+                            ['label' => '普通用户管理', 'icon' => 'user-circle', 'url' => ['user/index']],
+                            ['label' => '组织者管理', 'icon' => 'group', 'url' => ['organizer/index']],
+                        ],
+                    ],
+                    ['label' => '修改密码', 'icon' => 'user-secret', 'url' => ['site/repassword'],],
                     /*['label' => 'Gii', 'icon' => 'file-code-o', 'url' => ['/gii']],
                     ['label' => 'Debug', 'icon' => 'dashboard', 'url' => ['/debug']],
                     ['label' => 'Login', 'url' => ['site/login'], 'visible' => Yii::$app->user->isGuest],

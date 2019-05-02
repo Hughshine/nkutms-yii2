@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = ['label' => '我的发布记录', 'url' => ['mi
 $this->params['breadcrumbs'][] = ['label' => $modelForm->activity_name, 'url' => ['view','id'=>$modelForm->act_id]];
 $this->params['breadcrumbs'][] = '活动信息修改';
 ?>
-<div class="row">
+<div class="container">
     <div class = "col-lg-9">
         <div class ="panel-body">
             <?php $form = ActiveForm::begin(); ?>

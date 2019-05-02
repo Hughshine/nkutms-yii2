@@ -7,9 +7,10 @@ use yii\helpers\Html;
 
 <header class="main-header">
 
-    <?= Html::a('<span class="logo-mini">菜单</span>
-               <img src="/statics/images/activity_default_pic.png" class="img-circle pull-left" width="48px" height="48px" alt="a image"/>
-                <span class="logo-lg">' . '组织端' . '</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
+    <?= Html::a('<span class="logo-mini">菜单
+        </span>
+        <img src="/statics/images/activity_default_pic.png" class="img-circle pull-left" width="48px" height="48px" alt="a image"/>
+            <span class="logo-lg">' . '管理端' . '</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
 
     <nav class="navbar navbar-static-top" role="navigation">
 
@@ -227,7 +228,7 @@ use yii\helpers\Html;
                 <li class="dropdown user user-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                         <!--这里可以放头像<img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="user-image" alt="User Image"/>-->
-                        <span class="hidden-xs"><?= Yii::$app->user->identity->org_name ?></span>
+                        <span class="hidden-xs"><?= Yii::$app->user->identity->admin_name ?></span>
                     </a>
                     <ul class="dropdown-menu">
                         <!-- User image -->
@@ -235,8 +236,7 @@ use yii\helpers\Html;
                             <!--这里可以放头像<img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="img-circle"
                                  alt="User Image"/>-->
                             <p>
-                                <?= Yii::$app->user->identity->org_name?>
-                                <small><?='账号创建于'.date('Y-m-d H:i:s', Yii::$app->user->identity->created_at )?></small>
+                                <?= Yii::$app->user->identity->admin_name?>
                             </p>
                         </li>
                         <!-- Menu Body -->
@@ -256,7 +256,7 @@ use yii\helpers\Html;
                             <div class="pull-left">
                                 <?= Html::a(
                                     '<i class="fa fa-user-secret"></i> 修改密码',
-                                    ['site/password'],
+                                    ['site/repassword'],
                                     ['data-method' => 'post', 'class' => 'btn btn-default btn-flat']
                                 ) ?>
                                 <!--<a href="#" class="fa fa-user-secret" >  修改资料</a>-->

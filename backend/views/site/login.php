@@ -1,11 +1,10 @@
 <?php
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
-use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $form yii\bootstrap\ActiveForm */
-/* @var $model \common\models\LoginForm */
+/* @var $model \backend\models\LoginForm */
 
 $this->title = '登录';
 
@@ -22,7 +21,7 @@ $fieldOptions2 = [
 
 <div class="login-box">
     <div class="login-logo">
-        <a href="#"><b>南开大学票务组织端</b></a>
+        <a href="#"><b>票务系统组织端</b></a>
     </div>
     <!-- /.login-logo -->
     <div class="login-box-body">

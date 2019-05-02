@@ -19,7 +19,7 @@ class TicketSearch extends Ticket
     public function rules()
     {
         return [
-            [['id', 'user_id', 'activity_id',  'serial_number', 'status'], 'integer'],
+            [['id', 'user_id', 'activity_id',  'serial_number', 'status',], 'integer'],
             [['created_at','activity_name','user_name'],'safe'],//加入这句gridview的搜索框就可以实现了
             //在integer去掉created_at并safe中加入created_at可以按区域搜索
         ];
@@ -90,10 +90,10 @@ class TicketSearch extends Ticket
 
         //注意这里start_at改变了属性:原本在数据库中是int,但在这变成了字符串型
         //因为日期组件将start修改成了字符串型
-        if (!empty($this->create_at))
+        if (!empty($this->created_at))
         {
-            $query->andFilterCompare('create_at', strtotime(explode('/', $this->create_at)[0]), '>=');//起始时间
-            $query->andFilterCompare('create_at', (strtotime(explode('/', $this->create_at)[1]) + 86400), '<');//结束时间
+            $query->andFilterCompare('tk_ticket.created_at', strtotime(explode('/', $this->created_at)[0]), '>=');//起始时间
+            $query->andFilterCompare('tk_ticket.created_at', (strtotime(explode('/', $this->created_at)[1]) + 86400), '<');//结束时间
         }
         $query->andFilterWhere(['like', 'activity_name', $this->activity_name]);
         $query->andFilterWhere(['like', 'user_name', $this->user_name]);

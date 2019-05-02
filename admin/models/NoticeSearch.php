@@ -17,8 +17,8 @@ class NoticeSearch extends Notice
     public function rules()
     {
         return [
-            [['id', 'updated_at', 'created_at'], 'integer'],
-            [['title', 'content', ], 'safe'],
+            [['id', ], 'integer'],
+            [['title', 'content','status','updated_at','created_at'], 'safe'],
         ];
     }
 
@@ -59,9 +59,19 @@ class NoticeSearch extends Notice
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'updated_at' => $this->updated_at,
-            'created_at' => $this->created_at,
+            'status' => $this->status,
         ]);
+
+        if (!empty($this->created_at))
+        {
+            $query->andFilterCompare('created_at', strtotime(explode('/', $this->created_at)[0]), '>=');//起始时间
+            $query->andFilterCompare('created_at', (strtotime(explode('/', $this->created_at)[1]) + 86400), '<');//结束时间
+        }
+        if (!empty($this->updated_at))
+        {
+            $query->andFilterCompare('updated_at', strtotime(explode('/', $this->updated_at)[0]), '>=');//起始时间
+            $query->andFilterCompare('updated_at', (strtotime(explode('/', $this->updated_at)[1]) + 86400), '<');//结束时间
+        }
 
         $query->andFilterWhere(['like', 'title', $this->title])
             ->andFilterWhere(['like', 'content', $this->content]);

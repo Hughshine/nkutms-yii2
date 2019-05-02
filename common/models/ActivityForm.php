@@ -477,10 +477,11 @@ class ActivityForm extends BaseForm
      * @param array $cond 条件
      * @param integer $curPage
      * @param integer $pageSize
+     * @param integer $limit
      * @param array $sortOrder
      * @return array
      */
-    public static function getList($cond, $curPage = 1, $pageSize = 5, $sortOrder = ['id' => SORT_DESC])
+    public static function getList($cond, $curPage = 1, $pageSize = 5, $sortOrder = ['id' => SORT_DESC],$limit=50)
     {
         $model=new ActivityForm();
         $select= ['id','activity_name','release_by','release_at',
@@ -492,7 +493,8 @@ class ActivityForm extends BaseForm
             ->select($select)
             ->where($cond)
             ->with('releaseBy')//根据关系releaseBy
-            ->orderBy($sortOrder);
+            ->orderBy($sortOrder)
+            ->limit($limit);
         $model=new ActivityForm();
         $res=$model->getPages($query,$curPage,$pageSize);
         return $res;
@@ -562,7 +564,7 @@ class ActivityForm extends BaseForm
         if(empty($this->introduction))
             return null;
         return(mb_substr(str_replace('&nbsp;',' ',
-            strip_tags($this->introduction)),$s,$e,$char));
+            strip_tags($this->introduction)),$s,$e,$char)).'......';
     }
 
     /**

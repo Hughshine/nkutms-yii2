@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = '活动发布';
 
 ?>
 
-<div class="row">
+<div class="container">
     <div class = "col-lg-9">
         <div class ="panel-body">
             <?php $form = ActiveForm::begin(); ?>
