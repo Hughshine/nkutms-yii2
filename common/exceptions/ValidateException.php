@@ -21,7 +21,7 @@ class ValidateException extends ProjectException
         $res=$this->getMessage();
         $res=$res.'ValidateErrors:'.$this->getErrors();
         if($this->preException!=null)
-            $res=$res.$this->preException->getExceptionMsg().';';
+            $res=$res.'<='.$this->preException->getExceptionMsg().';';
         return $res;
     }
 

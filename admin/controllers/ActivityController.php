@@ -37,7 +37,7 @@ class ActivityController extends Controller
                     [//登录用户能访问这个控制器里的方法
                         'allow'=>true,
                         //可访问的页面名字
-                        'actions'=>['index','view','create','update','review','ueditor'],
+                        'actions'=>['index','ticket-list','view','create','update','review','ueditor'],
                         'roles'=>['@'],//登录用户
                     ],
                 ],
@@ -172,6 +172,25 @@ class ActivityController extends Controller
         }
     }
 
+    /**
+     * 活动票务信息查看
+     * @param integer $id 活动ID
+     * @return string|\yii\web\Response
+     */
+    public function actionTicketList($id)
+    {
+        if(!is_numeric($id))
+            return $this->goBack();
+        if (Yii::$app->user->isGuest)
+            return $this->redirect('site/login');
+
+        $model=Activity::findOne(['id'=>$id]);
+
+        if($model)
+            return $this->render('ticket-view', ['model' => $model]);
+        else
+            return $this->goBack();
+    }
 
     /**
      * 一键无效化或通过活动功能

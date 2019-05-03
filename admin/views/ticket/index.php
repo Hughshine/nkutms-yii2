@@ -13,7 +13,7 @@ $this->title = '票务管理';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="container">
-    <?= Html::a('创建票务记录', ['create'], ['class' => 'btn btn-warning pull-right']) ?>
+    <?= Html::a('创建票务记录', ['create'], ['class' => 'btn btn-danger pull-right']) ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

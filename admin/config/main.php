@@ -27,7 +27,7 @@ return [
             {
                 $user = $event->identity; //这里的就是Model的实例了
 
-                $user->logged_at = time()+7*3600;
+                $user->logged_at = time()
                 $user->save();
             },*/
             'identityCookie' => ['name' => '_identity-admin', 'httpOnly' => true],

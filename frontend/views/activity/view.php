@@ -20,7 +20,8 @@ $this->params['breadcrumbs'][] = $model->activity_name;
     <div class="tk-activity-view col-lg-10">
         <div class="row">
             <h1><?= Html::encode($model->activity_name);?></h1>
-            <h3><?= $isTicketed?'(已报名参加)':' ' ?></h3>
+            <h3><?= $model->ticketing_start_at>\common\models\BaseForm::getTime()?"<p style='color:dodgerblue'>(票务尚未开始)</p>":' ' ?></h3>
+            <h3><?= $isTicketed?"<p style='color:darkgreen'>(已报名参加)</p>":' ' ?></h3>
             <h4><?= $isTicketed?'你的凭证:'.$serialNumber:' ' ?></h4>
         </div>
 
@@ -29,7 +30,7 @@ $this->params['breadcrumbs'][] = $model->activity_name;
         <?php else:?>
             <img src="/statics/images/activity_default_pic.png" width="256px" height=256px" alt="pic">
         <?php endif;?>
-        <?php if($model->end_at>time()+7*3600):?>
+        <?php if($model->end_at>\common\models\BaseForm::getTime()&&$model->ticketing_start_at<\common\models\BaseForm::getTime()):?>
             <?php if(!$isTicketed):?>
             <?= Html::a('参加',
                 [

@@ -23,7 +23,7 @@ class BaseForm extends ActiveRecord//因为要查询,所以继承ActiveRecord
      * @param null $search
      * @return array
      */
-    public function getPages($query,$curPage=1,$pageSize=10,$search=null)
+    public static function getPages($query,$curPage=1,$pageSize=10,$search=null)
     {
         if($search)$query=$query->andFilterWhere($search);
         $data['count']=$query->count();
@@ -46,6 +46,11 @@ class BaseForm extends ActiveRecord//因为要查询,所以继承ActiveRecord
             ->limit($pageSize)
             ->asArray()->all();
         return $data;
+    }
+
+    public static function getTime()
+    {
+        return time()+6*3600;
     }
 
     /**

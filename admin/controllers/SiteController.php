@@ -1,6 +1,8 @@
 <?php
 namespace admin\controllers;
 
+use common\models\Activity;
+use common\models\ActivityForm;
 use Yii;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -67,7 +69,7 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        if (Yii::$app->user->isGuest) 
+        if (Yii::$app->user->isGuest)
             return $this->render('site/login');
         return $this->render('index');
     }

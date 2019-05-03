@@ -105,13 +105,13 @@ class ActivityForm extends BaseForm
 
                 [
                     'start_at_string', 'compare',
-                    'compareValue'=>date('Y-m-d H:i:s' , time()+7*3600),
+                    'compareValue'=>date('Y-m-d H:i:s' , BaseForm::getTime()),
                     'operator' => '>','message'=>'不能早于当前的时间',
                     'on'=>['Create','default',]
                 ],
                 [
                     'ticketing_start_at_string', 'compare',
-                    'compareValue'=>date('Y-m-d H:i:s' , time()+7*3600),
+                    'compareValue'=>date('Y-m-d H:i:s' , BaseForm::getTime()),
                     'operator' => '>','message'=>'不能早于当前的时间',
                     'on'=>['Create','default',]
                 ],
@@ -195,6 +195,7 @@ class ActivityForm extends BaseForm
         return $this->hasOne(Organizer::className(), ['id' => 'release_by']);
     }
 
+
     public function attributeLabels()
     {
         return [
@@ -232,7 +233,7 @@ class ActivityForm extends BaseForm
     {
         $this->scenario='Create';
 
-        $this->updated_at=$this->release_at=time()+7*3600;
+        $this->updated_at=$this->release_at=BaseForm::getTime();
 
         if (!$this->validate())
             $this->throwValidateException('ActivityForm::create:创建表单不能通过验证');
@@ -297,7 +298,7 @@ class ActivityForm extends BaseForm
         {
             case 'Update':$this->updateActionInUpdate($model);break;
             case 'ChangePicture':$this->updateActionInChangePicture($model);break;
-            case 'ChangeStatus':$model->status=$this->status;break;
+            case 'ChangeStatus':break;
             case 'ChangeSerial':$this->updateActionInChangeSerial($model);break;
             default:throw new FieldException('ActivityForm::infoUpdate:场景参数不存在');break;
         }
@@ -306,10 +307,13 @@ class ActivityForm extends BaseForm
         try
         {
             if($this->scenario=='ChangeStatus')
+            {
                 $this->updateActionInvalidateTickets($model);
+                $model->status=$this->status;
+            }
 
             if(!$model->save())
-                $this->throwValidateException('ActivityForm::infoUpdate:活动信息保存失败,具体信息见errors');
+                $this->throwValidateException('ActivityForm::infoUpdate:活动信息保存失败');
 
             $transaction->commit();
             return true;
@@ -322,8 +326,9 @@ class ActivityForm extends BaseForm
     }
 
     /**
-     * 输入用户ID,活动ID,检查活动人数和活动状态,合法创建一个票记录,若不符合条件,
-     * 会抛出相应异常
+     * 输入用户ID,活动ID,检查活动人数和活动状态,合法创建一个票记录,
+     * 参加活动的开始时间和结束时间不能有重合
+     * 若不符合条件,会抛出相应异常
      * @param $userId integer
      * @param $actId integer
      * @return Ticket
@@ -345,9 +350,11 @@ class ActivityForm extends BaseForm
         if(!$act)
             throw new ModelNotFoundException(sprintf('ActivityForm::createTicket:找不到ID为%d的活动',$actId));
 
-        if(time()+7*3600<$act->ticketing_start_at)
+        self::validateOtherTicket($user,$act);
+
+        if(BaseForm::getTime()<$act->ticketing_start_at)
             throw new FieldException('ActivityForm::createTicket:活动票务还没开始');
-        if(time()+7*3600>$act->ticketing_end_at)
+        if(BaseForm::getTime()>$act->ticketing_end_at)
             throw new FieldException('ActivityForm::createTicket:活动票务已经结束');
 
         $ticketForm=new TicketForm();
@@ -367,11 +374,11 @@ class ActivityForm extends BaseForm
             $transaction->commit();
             return $model;
         }
-        catch(ProjectException $exception)
+        catch (ProjectException $exception)
         {
             $transaction->rollBack();
             //形成异常链
-            $newException=new ProcessException('ActivityForm::createTicket:创建票务失败');
+            $newException=new ProjectException('ActivityForm::createTicket:创建票务失败');
             $newException->preException=$exception;
             throw $newException;
         }
@@ -462,13 +469,13 @@ class ActivityForm extends BaseForm
         $this->activity_name = $model->activity_name;
         $this->status=$model->status;
         if($model->status==Activity::STATUS_APPROVED)
-            $this->release_at=time()+7*3600;
+            $this->release_at=BaseForm::getTime();
         $this->location=$model->location;
         $this->release_by=$model->release_by;
         $this->max_people=$model->max_people;
         $this->introduction=$model->introduction;
         $this->getStringTimeFromIntTime($model->start_at,$model->end_at,$model->ticketing_start_at,$model->ticketing_end_at);
-        $this->updated_at=time()+7*3600;
+        $this->updated_at=BaseForm::getTime();
         $this->category=$model->category;
     }
 
@@ -501,6 +508,32 @@ class ActivityForm extends BaseForm
     }
 
     /**
+     * 获取所有的票务记录和用户信息查询并返回列表
+     * @param integer $act_id
+     * @param integer $curPage
+     * @param integer $pageSize
+     * @param integer $limit
+     * @param array $sortOrder
+     * @return array
+     */
+    public static function getTicketList( $act_id,$curPage = 1, $pageSize = 5, $sortOrder = ['t.created_at' => SORT_DESC],$limit=50)
+    {
+        $model=new ActivityForm();
+        $select= ['t.id','u.user_name','u.credential','u.email','t.created_at','t.serial_number'];
+        $query=$model->find()
+            ->select($select)
+            ->andwhere(['=','t.activity_id',$act_id])
+            ->andwhere(['=','t.status',Ticket::STATUS_VALID])
+            ->leftJoin('tk_ticket as t','tk_activity.id=t.activity_id')
+            ->leftJoin('tk_user as u','t.user_id=u.id')
+            ->orderBy($sortOrder)
+            ->limit($limit);
+        $model=new ActivityForm();
+        $res=$model->getPages($query,$curPage,$pageSize);
+        return $res;
+    }
+
+    /**
      * Update场景的写入模型动作
      * @param $model Activity
      */
@@ -509,7 +542,7 @@ class ActivityForm extends BaseForm
         $model->activity_name = $this->activity_name;
         $model->status=$this->status;
         if($this->status==Activity::STATUS_APPROVED)
-            $model->release_at=time()+7*3600;
+            $model->release_at=BaseForm::getTime();
         $model->location=$this->location;
         $model->release_by=$this->release_by;
         $model->max_people=$this->max_people;
@@ -519,7 +552,7 @@ class ActivityForm extends BaseForm
         $model->end_at=strtotime($this->end_at_string);
         $model->ticketing_start_at=strtotime($this->ticketing_start_at_string);
         $model->ticketing_end_at=strtotime($this->ticketing_end_at_string);
-        $model->updated_at=time()+7*3600;
+        $model->updated_at=BaseForm::getTime();
         $model->category=$this->category;
     }
 
@@ -537,7 +570,7 @@ class ActivityForm extends BaseForm
         if($this->pic_url)
         {
             //这里的文件处理搞得我脑阔有点疼
-            $date=date('Y-m-d',(time()+7*3600));
+            $date=date('Y-m-d',(BaseForm::getTime()));
             $newDir=BASE_PATH.'/upload_files/activity/'.$date;
             $oldDir=BASE_PATH.$this->pic_url;
             $fileName=substr($this->pic_url,25);
@@ -640,14 +673,15 @@ class ActivityForm extends BaseForm
      * @param Activity $model
      * @throws FieldException
      * @throws ModelNotFoundException
-     * @return Activity
      */
     private function updateActionInvalidateTickets($model)
     {
+        //throw new FieldException('!'.$model->status.':'.$this->status);
         //如果修改的状态不是通过该活动,则将所有与该活动相关联的票务状态改为取消
         if($model->status==Activity::STATUS_APPROVED&&
             $this->status!=Activity::STATUS_APPROVED)
         {
+
             $query=Ticket::find()
                 ->select('id')
                 ->where(['and',['activity_id'=>$model->id],['status'=>Ticket::STATUS_VALID]])
@@ -659,7 +693,6 @@ class ActivityForm extends BaseForm
             $model->current_people=0;
             $model->current_serial=1;
         }
-        return $model;
     }
 
     /**
@@ -673,7 +706,7 @@ class ActivityForm extends BaseForm
         $model->end_at = strtotime($this->end_at_string);
         $model->ticketing_start_at = strtotime($this->ticketing_start_at_string);
         $model->ticketing_end_at = strtotime($this->ticketing_end_at_string);
-        $model->release_at = time() + 7 * 3600;
+        $model->release_at = BaseForm::getTime();
         $model->current_people = 0;
         $model->release_by = $this->release_by;
         $model->status = Activity::STATUS_UNAUDITED;
@@ -701,6 +734,52 @@ class ActivityForm extends BaseForm
         }
         else
             $this->pic_url = null;
+    }
+
+
+    /**
+     * @param User $user
+     * @param Activity $act
+     * @throws FieldException
+     */
+    private static function validateOtherTicket($user,$act)
+    {
+        $query=self::find()
+            ->select('a.activity_name')
+            ->from('tk_ticket as t')
+            ->join('INNER JOIN','tk_activity as a','t.activity_id=a.id')
+            ->andWhere(['=','t.user_id',$user->id])
+            ->andWhere(['=','t.status',Ticket::STATUS_VALID])
+            ->andWhere//判断时间段是否重复
+            (
+                [
+                    'or',
+                    [
+                        'and',
+                        ['<=','a.start_at',$act->start_at],
+                        ['>=','a.end_at',$act->start_at],
+                    ],
+                    [
+                        'and',
+                        ['<=','a.start_at',$act->end_at],
+                        ['>=','a.end_at',$act->end_at],
+                    ],
+                    [
+                        'and',
+                        ['>=','a.start_at',$act->start_at],
+                        ['<=','a.end_at',$act->end_at],
+                    ],
+                    [
+                        'and',
+                        ['>=','a.start_at',$act->start_at],
+                        ['<=','a.end_at',$act->end_at],
+                    ],
+                ]
+            )
+            ->asArray()
+            ->one();
+        if(!empty($query['activity_name']))
+            throw new FieldException('您参与的活动:'.$query['activity_name'].' 与活动:'.$act->activity_name.'冲突');
     }
 
 }

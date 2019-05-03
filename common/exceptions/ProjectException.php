@@ -25,9 +25,9 @@ class ProjectException extends \Exception
      */
     public function getExceptionMsg()
     {
-        $res=parent::getMessage().'\n';
+        $res=parent::getMessage();
         if($this->preException!=null)
-            $res=$res.$this->preException->getExceptionMsg().'\n';
+            $res=$res.'<='.$this->preException->getExceptionMsg();
         return $res;
     }
 }

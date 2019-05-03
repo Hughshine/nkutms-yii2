@@ -15,10 +15,11 @@ $this->params['breadcrumbs'][] = $model->activity_name;
     <div class="row">
             <div class="row">
                 <h1><?= Html::encode($model->activity_name) ?>
-                    <?php if($model->release_by==Yii::$app->user->id
-                        &&$model->status!=\common\models\Activity::STATUS_APPROVED
+                    <?php if($model->release_by==Yii::$app->user->id):?>
+                        <?php
+                        if($model->status!=\common\models\Activity::STATUS_APPROVED
                         &&$model->status!=\common\models\Activity::STATUS_CANCEL
-                        &&$model->start_at>time()+7*3600):?>
+                        &&$model->start_at>\common\models\BaseForm::getTime()):?>
                         <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']); ?>
                         <?= Html::a('修改预览图',
                             ['change-picture', 'id' => $model->id],
@@ -44,6 +45,13 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                                         'method' => 'post',
                                     ],
                             ]); ?>
+
+                        <?php else:?>
+                            <?php if($model->status==\common\models\Activity::STATUS_APPROVED&&$model->start_at>\common\models\BaseForm::getTime()):?>
+                                <?= Html::a('查看票务信息', ['ticket-list', 'id' => $model->id], ['class' => 'btn btn-primary']); ?>
+                            <?php endif;?>
+                        <?php endif;?>
+
                     <?php endif;?>
                 </h1>
             </div>

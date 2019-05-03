@@ -5,7 +5,7 @@ namespace admin\assets;
 use yii\web\AssetBundle;
 
 /**
- * Main backend application asset bundle.
+ * Main admin application asset bundle.
  */
 class AppAsset extends AssetBundle
 {

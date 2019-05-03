@@ -28,6 +28,7 @@ use backend\widgets\activity\ActivityWidget;
                 <span style="font-size:20px"><span class="fa fa-ticket"></span>票务开始---结束时间</span><br/>
                 <span style="font-size:20px"><span class="fa fa-info-circle"></span>当前状态</span><br/>
             </div>
+
         </div>
     </div>
 </div>

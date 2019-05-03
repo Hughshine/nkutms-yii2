@@ -137,7 +137,7 @@ class TicketForm extends BaseForm
                     'status'=>Ticket::STATUS_VALID,
                     'activity_id'=>$this->activity_id
                 ]))
-                $this->addError($attribute, '你已经参与了这个活动');
+                $this->addError($attribute, '已经参与了这个活动');
         }
     }
 

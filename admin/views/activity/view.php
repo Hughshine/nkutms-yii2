@@ -12,73 +12,54 @@ $this->params['breadcrumbs'][] = ['label' => '活动管理', 'url' => ['index']]
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="container">
-
-
-    <?php if($model->ticketing_start_at>time()+7*3600):?>
-        <h1><?= Html::encode($this->title) ?></h1>
-        <p>
-            <?php if($model->status!=common\models\Activity::STATUS_CANCEL):?>
-                <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-            <?php endif;?>
-            <?php switch($model->status):
-                case \common\models\Activity::STATUS_UNAUDITED :?>
-
-                    <?= Html::a('通过该活动',
-                    [
-                        'review',
-                        'id' => $model->id,
-                        'status'=>\common\models\Activity::STATUS_APPROVED
-                    ],
-                    [
-                        'class' => 'btn btn-success',
-                        'data' =>
-                            [
-                                'confirm' => '确定通过?',
-                                'method' => 'post',
-                            ],
-                    ]) ?>
-
-                <?php case \common\models\Activity::STATUS_APPROVED :?>
-                    <?= Html::a('驳回该活动',
-                    [
-                        'review',
-                        'id' => $model->id,
-                        'status'=>\common\models\Activity::STATUS_REJECTED
-                    ],
-                    [
-                        'class' => 'btn btn-warning',
-                        'data' =>
-                            [
-                                'confirm' => '确定驳回?',
-                                'method' => 'post',
-                            ],
-                    ]) ?>
-                    <?php break;?>
-                <?php case \common\models\Activity::STATUS_REJECTED :?>
-                    <?= Html::a('通过该活动',
-                        [
-                            'review',
-                            'id' => $model->id,
-                            'status'=>\common\models\Activity::STATUS_APPROVED
-                        ],
-                        [
-                            'class' => 'btn btn-success',
-                            'data' =>
-                                [
-                                    'confirm' => '确定通过?',
-                                    'method' => 'post',
-                                ],
-                        ]) ?>
-        </p>
+        <?php if($model->status!=common\models\Activity::STATUS_CANCEL&&$model->ticketing_start_at>\common\models\BaseForm::getTime()):?>
+            <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary pull-right']) ?>
+        <?php endif;?>
+        <?php switch($model->status):
+            case \common\models\Activity::STATUS_UNAUDITED :?>
+                <?php if($model->ticketing_start_at>\common\models\BaseForm::getTime()):?>
+                    <h1 style="color:darkred"><?= Html::encode($this->title) ?> (未审核)</h1>
+                    <p>
+                        <?= Html::a('通过该活动', ['review', 'id' => $model->id, 'status'=>\common\models\Activity::STATUS_APPROVED], ['class' => 'btn btn-success', 'data' => ['confirm' => '确定通过?', 'method' => 'post',],]) ?>
+                        <?= Html::a('驳回该活动', ['review', 'id' => $model->id, 'status'=>\common\models\Activity::STATUS_REJECTED], ['class' => 'btn btn-warning', 'data' => ['confirm' => '确定驳回?', 'method' => 'post',],]) ?>
+                    </p>
+                <?php else:?>
+                     <h1 style="color:grey"><?= Html::encode($this->title) ?> (已过期)</h1>
+                <?php endif;?>
+                <?php break;?>
+            <?php case \common\models\Activity::STATUS_APPROVED :?>
+                <?php if($model->ticketing_start_at>\common\models\BaseForm::getTime()):?>
+                    <h1 style="color:green"><?= Html::encode($this->title) ?> (已通过)</h1>
+                    <p>
+                        <?= Html::a('驳回该活动', ['review', 'id' => $model->id, 'status'=>\common\models\Activity::STATUS_REJECTED], ['class' => 'btn btn-danger pull-right', 'data' => ['confirm' => '确定驳回?', 'method' => 'post',],]) ?>
+                    </p>
+                <?php else:?>
+                    <?php if($model->ticketing_end_at>\common\models\BaseForm::getTime()):?>
+                        <h1 style="color:dodgerblue"><?= Html::encode($this->title) ?> (票务正常)</h1>
+                        <p>
+                            <?= Html::a('驳回该活动', ['review', 'id' => $model->id, 'status'=>\common\models\Activity::STATUS_REJECTED], ['class' => 'btn btn-danger pull-right', 'data' => ['confirm' => '确定驳回?', 'method' => 'post',],]) ?>
+                        </p>
+                    <?php else:?>
+                        <h1 style="color:grey"><?= Html::encode($this->title) ?> (已结束)</h1>
+                    <?php endif;?>
+                <?php endif;?>
+                <p>
+                    <?= Html::a('查看票务信息', ['ticket-list', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+                </p>
+                <?php break;?>
+            <?php case \common\models\Activity::STATUS_REJECTED :?>
+                <h1 style="color:darkred"><?= Html::encode($this->title) ?> (被驳回)</h1>
+                <?php if($model->ticketing_start_at>\common\models\BaseForm::getTime()):?>
+                    <p>
+                        <?= Html::a('通过该活动', ['review', 'id' => $model->id, 'status'=>\common\models\Activity::STATUS_APPROVED], ['class' => 'btn btn-success', 'data' => ['confirm' => '确定通过?', 'method' => 'post',],]) ?>
+                    </p>
+                <?php endif;?>
+                <?php break;?>
+            <?php case \common\models\Activity::STATUS_CANCEL :?>
+                <h1 style="color:grey"><?= Html::encode($this->title) ?> (已取消)</h1>
                 <?php break;
             default:break;
         endswitch;?>
-    <?php else:?>
-
-        <h1 style="color:darkred"><?= Html::encode($this->title) ?> (已过期)</h1>
-
-    <?php endif;?>
-
 
     <?= DetailView::widget([
         'model' => $model,

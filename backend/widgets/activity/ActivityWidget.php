@@ -23,11 +23,37 @@ class ActivityWidget extends Widget
     public$more=false;//是否显示更多
     public$page=true;//是否显示分页
     public$option='';//组件类型
+    public$act_id;
 
     public function run()
     {
         switch($this->option)
         {
+            case 'ticket-list':
+            case 'ticket-list-admin':
+                {
+                    $curPage=Yii::$app->request->get('page',1);
+
+                    $model=Activity::findOne(['id',$this->act_id]);
+
+                    if(!$model)return null;
+                    //如果不是admin调用,发布者不可查看其他发布者发布活动的票务情况
+                    if($this->option=='ticket-list' && $model->release_by!=Yii::$app->user->id) return null;
+
+                    $res=ActivityForm::getTicketList($this->act_id,$curPage,$this->limit,['ticketing_start_at'=>SORT_ASC],1000);
+
+                    $result['title']=$this->title?:"票务信息:活动:".$model->activity_name;
+
+
+                    $result['body']=$res['data']?:[];
+                    if($this->page)
+                    {
+                        $page=new Pagination(['totalCount'=>$res['count'],'pageSize'=>$res['pageSize']]);
+                        $result['page']=$page;
+                    }
+                    return $this->render('ticket-view',['data'=>$result]);
+                    break;
+                }
             case 'admin-index':
             case 'admin-index-out-of-date':
                 {
@@ -35,13 +61,13 @@ class ActivityWidget extends Widget
 
                     if($this->option!='admin-index-out-of-date')
                         $cond=
-                            ['and',['>','ticketing_start_at',time()+7*3600],
+                            ['and',['>','ticketing_start_at',\common\models\BaseForm::getTime()],
                                 ['=','status',Activity::STATUS_UNAUDITED]
                             ];
                     else
                         $cond=
-                            ['and',['<','ticketing_start_at',time()+7*3600],
-                            ['and',['>','ticketing_start_at',time()-(7+24)*3600],
+                            ['and',['<','ticketing_start_at',\common\models\BaseForm::getTime()],
+                            ['and',['>','ticketing_start_at',\common\models\BaseForm::getTime()-86400],
                             ['=','status',Activity::STATUS_UNAUDITED]
                         ]];
 

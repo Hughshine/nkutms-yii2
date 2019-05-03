@@ -57,7 +57,7 @@ use yii\widgets\LinkPager;
 
                 <br/>
                 <h3 align="right"><span class="fa fa-info-circle"></span>
-                <?php if($list ['ticketing_end_at']<time()+7*3600):?>
+                <?php if($list ['ticketing_end_at']<\common\models\BaseForm::getTime()):?>
                         <font color="#696969">已过期</font>
                 <?php else:?>
                     <?php if($list['current_people']<$list['max_people']):?>

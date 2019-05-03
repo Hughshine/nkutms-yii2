@@ -12,6 +12,7 @@
 namespace frontend\controllers;
 
 use common\exceptions\ProjectException;
+use common\exceptions\ValidateException;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;

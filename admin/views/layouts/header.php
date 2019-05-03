@@ -7,7 +7,7 @@ use yii\helpers\Html;
 
 <header class="main-header">
 
-    <?= Html::a('<span class="logo-mini">菜单
+    <?= Html::a('<span class="logo-mini" style="height=55px">菜单
         </span>
         <img src="/statics/images/activity_default_pic.png" class="img-circle pull-left" width="48px" height="48px" alt="a image"/>
             <span class="logo-lg">' . '管理端' . '</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>

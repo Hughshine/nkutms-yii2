@@ -242,7 +242,7 @@ class Ticket extends ActiveRecord
         $ticket = new Ticket();
         $ticket->user_id = $user_id;
         $ticket->activity_id = $activity_id;
-        $ticket->created_at = time()+7*3600;
+        $ticket->created_at = BaseForm::getTime();
         $ticket->serial_number = $current_serial;
         $ticket->status = 0;
         $ticket->save(false);

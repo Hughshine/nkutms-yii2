@@ -11,12 +11,16 @@ $this->title = '票务系统管理端';
 
 <div class="container">
     <div class="container">
-        <?= Html::a('活动管理', ['activity/index'], ['class' => 'btn-lg btn-primary ']) ?>
-        <?= Html::a('票务管理', ['ticket/index'], ['class' => 'btn-lg btn-primary ']) ?>
-        <?= Html::a('通知管理', ['notice/index'], ['class' => 'btn-lg btn-primary ']) ?>
-        <?= Html::a('用户管理', ['user/index'], ['class' => 'btn-lg btn-warning ']) ?>
-        <?= Html::a('组织者管理', ['organizer/index'], ['class' => 'btn-lg btn-warning ']) ?>
-
+        <div class="col-lg-4">
+            <?= Html::a('活动管理', ['activity/index'], ['class' => 'btn-lg btn-primary ']) ?>
+            <?= Html::a('票务管理', ['ticket/index'], ['class' => 'btn-lg btn-primary ']) ?>
+        </div>
+        <div class="col-lg-4">
+            <?= Html::a('用户管理', ['user/index'], ['class' => 'btn-lg btn-warning ']) ?>
+            <?= Html::a('组织者管理', ['organizer/index'], ['class' => 'btn-lg btn-warning ']) ?>
+        </div>
+        <div class="col-lg-4">
+        </div>
     </div>
     <br/>
     <div class="row" >

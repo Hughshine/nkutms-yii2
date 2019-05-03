@@ -38,6 +38,7 @@ class ActivityController extends Controller
                                 'mine','view','update',
                                 'cancel','upload','change-picture',
                                 'remove-picture','ueditor',
+                                'ticket-list',
                             ],
                         'allow' => true,
                         'roles' => ['@'],
@@ -188,9 +189,29 @@ class ActivityController extends Controller
         if (Yii::$app->user->isGuest)
             return $this->redirect('site/login');
 
-        $model=$this->ValidateActivityId($id);
+        $model=Activity::findOne(['id',$id]);
         if($model)
             return $this->render('view', ['model' => $model]);
+        else
+            return $this->goBack();
+    }
+
+    /**
+     * 活动票务信息查看
+     * @param integer $id 活动ID
+     * @return string|\yii\web\Response
+     */
+    public function actionTicketList($id)
+    {
+        if(!is_numeric($id))
+            return $this->goBack();
+        if (Yii::$app->user->isGuest)
+            return $this->redirect('site/login');
+
+        $model=$this->ValidateActivityId($id);
+
+        if($model)
+            return $this->render('ticket-view', ['model' => $model]);
         else
             return $this->goBack();
     }
