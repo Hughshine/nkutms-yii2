@@ -536,13 +536,17 @@ class ActivityForm extends BaseForm
     /**
      * Update场景的写入模型动作
      * @param $model Activity
+     * @throws FieldException
+     * @throws ModelNotFoundException
      */
     private function updateActionInUpdate($model)
     {
         $model->activity_name = $this->activity_name;
-        $model->status=$this->status;
         if($this->status==Activity::STATUS_APPROVED)
             $model->release_at=BaseForm::getTime();
+        else
+            self::updateActionInvalidateTickets($model);
+        $model->status=$this->status;
         $model->location=$this->location;
         $model->release_by=$this->release_by;
         $model->max_people=$this->max_people;
@@ -750,6 +754,7 @@ class ActivityForm extends BaseForm
             ->join('INNER JOIN','tk_activity as a','t.activity_id=a.id')
             ->andWhere(['=','t.user_id',$user->id])
             ->andWhere(['=','t.status',Ticket::STATUS_VALID])
+            ->andWhere(['<>','a.id',$act->id])
             ->andWhere//判断时间段是否重复
             (
                 [

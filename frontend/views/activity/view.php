@@ -15,7 +15,6 @@ $this->params['breadcrumbs'][] = $model->activity_name;
 ?>
 <div class="row">
     <div class="col-lg-1">
-
     </div>
     <div class="tk-activity-view col-lg-10">
         <div class="row">
@@ -26,11 +25,11 @@ $this->params['breadcrumbs'][] = $model->activity_name;
         </div>
 
         <?php if($model->pic_url):?>
-        <img src= "<?=$model->pic_url?>" width="256px" height="256px" alt="pic">
+            <img src= "<?=$model->pic_url?>" width="256px" height="256px" alt="pic">
         <?php else:?>
             <img src="/statics/images/activity_default_pic.png" width="256px" height=256px" alt="pic">
         <?php endif;?>
-        <?php if($model->end_at>\common\models\BaseForm::getTime()&&$model->ticketing_start_at<\common\models\BaseForm::getTime()):?>
+        <?php if($model->ticketing_end_at>\common\models\BaseForm::getTime()&&$model->ticketing_start_at<\common\models\BaseForm::getTime()):?>
             <?php if(!$isTicketed):?>
             <?= Html::a('参加',
                 [
