@@ -94,10 +94,9 @@ OrganizerController => baseurl/tickets/...
         (signup)
 ```
 
-## 注意事项：
-- wechat-login功能暂未检查请求来源，抢票者注册/登录功能不安全
-- 公共类rules可能有冲突，保存时请使用save(false)
-- 数据库表具有冗余列，可以自行取舍（不够标准，还望见谅QAQ）
+## 注意事项
+
+
 - 欢迎大家pr，提几个issue，帮助菜菜的我们~ QwQ！
 
 
