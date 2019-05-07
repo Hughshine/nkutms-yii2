@@ -17,7 +17,7 @@ return [
             'csrfParam' => '_csrf-backend',
         ],
         'user' => [
-            'identityClass' => 'api\models\User',
+            'identityClass' => 'common\models\User',
             'enableAutoLogin' => true,
             'enableSession' => false,
             // 'identityCookie' => ['name' => '_identity-backend', 'httpOnly' => true],
@@ -103,6 +103,20 @@ return [
                     'extraPatterns' => [
                         'POST edit-profile' => 'edit-profile'
                     ]
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'activity',
+                    'extraPatterns' => [
+                        'POST ticketing-with-trigger' => 'ticketing-with-trigger'
+                    ]
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'ticket',
+                    'extraPatterns' => [
+                        'POST withdraw-with-procedure' => 'withdraw-with-procedure'
+                    ],
                 ],
             ],
         ],

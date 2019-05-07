@@ -43,7 +43,8 @@ class ActivityController extends ActiveController
         				'my-participants',
         				'add-activity',
         				'edit-activity',
-        				'cancel-activity'
+        				'cancel-activity',
+                        'danger-delete'
         			];
  
         // 需要进行认证的action就要设置安全认证类
@@ -185,10 +186,7 @@ class ActivityController extends ActiveController
 		if($organizer == null)
 			return ['code'=>1,'message' => 'inner problem -- organizer is null'];
 
-		$activity = Activity::find()
-					->where(['id'=>$activity_id])
-					->limit(1)
-					->one();
+		$activity = Activity::findOne(['id'=>$activity_id]);
 
 		if($activity == null)
 			return ['code'=>1,'message' => 'activity inexists'];
@@ -341,7 +339,6 @@ class ActivityController extends ActiveController
 		$intro = $request->post('intro');
 
 		$act_form = new ActivityForm();
-		//$act_form->is_api = true;
 
         //复制模型的信息给表单
         $act_form->getModelInfo($activity);
@@ -460,12 +457,13 @@ class ActivityController extends ActiveController
         {
             return ['code'=>1, 'message'=> $exception->getMessage()];
         }
+	}
 
-		/*$request = Yii::$app->request;
+	public function actionDangerDelete()
+    {
+        $request = Yii::$app->request;
 		$organizer = Yii::$app->user->identity;
-
 		$activity_id = $request->post('activity_id');
-
 
         $transaction=Yii::$app->db->beginTransaction();
 		try
@@ -474,12 +472,9 @@ class ActivityController extends ActiveController
 				throw new \Exception('empty activity id');
 
 			if($organizer == null)
-				throw new \Exception('empty activity id');
+				throw new \Exception('empty organizer id');
 
-			$activity = Activity::find()
-						->where(['id'=>$activity_id])
-						->limit(1)
-						->one();
+			$activity = Activity::findOne(['id' => $activity_id]);
 
 			if($activity == null)
 				throw new \Exception('activity inexists');
@@ -489,21 +484,21 @@ class ActivityController extends ActiveController
 
 			if($activity->status == Activity::STATUS_CANCEL)
 				throw new \Exception('already cancelled');
-			
-			$act_form = new ActivityForm();
-			$act_form->status = Activity::STATUS_CANCEL;
-			if(!$act_form->infoUpdate($activity,'ChangeStatus'))
-			{
-				throw new \Exception('cancel failed');
-			}
+
+			Ticket::deleteAll([
+				'and',
+				'activity_id'=> $activity_id,
+			]);
+
+            $activity->delete();
 
 			$transaction->commit();
-			return ['code'=>0,'message' => 'cancel success','data'=>$activity];
+			return ['code'=>0,'message' => 'danger-delete success'];
 		}
 		catch(\Exception $e)
 		{
 			$transaction->rollBack();
 			return ['code'=>1, 'message'=> $e->getMessage()];
-		}*/
-	}
+		}
+    }
 }

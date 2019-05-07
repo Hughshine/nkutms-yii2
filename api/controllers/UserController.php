@@ -257,9 +257,7 @@ class UserController extends ActiveController
         else
         {
         	$sql_wechat = $output['openid'];
-	        $sql_session_key = $output['session_key'];
         }
-		// $sql_category = $request->post('category', 0); 
 
 		$user = User::findOne(['wechat_id' => $sql_wechat]);
 		// 未绑定的微信号直接禁止，存入redis

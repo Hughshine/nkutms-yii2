@@ -35,7 +35,7 @@ class TicketController extends ActiveController
 		public function behaviors() {
         $behaviors = parent::behaviors();
  
-        // 需要进行认证的action就要设置安全认证类
+        // 需要进行认证的action就要设置安全认证类。TicketController全部需要认证呀
         $behaviors['authenticator'] = [
                 'class' => QueryParamAuth::className()
         ];
@@ -49,8 +49,6 @@ class TicketController extends ActiveController
 		{	
 			$user = Yii::$app->user->identity;
 
-			$request = Yii::$app->request;
-			
 			$modelClass = $this->modelClass;
 
 			$provider = new ActiveDataProvider(
@@ -76,20 +74,18 @@ class TicketController extends ActiveController
 		public function actionSearchById()
 		{
 			$request = Yii::$app->request;
-			$sql_ticketid = $request->post('ticket_id');   
+			$ticket_id = $request->post('ticket_id');
 
-			$ticket = Ticket::find()
-					->where(['id' => $sql_ticketid])
-					->limit(1)
-					->one();
+			$ticket = Ticket::findOne(['id' => $ticket_id]);
+
 			if($ticket == null)
 			{
 				return ['code' => 1, 'message' => 'ticket do not exist'];
 			}
-			return $ticket;
+			return ['code' => 0, 'message' => 'success', 'data' => $ticket];
 		}
 		/*
-		 	退票
+		 	退票，在作业中也暂时不使用啦
 		 */
 		public function actionWithdraw()
 		{
@@ -117,47 +113,26 @@ class TicketController extends ActiveController
             {
                 return ['code' => 1, 'message' => $exception->getMessage()];
             }
-            /*
-			$ticket_id = $request->post('ticket_id');   
 
-			if(!$ticket_id) return ['code'=>1, 'message'=>'empty ticket id'];
-
-			$ticket=Ticket::findOne(['id' => $ticket_id,'user_id' => $user->id,'status'=>Ticket::STATUS_VALID]);
-
-	        if(!$ticket)
-	        {
-	            return ['code' => 1, 'message' => 'ticket do not exist or operation is invalid'];
-	        }
-
-			$act=Activity::findOne(['id'=>$ticket->activity->id,'status'=>Activity::STATUS_APPROVED]);
-
-	        $ticketForm=new TicketForm();
-	        $ticketForm->is_api=true;
-	        $ticketForm->status=Ticket::STATUS_WITHDRAW;
-
-	        $actForm=new ActivityForm();
-	        $actForm->is_api=true;
-	        $actForm->current_people=$act->current_people-1;
-
-	        if($actForm->current_people<0)$actForm->current_people=0;
-	        $actForm->current_serial=$act->current_serial;
-
-	        $transaction=Yii::$app->db->beginTransaction();
-	        try
-	        {
-	            if($ticketForm->infoUpdate($ticket,'ChangeStatus')&&$actForm->infoUpdate($act,'ChangeSerial')){
-					$transaction->commit();
-	            	return ['code' => 0, 'message' => 'success', 'data' => $ticket];
-	            }
-	            else
-	            {
-	                throw new \Exception('操作失败');
-	            }
-	        }
-	        catch(\Exception $e)
-	        {
-	            $transaction->rollBack();
-	            return ['code' => 1, 'message' => 'operation failed'];
-	        }*/
 		}
+
+        public function actionWithdrawWithProcedure()
+        {
+            $request = Yii::$app->request;
+
+            $ticket_id = $request->post('ticket_id');
+
+            $user_id = Yii::$app->user->identity->id;
+
+            try {
+                Yii::$app->db->createCommand("CALL withdraw_ticket(:ticket_id, :in_user_id)")
+                    ->bindValue(':ticket_id', $ticket_id)
+                    ->bindValue(':in_user_id', $user_id)
+                    ->execute();
+            }catch( \Exception $e ) {
+                return ['code' => 1, 'message' => $e->getMessage()];
+            }
+            return ['code' => 0, 'message' => 'success'];
+
+        }
 }

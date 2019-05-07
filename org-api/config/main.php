@@ -115,6 +115,13 @@ return [
                         'POST edit-profile' => 'edit-profile'
                     ]
                 ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'activity',
+                    'extraPatterns' => [
+                        'POST danger-delete' => 'danger-delete'
+                    ]
+                ],
             ],
         ],
         

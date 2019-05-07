@@ -187,6 +187,10 @@ class Ticket extends ActiveRecord
             return [
                 "ticket_id" => "id",
                 "user_id",
+                "user_name" => function($model)
+                {
+                    return User::findOne(["id" => $model->user_id])->user_name;
+                },
                 "activity_id",
                 "activity_name" => function()
                 {

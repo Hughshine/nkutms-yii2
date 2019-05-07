@@ -7,20 +7,17 @@ use yii\rest\ActiveController;
 use yii\data\ActiveDataProvider;
 use common\models\Activity;
 use common\models\ActivityForm;
-use common\models\User;
 use common\models\Ticket;
-use common\models\TicketForm;
-// use common\models\TicketEvent;
 
-use yii\helpers\ArrayHelper;
+use api\models\ActivityBriefInfo;
+
 use yii\filters\auth\QueryParamAuth;
-use yii\filters\RateLimiter;
 
-use yii\behaviors\TimestampBehavior;
 
 class ActivityController extends ActiveController
 {
 	public $modelClass = 'common\models\Activity';
+
 	//TODO 权限控制，对活动进行提交修改；
 	public function behaviors() {
         $behaviors = parent::behaviors();
@@ -29,7 +26,7 @@ class ActivityController extends ActiveController
         $currentAction = Yii::$app->controller->action->id;
  
         // 需要进行认证的action
-        $authActions = ['ticketing'];
+        $authActions = ['ticketing','ticketing-with-trigger'];
  
         // 需要进行认证的action就要设置安全认证类
         if(in_array($currentAction, $authActions)) {
@@ -56,22 +53,18 @@ class ActivityController extends ActiveController
 
 	public function actionIndex()
 	{
-		$modelClass = $this->modelClass;
+//		$modelClass = $this->modelClass;
 
 		$provider = new ActiveDataProvider(
 			[
 				// 'msg' => 0,
-				'query' => $modelClass::find()
-				->where(['and',
-					['category' => 0],
-					['status' => Activity::STATUS_APPROVED]])
-				->orderBy('release_at DESC'),//根据发布时间逆序排序
-				
-				'pagination' => ['pageSize'=>5],
+				'query' => ActivityBriefInfo::find()
+                    ->orderBy('start_at DESC'),//根据开始时间
+				'pagination' => ['pageSize'=>3],
 			]
 		);
 		//TODO: asArray
-		return ['code'=>0,'message'=>'success','data'=>$provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/10+1)];
+		return ['code'=>0,'message'=>'success','data'=>$provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/3+1)];
 	}
 
 	public function actionView($id){
@@ -79,25 +72,25 @@ class ActivityController extends ActiveController
 
 		if($activity == null)
 			return ['code'=>1,'message'=>'activity inexists'];
-		return ['code'=>0,'message'=>'success','data'=>$activity,'pages'=>intval(($provider->getTotalCount()-1)/20)];
+		return ['code'=>0,'message'=>'success','data'=>$activity];
 	}
 
 	public function actionSearch()
 	{
 
 		$request = Yii::$app->request;
-		$sql_name = $request->post('name','');   
-		$sql_category = $request->post('category',0);   
-		$sql_status = $request->post('status',0);   
+		$name = $request->post('name','');
+		$category = $request->post('category',0);
+		$status = $request->post('status',0);
 
 
 		$provider = new ActiveDataProvider(
 			[
 				'query' => Activity::find() //暂时没有问题
 						->where(['and', 
-						['like','activity_name',$sql_name],
-						['category' => $sql_category],
-						['status' => $sql_status],
+						['like','activity_name',$name],
+						['category' => $category],
+						['status' => $status],
 						])
 						->orderBy('release_at DESC'),//根据发布时间逆序排序
 				
@@ -110,10 +103,9 @@ class ActivityController extends ActiveController
 
 	/*
 		POST user_id,activity_id
-		创建$ticket,$ticket_event
 		return $ticket
 	 */
-	public function actionTicketing()
+	public function actionTicketing()//已经添加了trigger...在作业里不使用这个了
 	{
 		$request = Yii::$app->request;
 
@@ -122,6 +114,7 @@ class ActivityController extends ActiveController
         try
         {
             $ticket=ActivityForm::createTicket(Yii::$app->user->id,$activity_id);
+
             return ['code'=> 0, 'message' => 'success', 'data' => $ticket];
         }
         catch (ProjectException $exception)
@@ -133,71 +126,27 @@ class ActivityController extends ActiveController
             return ['code' => 1, 'message' => $exception->getMessage()];
         }
 
-
-		/*$user = Yii::$app->user->identity;
-
-		$user_id = $user->id;
-
-		$activity_id = $request->post('activity_id');
-		
-		if($activity_id == null)
-			return ['code'=> 1,'message' => 'empty activity_id'];
-        if( $user == null )//作用可能不大
-            return ['code' => 1, 'message' => 'inner problem -- user'];
-		$activity = Activity::find()
-				->where(['id' => $activity_id])
-				->limit(1)
-				->one();
-
-		if( $activity == null )
-			return ['code'=> 1, 'message' => 'invalid activity id'];
-
-		if( $activity->status != Activity::STATUS_APPROVED)
-		{
-			return ['code'=> 1, 'message' => 'invalid activity status'];
-		}
-
-		if(time()+7*3600<$activity->ticketing_start_at||time()+7*3600>$activity->ticketing_end_at)
-		{
-			return ['code'=> 1, 'message' => 'invalid ticketing time'];
-		}
-
-		$ticketForm=new TicketForm();
-		$ticketForm->is_api=true;
-        $ticketForm->activity_id=$activity_id;
-        $ticketForm->user_id=$user->id;
-        $ticketForm->status=Ticket::STATUS_VALID;
-        $ticketForm->serial_number=$activity->current_serial;
-
-		$actForm=new ActivityForm();
-        $actForm->is_api=true;
-        $actForm->current_serial=$activity->current_serial+1;
-        $actForm->current_people=$activity->current_people+1;
-        
-        $transaction=Yii::$app->db->beginTransaction();
-        try
-        {
-        	$ticket = $ticketForm->create();
-        	if(!$ticket)
-        	{
- 				throw new \Exception('cannot ticket twice');
-        	}
-
-            if($actForm->infoUpdate($activity,'ChangeSerial')){
-            	$transaction->commit();
-                return ['code'=> 0, 'message' => 'success', 'data' => $ticket];
-            }
-            else
-            {
-            	throw new \Exception('full');
-            }
-
-        }
-        catch(\Exception $e)
-        {
-            $transaction->rollBack();
-            return ['code' => 1, 'message' => $e->getMessage()];
-        }*/
-
 	}
+
+	public function actionTicketingWithTrigger()
+    {
+        $request = Yii::$app->request;
+
+        $user = Yii::$app->user;
+
+        $user_id = $user->id;
+        $activity_id = $request->post('activity_id');
+
+        try {
+            $ticket = new Ticket();
+            $ticket->user_id = $user_id;
+            $ticket->activity_id = $activity_id;
+            $ticket->status = Ticket::STATUS_VALID;
+            $ticket->save(false);
+        }catch(\Exception $e)
+        {
+            return ['code' => 1, 'message' => $e->getMessage()];
+        }
+        return ['code' => 0, 'message' => 'success', 'data' => $ticket];
+    }
 }
