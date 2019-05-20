@@ -85,6 +85,9 @@ class ActivityWidget extends Widget
                         $page=new Pagination(['totalCount'=>$res['count'],'pageSize'=>$res['pageSize']]);
                         $result['page']=$page;
                     }
+                    if(count($result['body'])==0)
+                        return null;
+
                     return $this->render('admin-review-index',['data'=>$result,'option'=>$this->option]);
                     break;
                 }

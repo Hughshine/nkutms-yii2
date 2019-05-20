@@ -16,5 +16,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= $this->render('_form', [
         'model' => $model,
     ]) ?>
-
+	
+	<center>
+        <h3>创建完毕后确认发布即可让用户和组织者可见</h3>
+    </center>
+	
 </div>

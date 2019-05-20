@@ -21,7 +21,7 @@ use yii\widgets\ActiveForm;
         ]
     ]) ?>
 
-    <div class="form-group">
+    <div class="form-group" align="center">
         <?= Html::submitButton('确定', ['class' => 'btn btn-success']) ?>
     </div>
 
