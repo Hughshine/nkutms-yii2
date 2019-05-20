@@ -12,10 +12,12 @@ return [
     'language' => 'zh-CN',
     'controllerNamespace' => 'admin\controllers',
     'bootstrap' => ['log'],
+    'homeUrl'=>'/admin',
     'modules' => ['yiigiiModule'],//将gii模块加入到配置文件中
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-admin',
+            'baseUrl'=>'/admin',
         ],
         'user' => [
             // 'class' => 'admin\models\Admin',
@@ -35,12 +37,16 @@ return [
         //路由设置：美化url
         'urlManager' => 
         [
-            'enablePrettyUrl' => false,
+            'enablePrettyUrl' => true,
             'showScriptName' => false,
         ],
         'session' => [
             // this is the name of the session cookie used for login on the admin
             'name' => 'advanced-admin',
+            'cookieParams'=>
+                [
+                    'path'=>'/admin',
+                ]
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
@@ -69,3 +75,4 @@ return [
     ],
     'params' => $params,
 ];
+

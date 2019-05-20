@@ -14,7 +14,7 @@ use yii\helpers\Html;
         ['content' => $content]
     );
 } else{*/
-    if (class_exists('backend\assets\AppAsset'))
+    if (class_exists('admin\assets\AppAsset'))
         admin\assets\AppAsset::register($this);
 
     dmstr\web\AdminLteAsset::register($this);
@@ -57,4 +57,3 @@ use yii\helpers\Html;
     </body>
     </html>
     <?php $this->endPage() ?>
-<?php /*}*/?>
