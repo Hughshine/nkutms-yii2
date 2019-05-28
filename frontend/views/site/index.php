@@ -4,7 +4,7 @@
 use yii\helpers\Url;
 use yii\helpers\Html;
 use backend\widgets\activity\ActivityWidget;
-use admin\widgets\notice\NoticeWidget
+use admin\widgets\notice\NoticeWidget;
 ?>
 <!DOCTYPE html>
 <html lang=<?= Yii::$app->language ?> >
