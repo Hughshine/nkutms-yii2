@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     </p>
                 <?php else:?>
                     <?php if($model->ticketing_end_at>\common\models\BaseForm::getTime()):?>
-                        <h1 style="color:dodgerblue"><?= Html::encode($this->title) ?> (票务正常)</h1>
+                        <h1 style="color:dodgerblue"><?= Html::encode($this->title) ?> (正常)</h1>
                         <p>
                             <?= Html::a('驳回该活动', ['review', 'id' => $model->id, 'status'=>\common\models\Activity::STATUS_REJECTED], ['class' => 'btn btn-danger pull-right', 'data' => ['confirm' => '确定驳回?', 'method' => 'post',],]) ?>
                         </p>
@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php endif;?>
                 <?php endif;?>
                 <p>
-                    <?= Html::a('查看票务信息', ['ticket-list', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
+                    <?= Html::a('查看参与信息', ['ticket-list', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
                 </p>
                 <?php break;?>
             <?php case \common\models\Activity::STATUS_REJECTED :?>
@@ -132,7 +132,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'ticketing_start_at'=>
             [
-                'label'=>'票务开始时间',
+                'label'=>'报名开始时间',
                 'attribute'=>'ticketing_start_at',
                 'value' => function ($model) {
                         return date('Y-m-d:H:i:s',($model->ticketing_start_at));
@@ -140,7 +140,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'ticketing_end_at'=>
             [
-                'label'=>'票务结束时间',
+                'label'=>'报名结束时间',
                 'attribute'=>'ticketing_end_at',
                 'value' => function ($model) {
                         return date('Y-m-d:H:i:s',($model->ticketing_end_at));

@@ -83,6 +83,7 @@ class SiteController extends Controller
                 'class' => 'common\widgets\file_upload\UploadAction',     //这里扩展地址别写错
                 'config' =>
                     [
+                        #'uploadFilePath'=>'/www/nkutms/frontend/web',
                           'imagePathFormat' =>"/upload_files/temp/images/{yyyy}{mm}{dd}{time}{rand:6}",
                     ]
             ],

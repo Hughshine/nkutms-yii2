@@ -173,7 +173,7 @@ class ActivityController extends Controller
     }
 
     /**
-     * 活动票务信息查看
+     * 活动报名信息查看
      * @param integer $id 活动ID
      * @return string|\yii\web\Response
      */

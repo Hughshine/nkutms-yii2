@@ -21,9 +21,9 @@ use yii\db\ActiveRecord;
  * @property string $introduction 介绍
  * @property int $current_people
  * @property int $max_people
- * @property int $current_serial 用于产生票务的序列号
- * @property int $ticketing_start_at 票务开始时间
- * @property int $ticketing_end_at 票务开始时间
+ * @property int $current_serial 用于产生的序列号
+ * @property int $ticketing_start_at 报名开始时间
+ * @property int $ticketing_end_at 报名开始时间
  * @property string $pic_url 暂不支持传入图片
  * @property string $summary 摘要字段
  * @property Organizer $releaseBy
@@ -113,9 +113,9 @@ class Activity extends ActiveRecord
 
             ['start_at', 'compare','compareAttribute'=>'end_at', 'operator' => '<','message'=>'活动开始时间不能晚于结束时间'],
 
-            ['ticketing_start_at', 'compare','compareAttribute'=>'ticketing_end_at', 'operator' => '<','message'=>'票务开始时间不能晚于结束时间'],
+            ['ticketing_start_at', 'compare','compareAttribute'=>'ticketing_end_at', 'operator' => '<','message'=>'报名开始时间不能晚于结束时间'],
 
-            ['ticketing_end_at', 'compare','compareAttribute'=>'start_at', 'operator' => '<','message'=>'票务结束时间不能晚于活动开始时间'],
+            ['ticketing_end_at', 'compare','compareAttribute'=>'start_at', 'operator' => '<','message'=>'报名结束时间不能晚于活动开始时间'],
         ];
     }
 
@@ -149,14 +149,14 @@ class Activity extends ActiveRecord
             'release_at' => '发布时间',
             'start_at' => '活动开始时间',
             'end_at' => '活动结束时间',
-            'ticketing_start_at'=>'票务开始时间',
-            'ticketing_end_at'=>'票务结束时间',
+            'ticketing_start_at'=>'报名开始时间',
+            'ticketing_end_at'=>'报名结束时间',
             'updated_at' => '字段更新时间',
             'created_at'=>'字段创建时间',
             'introduction' => '介绍',
             'current_people' => '当前人数',
             'max_people' => '最大人数',
-            'current_serial' => '票务的序列号',
+            'current_serial' => '序列号',
             'pic_url' => '图片',
             'summary' => '摘要',
         ];

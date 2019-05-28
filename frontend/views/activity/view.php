@@ -13,130 +13,159 @@ $this->title = '修改活动信息';
 $this->params['breadcrumbs'][] = ['label' => '活动列表', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $model->activity_name;
 ?>
-<div class="row">
-    <div class="col-lg-1">
-    </div>
-    <div class="tk-activity-view col-lg-10">
-        <div class="row">
-            <h1><?= Html::encode($model->activity_name);?></h1>
-            <h3><?= $model->ticketing_start_at>\common\models\BaseForm::getTime()?"<p style='color:dodgerblue'>(票务尚未开始)</p>":' ' ?></h3>
-            <h3><?= $isTicketed?"<p style='color:darkgreen'>(已报名参加)</p>":' ' ?></h3>
-            <h4><?= $isTicketed?'你的凭证:'.$serialNumber:' ' ?></h4>
-        </div>
 
+<head>
+	<style>
+		.act-title {
+			text-align:center;
+			font-size:50px;
+			font-weight:bold;
+			color:rgb(139, 60, 112);
+			margin-top:0;
+			margin-bottom:20px;
+		}
+		.act-info-one {
+			text-align:center;
+			font-size:20px;
+			font-weight:bold;
+			color:dodgerblue;
+			margin:10px 0px;
+		}
+		.column-flex {
+			display:flex;
+			flex-direction:column;
+			width:100%;
+			height:100%;
+			justify-content:center;
+			align-items:center;
+		}
+		.row-flex {
+			display:flex;
+			flex-direction:row;
+			justify-content:center;
+			align-items:center;
+			height:100%;
+			width:100%;
+		}
+		.check-button {
+			color:#fff;
+			background-color:#428bca;
+			border-color:#357ebd;
+			font-size:20px;
+			border-radius:10px;
+			line-height:40px;
+			padding:0 40px;
+		}
+		.tb-div {
+			margin:20px 0px;
+		}
+		table.all-table-style {
+			border-width:1px;
+			padding:10px;
+			border-style:solid;
+			border-color:#a9c6c9;
+			width:100%;
+			font-size:20px;
+		}
+		table.all-table-style td {
+			border-width:1px;
+			padding:10px;
+			border-style: solid;
+			border-color: #a9c6c9;
+		}
+		.attribute-color {
+			background-color:#f0f2f5;
+			color:#000;
+		}
+		.domain-color {
+			background-color:#e2e5e9;
+			color:#000;
+		}
+		.intro-title {
+			font-size:30px;
+			color:#000;
+			font-weight:bold;
+			border-left-width:7px;
+			border-left-style:solid;
+			border-left-color:rgb(139, 60, 112);
+		}
+		.intro-content {
+			margin-top:15px;
+			font-size:20px;
+			color:#000;
+		}
+	</style>
+</head>
+<div class="row">
+    <div class="tk-activity-view">
+        <div class="row">
+            <div class="act-title"><?= Html::encode($model->activity_name);?></div>
+		<div class="row-flex">
+            <div class="act-info-one"><?= $model->ticketing_start_at>\common\models\BaseForm::getTime()?"<div style='color:#888888'>(票务尚未开始)</div>":'' ?></div>
+            <div class="act-info-one"><?= $isTicketed?"<div style='color:darkgreen'>(已报名参加)&emsp;&emsp;</div>":'' ?></div>
+            <div class="act-info-one"><?= $isTicketed?"<div style='color:black'>你的序列号:$serialNumber</div>":'' ?></div>
+		</div>
+        </div>
+		<div style="text-align:center;">
         <?php if($model->pic_url):?>
-            <img src= "<?=$model->pic_url?>" width="256px" height="256px" alt="pic">
+            <img src= "<?=$model->pic_url?>" width="200px" height="200px" alt="pic">
         <?php else:?>
-            <img src="/statics/images/activity_default_pic.png" width="256px" height=256px" alt="pic">
+            <img src="/statics/images/activity_default_pic.png" width="200px" height="200px" alt="pic">
         <?php endif;?>
+		</div>
+		<div style="text-align:center;margin-bottom:20px;margin-top:20px;">
         <?php if($model->ticketing_end_at>\common\models\BaseForm::getTime()&&$model->ticketing_start_at<\common\models\BaseForm::getTime()):?>
             <?php if(!$isTicketed):?>
+			<button class="check-button">
             <?= Html::a('参加',
                 [
                     'create-ticket',
                     'act_id' => $model->id,
                 ],
                 [
-                    'class' => 'btn btn-primary pull-right',
+                    'class' => 'check-button',
                     'data' => ['method' => 'post',],
                 ]) ?>
+			</button>
             <?php else:?>
+			<button class="check-button">
                 <?= Html::a('取消参加',
                     [
                         'cancel-ticket',
                         'act_id' => $model->id,
                     ],
                     [
-                        'class' => 'btn btn-primary pull-right',
+                        'class' => 'check-button',
                         'data' => ['method' => 'post','confirm'=>'确定取消参与该活动?'],
                     ]) ?>
+			</button>
             <?php endif;?>
         <?php endif;?>
-        <?= DetailView::widget([
-            'model' => $model,
-            'attributes' => [
-                'id',
-                'activity_name',
-                'category'=>
-                    [
-                        'label'=>'活动类别',
-                        'attribute'=>'category',
-                        'value'=>
-                            function($model)
-                            {
-                                if(!is_numeric($model->category)||$model->category>=count(ACT_CATEGORY)||$model->category<0)
-                                    return '未知';
-                                return ACT_CATEGORY[$model->category];
-                            },
-                    ],
-                'location',
-                'max_people',
-                'current_people',
-                'start_at'=>
-                    [
-                        'label'=>'活动开始时间',
-                        'attribute'=>'start_at',
-                        'value' => function ($model) {
-                                return date('Y-m-d:H:i:s',($model->start_at));
-                            },
-                    ],
-                'end_at'=>
-                    [
-                        'label'=>'活动结束时间',
-                        'attribute'=>'end_at',
-                        'value' => function ($model) {
-                            return date('Y-m-d:H:i:s',($model->end_at));
-                        },
-                    ],
-                'release_by'=>
-                    [
-                        'label'=>'发布者',
-                        'attribute'=>'release_by',
-                        'value'=>
-                            function($model)
-                            {
-                                $organizer=Organizer::findIdentity_admin($model->release_by);
-                                if(!$organizer)
-                                {
-                                    return '未找到发布者';
-                                }
-                                else
-                                    return $organizer->org_name;
-                            },
-                    ],
-                'ticketing_start_at:'=>
-                    [
-                        'label'=>'票务开始时间',
-                        'attribute'=>'ticketing_start_at',
-                        'value' => function ($model) {
-                            return date('Y-m-d:H:i:s',($model->ticketing_start_at));
-                        },
-                    ],
-                'ticketing_end_at:'=>
-                    [
-                        'label'=>'票务结束时间',
-                        'attribute'=>'ticketing_end_at',
-                        'value' => function ($model) {
-                            return date('Y-m-d:H:i:s',($model->ticketing_end_at));
-                        },
-                    ],
-                'release_at'=>
-                    [
-                        'label'=>'发布时间',
-                        'attribute'=>'release_at',
-                        'value' => function ($model) {
-                            return date('Y-m-d:H:i:s',($model->updated_at));
-                        },
-                    ],
-
-            ],
-        ]) ?>
-
-    </div>
-    <div class="col-lg-1">
-
+		</div>
+		<div class="intro-title">&nbsp;活动基本信息</div>
+		<div class="tb-div">
+		<table class="all-table-style">
+			<tr>
+			<td class="attribute-color">活动名称</td><td class="domain-color"><?=Html::encode($model->activity_name)?></td><td class="attribute-color">活动类别</td><td class="domain-color"><?=$model->category?></td>
+			</tr>
+			<tr>
+			<td class="attribute-color">发布者</td><td class="domain-color"><?=Html::encode($model->release_by)?></td><td class="attribute-color">活动地点</td><td class="domain-color"><?=Html::encode($model->location)?></td>
+			</tr>
+			<tr>
+			<td class="attribute-color">当前人数</td><td class="domain-color"><?=Html::encode($model->current_people)?></td><td class="attribute-color">最大人数</td><td class="domain-color"><?=Html::encode($model->max_people)?></td>
+			</tr>
+			<tr>
+			<td class="attribute-color">报名开始时间</td><td class="domain-color"><?=Html::encode(date('Y-m-d:H:i:s',($model->ticketing_start_at)))?></td><td class="attribute-color">报名结束时间</td><td class="domain-color"><?=date('Y-m-d:H:i:s',($model->ticketing_end_at))?></td>
+			</tr>
+			<tr>
+			<td class="attribute-color">活动开始时间</td><td class="domain-color"><?=Html::encode(date('Y-m-d:H:i:s',($model->start_at)))?></td><td class="attribute-color">活动结束时间</td><td class="domain-color"><?=date('Y-m-d:H:i:s',($model->end_at))?></td>
+			</tr>			
+		</table>
+		</div>
     </div>
 </div>
-<h2>活动介绍</h2>
-<?=$model->introduction ?>
+<div class="row">
+<div class="intro-title">&nbsp;活动介绍</div>
+<div class="intro-content"><?=$model->introduction ?></div>
 
+</div>

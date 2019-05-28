@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'id'=>
             [
-                'label'=>'票务ID',
+                'label'=>'ID',
                 'attribute'=>'id',
             ],
             'user_id',

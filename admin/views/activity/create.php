@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'introduction')->widget('common\widgets\ueditor\Ueditor',[
                     'options'=>[
-                        'initialFrameWidth' => 900,//宽度
+                        'initialFrameWidth' => 845,//宽度
                         'initialFrameHeight' => 550,//高度
                     ]
                 ]) ?>
@@ -96,6 +96,13 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <div class="col-lg-3">
             <h2>注意事项:</h2>
+            <div class="panel-body">
+                <h3>1.报名开始时间要早于报名结束时间</h3>
+                <h3>2.活动开始时间要早于活动结束时间</h3>
+                <h3>3.报名结束时间要早于活动开始时间</h3>
+                <h3>4.活动地点确认正确</h3>
+
+            </div>
         </div>
     </div>
 </div>

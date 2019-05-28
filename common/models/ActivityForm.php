@@ -131,7 +131,7 @@ class ActivityForm extends BaseForm
                 [
                     'start_at_string', 'compare',
                     'compareAttribute'=>'ticketing_end_at_string', 'operator' => '>',
-                    'message'=>'活动开始时间不能早于票务结束时间',
+                    'message'=>'活动开始时间不能早于报名结束时间',
                     'on'=>['Create','Update','default',]
                 ],
                 //外键要求
@@ -208,9 +208,9 @@ class ActivityForm extends BaseForm
             'end_at_string' => '活动结束时间',
             'release_at' => '发布时间',
             'updated_at' => '上一次编辑时间',
-            'ticketing_start_at_string' => '票务发布时间',
-            'ticketing_end_at_string' => '票务结束时间',
-            'current_serial'=>'票务序列号',
+            'ticketing_start_at_string' => '报名发布时间',
+            'ticketing_end_at_string' => '报名结束时间',
+            'current_serial'=>'序列号',
             'location'=>'活动地点',
             'release_by'=>'发布者ID',
             'pic_url'=>'预览图(不选则为默认图)'
@@ -353,9 +353,9 @@ class ActivityForm extends BaseForm
         self::validateOtherTicket($user,$act);
 
         if(BaseForm::getTime()<$act->ticketing_start_at)
-            throw new FieldException('ActivityForm::createTicket:活动票务还没开始');
+            throw new FieldException('ActivityForm::createTicket:活动报名还没开始');
         if(BaseForm::getTime()>$act->ticketing_end_at)
-            throw new FieldException('ActivityForm::createTicket:活动票务已经结束');
+            throw new FieldException('ActivityForm::createTicket:活动报名已经结束');
 
         $ticketForm=new TicketForm();
         $actForm=new ActivityForm();

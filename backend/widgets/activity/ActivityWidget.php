@@ -37,12 +37,12 @@ class ActivityWidget extends Widget
                     $model=Activity::findOne(['id',$this->act_id]);
 
                     if(!$model)return null;
-                    //如果不是admin调用,发布者不可查看其他发布者发布活动的票务情况
+                    //如果不是admin调用,发布者不可查看其他发布者发布活动的参与情况
                     if($this->option=='ticket-list' && $model->release_by!=Yii::$app->user->id) return null;
 
                     $res=ActivityForm::getTicketList($this->act_id,$curPage,$this->limit,['ticketing_start_at'=>SORT_ASC],1000);
 
-                    $result['title']=$this->title?:"票务信息:活动:".$model->activity_name;
+                    $result['title']=$this->title?:"参与信息:活动:".$model->activity_name;
 
 
                     $result['body']=$res['data']?:[];
@@ -85,10 +85,10 @@ class ActivityWidget extends Widget
                         $page=new Pagination(['totalCount'=>$res['count'],'pageSize'=>$res['pageSize']]);
                         $result['page']=$page;
                     }
-                    if(count($result['body'])==0)
+                    if(count($result['body'])!=0)
+                        return $this->render('admin-review-index',['data'=>$result,'option'=>$this->option]);
+                    else
                         return null;
-
-                    return $this->render('admin-review-index',['data'=>$result,'option'=>$this->option]);
                     break;
                 }
             case 'index':
@@ -133,7 +133,7 @@ class ActivityWidget extends Widget
                     $curPage=Yii::$app->request->get('page',1);
                     $cond=['=','status',Activity::STATUS_APPROVED];
                     $res=ActivityForm::getList($cond,$curPage,$this->limit,['release_at'=>SORT_DESC]);
-                    $result['title']=$this->title?:"最新活动";
+                    $result['title']=$this->title?:"所有活动";
                     $result['body']=$res['data']?:[];
                     if($this->page)
                     {
@@ -175,6 +175,23 @@ class ActivityWidget extends Widget
                     return $this->render('index',['data'=>$result,'option'=>$this->option]);
                     break;
                 }
+            case 'frontendList_new':
+                {
+                    $curPage=Yii::$app->request->get('page',1);
+                    $cond=['and',['>','ticketing_end_at',\common\models\BaseForm::getTime()],
+                                ['=','status',Activity::STATUS_APPROVED]
+                            ];
+                    $res=ActivityForm::getList($cond,$curPage,$this->limit,['release_at'=>SORT_DESC]);
+                    $result['title']=$this->title?:"最新活动";
+                    $result['body']=$res['data']?:[];
+                    if($this->page)
+                    {
+                        $page=new Pagination(['totalCount'=>$res['count'],'pageSize'=>$res['pageSize']]);
+                        $result['page']=$page;
+                    }
+                    return $this->render('index',['data'=>$result,'option'=>$this->option]);
+                    break;
+                }				
             default:break;
         }
         return null;

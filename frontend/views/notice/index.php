@@ -26,6 +26,8 @@ use admin\widgets\notice\NoticeWidget;
     <link rel="stylesheet" href="<?=Url::to('@web/template/font-awesome/css/font-awesome.min.css');?>"  type="text/css">
     <link rel="stylesheet" href="<?=Url::to('@web/template/fonts/font-slider.css');?>" type="text/css">
 
+	<!--my CSS-->
+	<link rel="stylesheet" href="<?=Url::to('@web/template/mycss/mystyle.css');?>"  type="text/css">
     <!-- jQuery and Modernizr-->
     <script src="<?=Url::to('@web/template/js/jquery-2.1.1.js');?>"></script>
 
@@ -109,7 +111,7 @@ use admin\widgets\notice\NoticeWidget;
         </div>
         <div class="col-md-3">
             <?php if(!Yii::$app->user->isGuest):?>
-            <div id="cart" class="pull-left">
+            <div id="cart" class="pull-left mytop">
                 <?= Html::a('参与的活动', ['site/my-activities'],['class' => 'btn btn-1 fa fa-hand-paper-o',]) ?>
             </div>
             <?php endif;?>
@@ -144,14 +146,7 @@ use admin\widgets\notice\NoticeWidget;
     </div>
 </nav>
 <div class="row">
-    <div class="col-lg-9">
-        <?=NoticeWidget::widget([])?>
-    </div>
-    <div class="col-lg-3">
-        <div class="box-title">
-            图示:
-        </div>
-        <div class="panel-body border-bottom">
-        </div>
+    <div class="col-lg-12">
+        <?=NoticeWidget::widget(['option_type'=>'all'])?>
     </div>
 </div>

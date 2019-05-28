@@ -119,14 +119,6 @@ a.desc:after {
      outline: none;
  }
 
-.box-title
-{
-    color:#0c475b;
-    font-size:20px;
-    border-bottom:3px solid #3c8dbc;
-    padding-bottom:5px;
-}
-
 .panel-body
 {
     padding:15px 0 5px 0;

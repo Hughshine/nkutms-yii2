@@ -26,6 +26,9 @@ use backend\widgets\activity\ActivityWidget;
     <link rel="stylesheet" href="<?=Url::to('@web/template/font-awesome/css/font-awesome.min.css');?>"  type="text/css">
     <link rel="stylesheet" href="<?=Url::to('@web/template/fonts/font-slider.css');?>" type="text/css">
 
+	<!--my CSS-->
+	<link rel="stylesheet" href="<?=Url::to('@web/template/mycss/mystyle.css');?>"  type="text/css">
+	
     <!-- jQuery and Modernizr-->
     <script src="<?=Url::to('@web/template/js/jquery-2.1.1.js');?>"></script>
 
@@ -109,7 +112,7 @@ use backend\widgets\activity\ActivityWidget;
         </div>
         <div class="col-md-3">
             <?php if(!Yii::$app->user->isGuest):?>
-            <div id="cart" class="pull-left">
+            <div id="cart" class="pull-left mytop">
                 <?= Html::a('参与的活动', ['site/my-activities'],['class' => 'btn btn-1 fa fa-hand-paper-o',]) ?>
             </div>
             <?php endif;?>
@@ -148,16 +151,29 @@ use backend\widgets\activity\ActivityWidget;
         <?= ActivityWidget::widget(['option'=>'frontendList'])?>
     </div>
     <div class="col-lg-3">
-        <div class="box-title">
+        <div class="box-title-one">
             图示:
         </div>
+		<div class="box-title-line"></div>
         <div class="panel-body border-bottom">
+			<div class="panel-body-tb">
             <span style="font-size:20px"><span class="fa fa-user-o"></span>发布者</span><br/>
+			</div>
+			<div class="panel-body-tb">
             <span style="font-size:20px"><span class="fa fa-group"></span> <span class="fa fa-user-times"></span>人数</span><br/>
+			</div>
+			<div class="panel-body-tb">
             <span style="font-size:20px"><span class="fa fa-location-arrow"></span>活动地点</span><br/>
+			</div>
+			<div class="panel-body-tb">
             <span style="font-size:20px"><span class="fa fa-clock-o"></span>发布时间</span><br/>
-            <span style="font-size:20px"><span class="fa fa-ticket"></span>票务开始---结束时间</span><br/>
+			</div>
+			<div class="panel-body-tb">
+            <span style="font-size:20px"><span class="fa fa-ticket"></span>报名开始---结束时间</span><br/>
+			</div>
+			<div class="panel-body-tb">
             <span style="font-size:20px"><span class="fa fa-info-circle"></span>当前状态</span><br/>
+			</div>
         </div>
     </div>
 </div>

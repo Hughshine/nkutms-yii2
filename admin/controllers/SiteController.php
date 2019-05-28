@@ -127,7 +127,7 @@ class SiteController extends Controller
 
         $form = new LoginForm();
         if ($form->load(Yii::$app->request->post()) && $form->login())
-            return $this->goBack();
+            return $this->redirect('index');
         else
         {
             $form->password = '';

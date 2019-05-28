@@ -13,8 +13,8 @@ use yii\widgets\LinkPager;
         <div class="panel-title box-title">
             <h2><span>&nbsp <?=$data['title']?></span></h2>
             <div class="container">
-                <div class="col-md-2">
-                    <h4><span class="fa fa-info-circle">用户id</span></h4>
+                <div class="col-md-1">
+                    <h4><span class="fa fa-info-circle">id</span></h4>
                 </div>
                 <div class="col-md-2">
                     <h4><span class="fa fa-user-circle">用户昵称</span></h4>
@@ -22,7 +22,7 @@ use yii\widgets\LinkPager;
                 <div class="col-md-2">
                     <h4><span class="fa fa-address-book">用户账号</span></h4>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <h4><span class="fa fa-envelope">用户邮箱</span></h4>
                 </div>
                 <div class="col-md-2">
@@ -46,13 +46,13 @@ use yii\widgets\LinkPager;
                         <div class="col-md-2">
                             <span class="fa fa-address-book"></span><?=$list['credential']?>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <span class="fa fa-envelope"></span><?=$list['email']?>
                         </div>
                         <div class="col-md-2">
                             <span class="fa fa-ticket"></span><?=date('m-d H:i:s',$list['created_at'])?>
                         </div>
-                        <div class="col-md-1">
+                        <div class="col-md-2">
                             <span class="fa fa-dedent"></span><?=$list['serial_number']?>
                         </div>
                     </div>

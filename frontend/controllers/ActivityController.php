@@ -31,7 +31,7 @@ class ActivityController extends Controller
                 'rules' =>
                     [
                         [
-                            'actions' => ['index','error','view',],
+                            'actions' => ['index','error','view','search',],
                             'allow' => true,
                             'roles' => ['@','?'],
                         ],
@@ -140,5 +140,28 @@ class ActivityController extends Controller
         else
             return $this->render('view', ['model' =>$model,'isTicketed'=>$ticket!=null]);
     }
+	 /**
+     * 搜索页面
+	 * 传参数$sql_name $sql_category $sql_status
+     */
+	public function actionSearch($sql_name='',$sql_category=0)
+	{ 
+		$sql_status=0;
+		$provider = new ActiveDataProvider(
+			[
+				'query' => Activity::find() //暂时没有问题
+						->where(['and', 
+						['like','activity_name',$sql_name],
+						['category' => $sql_category],
+						['status' => $sql_status],
+						])
+						->orderBy('release_at DESC'),//根据发布时间逆序排序
+				
+				'pagination' => ['pageSize'=>10],
+			]
+		);
+
+		return ['code'=>0,'message'=>'success','data' => $provider->getModels(),'pages'=>intval(($provider->getTotalCount()-1)/10+1)];
+	}
 
 }

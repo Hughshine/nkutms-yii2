@@ -47,8 +47,8 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                             ]); ?>
 
                         <?php else:?>
-                            <?php if($model->status==\common\models\Activity::STATUS_APPROVED&&$model->start_at>\common\models\BaseForm::getTime()):?>
-                                <?= Html::a('查看票务信息', ['ticket-list', 'id' => $model->id], ['class' => 'btn btn-primary']); ?>
+                            <?php if($model->status==\common\models\Activity::STATUS_APPROVED):?>
+                                <?= Html::a('查看参与信息', ['ticket-list', 'id' => $model->id], ['class' => 'btn btn-primary']); ?>
                             <?php endif;?>
                         <?php endif;?>
 
@@ -129,7 +129,7 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                         ],
                     'ticketing_start_at:'=>
                         [
-                            'label'=>'票务开始时间',
+                            'label'=>'报名开始时间',
                             'attribute'=>'ticketing_start_at',
                             'value' => function ($model) {
                                 return date('Y-m-d:H:i:s',($model->ticketing_start_at));
@@ -137,7 +137,7 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                         ],
                     'ticketing_end_at:'=>
                         [
-                            'label'=>'票务结束时间',
+                            'label'=>'报名结束时间',
                             'attribute'=>'ticketing_end_at',
                             'value' => function ($model) {
                                 return date('Y-m-d:H:i:s',($model->ticketing_end_at));
