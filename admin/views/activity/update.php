@@ -26,12 +26,14 @@ $this->params['breadcrumbs'][] = '修改状态';
 
                 <?= $form->field($model, 'category')->dropDownList(ACT_CATEGORY)?>
 
-                <?= $form->field($model, 'introduction')->widget('common\widgets\ueditor\Ueditor',[
+                <!--?= $form->field($model, 'introduction')->widget('common\widgets\ueditor\Ueditor',[
                     'options'=>[
                         'initialFrameWidth' => 1050,//宽度
                         'initialFrameHeight' => 550,//高度
                     ]
-                ]) ?>
+                ]) ?-->
+                <?= $form->field($model, 'introduction')->textInput()?>
+
                 <?= $form->field($model, 'location')->textInput()?>
 
                 <?= $form->field($model, 'max_people')->textInput()?>

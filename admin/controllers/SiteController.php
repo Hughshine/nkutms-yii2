@@ -123,7 +123,7 @@ class SiteController extends Controller
         Yii::$app->log->targets['debug'] = null;
         $this->layout='main-login.php';
         if (!Yii::$app->user->isGuest)
-            return $this->goHome();
+            return $this->redirect('index');
 
         $form = new LoginForm();
         if ($form->load(Yii::$app->request->post()) && $form->login())

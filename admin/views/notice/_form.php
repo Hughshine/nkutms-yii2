@@ -14,12 +14,15 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'content')->widget('common\widgets\ueditor\Ueditor',[
+    <!--?= $form->field($model, 'content')->widget('common\widgets\ueditor\Ueditor',[
         'options'=>[
             'initialFrameWidth' => 1050,//宽度
             'initialFrameHeight' => 550,//高度
         ]
-    ]) ?>
+    ]) ?-->
+    <?= $form->field($model, 'content')->textInput() ?>
+
+
 
     <div class="form-group" align="center">
         <?= Html::submitButton('确定', ['class' => 'btn btn-success']) ?>

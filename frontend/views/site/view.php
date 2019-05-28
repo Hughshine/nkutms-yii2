@@ -101,8 +101,6 @@ $this->params['breadcrumbs'][] = $this->title;
 		<div style="width:20px;margin-left:5px;"><a href="/site/update?scenario=ChangeUserName">修改用户名</a></div>
 		<div class="sidenv_after"></div>
 		<div style="width:20px;margin-left:5px;"><a href="/site/update?scenario=ChangeEmail">修改邮箱</a></div>
-		<div class="sidenv_after"></div>
-		<div style="width:20px;margin-left:5px;"><a href="/site/update?scenario=ChangeAvatar">修改头像</a></div>
 	</div>
 </div>
 <div class="col-lg-11">

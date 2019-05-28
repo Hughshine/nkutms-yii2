@@ -79,8 +79,6 @@ $this->params['breadcrumbs'][] = '修改资料';
 	<div class="sidenv_after"></div>
 	<div style="width:20px;margin-left:5px;"><a href="/site/update?scenario=ChangeEmail">修改邮箱</a></div>
 	<div class="sidenv_after"></div>
-	<div style="width:20px;margin-left:5px;"><a href="/site/update?scenario=ChangeAvatar">修改头像</a></div>
-	<div class="sidenv_after"></div>
 	<div style="width:20px;margin-left:5px;"><a href="/site/view">我的资料</a></div>
 	</div>
 </div>

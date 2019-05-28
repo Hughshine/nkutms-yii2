@@ -26,19 +26,21 @@ $this->params['breadcrumbs'][] = '活动发布';
 
             <?= $form->field($model, 'category')->dropDownList(ACT_CATEGORY)?>
 
-            <?= $form->field($model, 'pic_url')->widget('common\widgets\file_upload\FileUpload',[
+            <!--?= $form->field($model, 'pic_url')->widget('common\widgets\file_upload\FileUpload',[
                                     'config'=>[
                                     //图片上传的一些配置，不写调用默认配置
                                     //'domain_url' => '@web/images/user/avatar',
                                 ]
-                            ]) ?>
+                            ]) ?-->
 
-            <?= $form->field($model, 'introduction')->widget('common\widgets\ueditor\Ueditor',[
+            <!--?= $form->field($model, 'introduction')->widget('common\widgets\ueditor\Ueditor',[
                 'options'=>[
                     'initialFrameWidth' => 1050,//宽度
                     'initialFrameHeight' => 550,//高度
                 ]
-            ]) ?>
+            ]) ?-->
+
+            <?= $form->field($model, 'introduction')->textInput() ?>
 
             <?= $form->field($model, 'location')->textInput() ?>
 

@@ -21,7 +21,7 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                         &&$model->status!=\common\models\Activity::STATUS_CANCEL
                         &&$model->start_at>\common\models\BaseForm::getTime()):?>
                         <?= Html::a('修改信息', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']); ?>
-                        <?= Html::a('修改预览图',
+                        <!--?= Html::a('修改预览图',
                             ['change-picture', 'id' => $model->id],
                             [
                                 'class' => 'btn btn-primary',
@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $model->activity_name;
                                     ],
                             ]
                         );
-                        ?>
+                        ?-->
                         <?= Html::a('取消该活动',
                             [
                                 'cancel',

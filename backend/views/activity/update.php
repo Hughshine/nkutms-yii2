@@ -30,12 +30,14 @@ $this->params['breadcrumbs'][] = '活动信息修改';
 
             <?= $form->field($modelForm, 'category')->dropDownList(ACT_CATEGORY)?>
 
-                <?= $form->field($modelForm, 'introduction')->widget('common\widgets\ueditor\Ueditor',[
+                <!--?= $form->field($modelForm, 'introduction')->widget('common\widgets\ueditor\Ueditor',[
                     'options'=>[
                         'initialFrameWidth' => 1050,//宽度
                         'initialFrameHeight' => 550,//高度
                     ]
-                ]) ?>
+                ]) ?-->
+            <?= $form->field($modelForm, 'introduction')->textInput() ?>
+
             <?= $form->field($modelForm, 'location')->textInput() ?>
 
             <?= $form->field($modelForm, 'max_people')->textInput() ?>
