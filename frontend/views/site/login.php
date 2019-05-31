@@ -26,9 +26,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'rememberMe')->checkbox() ?>
 
-                <div style="color:#999;margin:1em 0">
+                <!--div style="color:#999;margin:1em 0">
                     如果你忘记了了的密码,你可以申请 <?= Html::a('重设密码', ['site/request-password-reset']) ?>.
-                </div>
+                </div-->
 
                 <div class="form-group">
                     <?= Html::submitButton('登录', ['class' => 'btn btn-primary', 'name' => 'login-button']) ?>

@@ -286,7 +286,10 @@ class UserForm extends BaseForm
             switch($scenario)
             {
                 case 'ChangeStatus':
-                    $model->status = $this->status;break;
+                    if($model->status!=$this->status&&$model->status==User::STATUS_ACTIVE)
+                        $this->updateActionInChangeStatus($model);
+                    $model->status = $this->status;
+                    break;
                 case 'ChangeCategory':
                     $model->category = $this->category;break;
                 case 'ChangeUserName':
@@ -317,6 +320,29 @@ class UserForm extends BaseForm
             $transaction->rollBack();
             throw $exception;
         }
+    }
+
+    /**
+     * @param $model User
+     * @throws FieldException
+     * @throws \common\exceptions\ModelNotFoundException
+     */
+    private function updateActionInChangeStatus($model)
+    {
+        $query=Ticket::find()
+            ->select('t.id')
+            ->from('tk_ticket as t')
+            ->leftJoin('tk_activity as a','a.id=t.activity_id')
+            ->where(
+                ['and',
+                    ['and',['t.user_id'=>$model->id],['t.status'=>Ticket::STATUS_VALID]],
+                    ['>','a.start_at',BaseForm::getTime()]
+                ]
+            )
+            ->asArray()
+            ->all();
+        foreach ($query as $each)
+            TicketForm::invalidateTicket($each['id']);
     }
 
     /**
