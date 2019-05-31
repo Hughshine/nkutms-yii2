@@ -101,7 +101,7 @@ $this->params['breadcrumbs'][] = $model->activity_name;
         <div class="row">
             <div class="act-title"><?= Html::encode($model->activity_name);?></div>
 		<div class="row-flex">
-            <div class="act-info-one"><?= $model->ticketing_start_at>\common\models\BaseForm::getTime()?"<div style='color:#888888'>(票务尚未开始)</div>":'' ?></div>
+            <div class="act-info-one"><?= $model->ticketing_start_at>\common\models\BaseForm::getTime()?"<div style='color:#888888'>(报名尚未开始)</div>":'' ?></div>
             <div class="act-info-one"><?= $isTicketed?"<div style='color:darkgreen'>(已报名参加)&emsp;&emsp;</div>":'' ?></div>
             <div class="act-info-one"><?= $isTicketed?"<div style='color:black'>你的序列号:$serialNumber</div>":'' ?></div>
 		</div>
@@ -146,10 +146,16 @@ $this->params['breadcrumbs'][] = $model->activity_name;
 		<div class="tb-div">
 		<table class="all-table-style">
 			<tr>
-			<td class="attribute-color">活动名称</td><td class="domain-color"><?=Html::encode($model->activity_name)?></td><td class="attribute-color">活动类别</td><td class="domain-color"><?=$model->category?></td>
+			<td class="attribute-color">活动名称</td><td class="domain-color"><?=Html::encode($model->activity_name)?></td><td class="attribute-color">活动类别</td><td class="domain-color"><?=ACT_CATEGORY[$model->category]?></td>
 			</tr>
 			<tr>
-			<td class="attribute-color">发布者</td><td class="domain-color"><?=Html::encode($model->release_by)?></td><td class="attribute-color">活动地点</td><td class="domain-color"><?=Html::encode($model->location)?></td>
+                <td class="attribute-color">发布者</td>
+                <td class="domain-color">
+                    <?php
+                    $org=\orgapi\models\Organizer::findOne(['id'=>$model->release_by])
+                    ?>
+                    <?=Html::encode($org->org_name)?>
+                </td><td class="attribute-color">活动地点</td><td class="domain-color"><?=Html::encode($model->location)?></td>
 			</tr>
 			<tr>
 			<td class="attribute-color">当前人数</td><td class="domain-color"><?=Html::encode($model->current_people)?></td><td class="attribute-color">最大人数</td><td class="domain-color"><?=Html::encode($model->max_people)?></td>

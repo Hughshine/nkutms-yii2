@@ -242,16 +242,31 @@ class TicketForm extends BaseForm
         switch($scenario)
         {
             case 'Update':$model=$this->updateActionInUpdate($model);break;
-            case 'ChangeStatus':$model->status=$this->status;break;
+            case 'ChangeStatus':
+                $this->scenario=$scenario;
+                break;
             default:break;
         }
 
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
+            if($scenario=='ChangeStatus'&&$model->status==Ticket::STATUS_VALID&&$this->status!=$model->status)
+            {
+                $act_form=new ActivityForm();
+                $act=Activity::findOne(['id'=>$model->activity_id]);
+                if($act==null)
+                    throw new FieldException('TicketForm::infoUpdate:票对应的活动不存在');
+                $act_form->scenario='ChangeSerial';
+                $act_form->current_serial=$act->current_serial;
+                $act_form->current_people=$act->current_people-1;
+                if($act_form->current_people<0)
+                    $act_form->current_people=0;
+                $act_form->infoUpdate($act,'ChangeSerial');
+                $model->status=$this->status;
+            }
             if(!$model->save())
                 $this->throwValidateException('TicketForm::infoUpdate:模型保存失败');
-
             $transaction->commit();
             return true;
         }

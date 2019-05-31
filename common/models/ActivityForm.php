@@ -413,18 +413,10 @@ class ActivityForm extends BaseForm
         if(!$act)
             throw new ModelNotFoundException(sprintf('ActivityForm::cancelTicket:找不到ID为%d的活动',$act_id));
 
-        $ticketForm=new TicketForm();
-        $actForm=new ActivityForm();
-        $ticketForm->status=Ticket::STATUS_WITHDRAW;
-        $actForm->current_people=$act->current_people-1;
-        if($actForm->current_people<0)$actForm->current_people=0;
-        $actForm->current_serial=$act->current_serial;
-
         $transaction=Yii::$app->db->beginTransaction();
         try
         {
-            $ticketForm->infoUpdate($ticket,'ChangeStatus');
-            $actForm->infoUpdate($act,'ChangeSerial');
+            TicketForm::invalidateTicket($ticket->id);
             $transaction->commit();
             return true;
         }
