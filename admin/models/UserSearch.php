@@ -20,8 +20,8 @@ class UserSearch extends User
     public function rules()
     {
         return [
-            [['id', 'status', 'created_at', 'updated_at', 'category', 'credential'], 'integer'],
-            [['user_name', 'auth_key', 'password', 'wechat_id', 'access_token','email'], 'safe'],
+            [['id', 'status', 'created_at', 'updated_at', 'category', ], 'integer'],
+            [['user_name', 'auth_key', 'password', 'wechat_id', 'access_token','email','credential'], 'safe'],
         ];
     }
 
@@ -75,6 +75,7 @@ class UserSearch extends User
             ->andFilterWhere(['like', 'password', $this->password])*/
             ->andFilterWhere(['like', 'wechat_id', $this->wechat_id])
             ->andFilterWhere(['like', 'email', $this->email])
+            ->andFilterWhere(['like', 'credential', $this->credential])
             /*->andFilterWhere(['like', 'access_token', $this->access_token])*/;
 
         return $dataProvider;
